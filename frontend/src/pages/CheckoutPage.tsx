@@ -59,7 +59,7 @@ export const CheckoutPage: React.FC = () => {
       
       if (isAuthenticated && user && token) {
         // Заказ для авторизованного пользователя
-        response = await fetch('http://localhost:3001/api/orders', {
+        response = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export const CheckoutPage: React.FC = () => {
         });
       } else {
         // Заказ для гостя
-        response = await fetch('http://localhost:3001/api/orders/guest', {
+        response = await fetch(`${import.meta.env.VITE_API_URL}/orders/guest`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

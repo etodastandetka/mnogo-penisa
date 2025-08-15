@@ -132,7 +132,7 @@ export const PaymentQR: React.FC<PaymentQRProps> = ({
 
       console.log('Отправка фото чека для заказа:', order.id || order.orderNumber);
 
-      const response = await fetch('http://localhost:3001/api/orders/payment-proof', {
+                      const response = await fetch(`${import.meta.env.VITE_API_URL}/orders/payment-proof`, {
         method: 'POST',
         body: formData,
       });
