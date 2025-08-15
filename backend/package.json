@@ -2,12 +2,13 @@
   "name": "mnogo-rolly-simple-server",
   "version": "1.0.0",
   "description": "Простой сервер для Mnogo Rolly",
-  "main": "dist/server.js",
+  "main": "api/index.ts",
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node src/server.ts",
-    "seed": "ts-node src/seed.ts"
+    "seed": "ts-node src/seed.ts",
+    "vercel-build": "tsc"
   },
   "dependencies": {
     "@types/multer": "^2.0.0",
