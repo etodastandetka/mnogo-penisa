@@ -1,0 +1,109 @@
+import React from 'react';
+import { Card, CardContent } from './ui/Card';
+import { Button } from './ui/Button';
+import { Badge } from './ui/Badge';
+import { Plus, Minus } from 'lucide-react';
+import { useCartStore } from '../store/cartStore';
+import { formatPrice } from '../utils/format';
+import { Product } from '../types';
+
+interface ProductCardProps {
+  product: Product;
+}
+
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const { addItem, removeItem, updateQuantity, getItemQuantity } = useCartStore();
+  const quantity = getItemQuantity(product.id.toString());
+
+  const handleAddToCart = () => {
+    addItem(product);
+  };
+
+  const handleRemoveFromCart = () => {
+    removeItem(product.id.toString());
+  };
+
+  const handleUpdateQuantity = (newQuantity: number) => {
+    if (newQuantity <= 0) {
+      removeItem(product.id.toString());
+    } else {
+      updateQuantity(product.id.toString(), newQuantity);
+    }
+  };
+
+  return (
+    <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+      <div className="relative overflow-hidden rounded-t-xl">
+        <img
+          src={product.image_url || product.image || 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'}
+          alt={product.name}
+          className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
+          }}
+        />
+        {product.isPopular && (
+          <div className="absolute top-3 left-3">
+            <Badge variant="primary" className="bg-red-500 text-white">
+              Популярное
+            </Badge>
+          </div>
+        )}
+        {product.is_available === false && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <Badge variant="secondary" className="bg-gray-600 text-white">
+              Недоступно
+            </Badge>
+          </div>
+        )}
+      </div>
+      
+      <CardContent className="p-4">
+        <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
+          {product.name}
+        </h3>
+        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+          {product.description}
+        </p>
+        
+        <div className="flex items-center justify-between">
+          <span className="text-xl font-bold text-red-600">
+            {formatPrice(product.price)}
+          </span>
+          
+          {quantity > 0 ? (
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleUpdateQuantity(quantity - 1)}
+                className="w-8 h-8 p-0"
+              >
+                <Minus className="w-4 h-4" />
+              </Button>
+              <span className="font-semibold min-w-[2rem] text-center">{quantity}</span>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleUpdateQuantity(quantity + 1)}
+                className="w-8 h-8 p-0"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              size="sm"
+              onClick={handleAddToCart}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={product.is_available === false}
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};

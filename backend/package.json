@@ -1,0 +1,36 @@
+{
+  "name": "mnogo-rolly-simple-server",
+  "version": "1.0.0",
+  "description": "Простой сервер для Mnogo Rolly",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts",
+    "seed": "ts-node src/seed.ts"
+  },
+  "dependencies": {
+    "@types/multer": "^2.0.0",
+    "@types/node-telegram-bot-api": "^0.64.10",
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "node-telegram-bot-api": "^0.66.0",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/compression": "^1.7.2",
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/sqlite3": "^3.1.8",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}
