@@ -1,36 +1,69 @@
 import { create } from 'zustand';
-import { adminApi, AdminStats, AdminOrder, OrderFilters } from '../api/admin';
+import { getStats, getProducts, createProduct, updateProduct, deleteProduct } from '../api/admin';
 
-interface AdminState {
-  // Состояние
+export interface AdminStats {
+  totalOrders: number;
+  totalRevenue: number;
+  activeOrders: number;
+  totalProducts: number;
+  totalUsers: number;
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  isAdmin: boolean;
+  createdAt: string;
+}
+
+interface AdminStore {
+  // Статистика
   stats: AdminStats | null;
-  orders: AdminOrder[];
-  selectedOrder: AdminOrder | null;
   loading: boolean;
   error: string | null;
-
+  
+  // Продукты
+  products: any[];
+  productsLoading: boolean;
+  productsError: string | null;
+  
+  // Пользователи
+  users: AdminUser[];
+  usersLoading: boolean;
+  usersError: string | null;
+  
   // Действия
   fetchStats: () => Promise<void>;
-  fetchOrders: (filters?: OrderFilters) => Promise<void>;
-  fetchOrder: (id: number) => Promise<void>;
-  updateOrderStatus: (id: number, status: string) => Promise<void>;
-  setSelectedOrder: (order: AdminOrder | null) => void;
+  fetchProducts: () => Promise<void>;
+  createProduct: (productData: any) => Promise<void>;
+  updateProduct: (id: string, productData: any) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+
   clearError: () => void;
 }
 
-export const useAdminStore = create<AdminState>((set, get) => ({
+export const useAdminStore = create<AdminStore>((set, get) => ({
   // Начальное состояние
   stats: null,
-  orders: [],
-  selectedOrder: null,
   loading: false,
   error: null,
+  
+  products: [],
+  productsLoading: false,
+  productsError: null,
+  
+  users: [],
+  usersLoading: false,
+  usersError: null,
 
   // Получить статистику
   fetchStats: async () => {
     set({ loading: true, error: null });
     try {
-      const stats = await adminApi.getStats();
+      const stats = await getStats();
       set({ stats, loading: false });
     } catch (error) {
       set({ 
@@ -40,63 +73,54 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     }
   },
 
-  // Получить заказы
-  fetchOrders: async (filters) => {
-    set({ loading: true, error: null });
+  // Получить продукты
+  fetchProducts: async () => {
+    set({ productsLoading: true, productsError: null });
     try {
-      const orders = await adminApi.getOrders(filters);
-      set({ orders, loading: false });
+      const products = await getProducts();
+      set({ products, productsLoading: false });
     } catch (error) {
       set({ 
-        error: error instanceof Error ? error.message : 'Ошибка загрузки заказов',
-        loading: false 
+        productsError: error instanceof Error ? error.message : 'Ошибка загрузки продуктов',
+        productsLoading: false 
       });
     }
   },
 
-  // Получить заказ по ID
-  fetchOrder: async (id) => {
-    set({ loading: true, error: null });
+  // Создать продукт
+  createProduct: async (productData: any) => {
     try {
-      const order = await adminApi.getOrder(id);
-      set({ selectedOrder: order, loading: false });
+      await createProduct(productData);
+      // Обновляем список продуктов
+      get().fetchProducts();
     } catch (error) {
-      set({ 
-        error: error instanceof Error ? error.message : 'Ошибка загрузки заказа',
-        loading: false 
-      });
+      throw error;
     }
   },
 
-  // Обновить статус заказа
-  updateOrderStatus: async (id, status) => {
-    set({ loading: true });
+  // Обновить продукт
+  updateProduct: async (id: string, productData: any) => {
     try {
-      const updatedOrder = await adminApi.updateOrderStatus(id, status);
-      
-      // Обновляем заказ в списке
-      const { orders } = get();
-      const updatedOrders = orders.map(order => 
-        order.id === id ? updatedOrder : order
-      );
-      
-      set({ 
-        orders: updatedOrders,
-        selectedOrder: updatedOrder,
-        loading: false 
-      });
+      await updateProduct(id, productData);
+      // Обновляем список продуктов
+      get().fetchProducts();
     } catch (error) {
-      console.error('Ошибка обновления статуса заказа:', error);
-      // Не устанавливаем глобальную ошибку, чтобы не ломать интерфейс
-      set({ loading: false });
-      throw error; // Пробрасываем ошибку для обработки в компоненте
+      throw error;
     }
   },
 
-  // Установить выбранный заказ
-  setSelectedOrder: (order) => {
-    set({ selectedOrder: order });
+  // Удалить продукт
+  deleteProduct: async (id: string) => {
+    try {
+      await deleteProduct(id);
+      // Обновляем список продуктов
+      get().fetchProducts();
+    } catch (error) {
+      throw error;
+    }
   },
+
+
 
   // Очистить ошибку
   clearError: () => {

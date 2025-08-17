@@ -43,19 +43,47 @@ app.use(helmet());
 app.use(compression());
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Обработка preflight запросов
+app.options('*', cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Статическая папка для загруженных файлов
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  setHeaders: (res, path) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    
+    // Определяем тип контента по расширению файла
+    if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (path.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (path.endsWith('.gif')) {
+      res.setHeader('Content-Type', 'image/gif');
+    }
+  }
+}));
 
 // База данных (для Vercel используем in-memory или внешнюю БД)
 let db: sqlite3.Database;
 
 // Инициализация базы данных
 const initDatabase = () => {
-  // Для Vercel лучше использовать внешнюю БД или in-memory
-  // Здесь используем in-memory для демонстрации
-  db = new sqlite3.Database(':memory:');
+  // Создаем папку data если её нет
+  if (!fs.existsSync('./data')) {
+    fs.mkdirSync('./data', { recursive: true });
+  }
+  
+  // Используем файловую базу данных
+  db = new sqlite3.Database('./data/mnogo_rolly.db');
   
   // Создание таблиц
   db.serialize(() => {
@@ -68,6 +96,7 @@ const initDatabase = () => {
       address TEXT,
       password TEXT NOT NULL,
       role TEXT DEFAULT 'user',
+      is_admin BOOLEAN DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
@@ -103,6 +132,34 @@ const initDatabase = () => {
       FOREIGN KEY (user_id) REFERENCES users (id)
     )`);
 
+    // Добавляем колонку updated_at если её нет (миграция)
+    db.run(`ALTER TABLE orders ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP`, (err) => {
+      if (err && !err.message.includes('duplicate column name')) {
+        console.log('Column updated_at already exists or error:', err.message);
+      }
+    });
+
+    // Таблица банковских настроек
+    db.run(`CREATE TABLE IF NOT EXISTS bank_settings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      bank_name TEXT NOT NULL,
+      bank_link TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Добавляем начальные настройки если таблица пустая
+    db.get('SELECT COUNT(*) as count FROM bank_settings', (err: any, result: any) => {
+      if (err) {
+        return;
+      }
+      
+      if (result.count === 0) {
+        db.run(`INSERT INTO bank_settings (bank_name, bank_link) VALUES (?, ?)`, 
+          ['MBank', 'https://app.mbank.kg/qr#00020101021132440012c2c.mbank.kg01020210129965000867861302125204999953034175908YBRAI%20S.630462d0']);
+      }
+    });
+
     // Таблица элементов заказа
     db.run(`CREATE TABLE IF NOT EXISTS order_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -114,10 +171,32 @@ const initDatabase = () => {
       FOREIGN KEY (product_id) REFERENCES products (id)
     )`);
 
+    // Таблица корзины
+    db.run(`CREATE TABLE IF NOT EXISTS cart (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      quantity INTEGER NOT NULL DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users (id),
+      FOREIGN KEY (product_id) REFERENCES products (id)
+    )`);
+
     // Создание админа по умолчанию
     const adminPassword = bcrypt.hashSync('admin123', 10);
-    db.run(`INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?, ?, ?, ?)`, 
-      ['admin@mnogo-rolly.ru', adminPassword, 'Администратор', 'admin']);
+    db.run(`INSERT OR IGNORE INTO users (email, password, name, role, is_admin) VALUES (?, ?, ?, ?, ?)`, 
+      ['admin@mnogo-rolly.ru', adminPassword, 'Администратор', 'admin', 1]);
+    
+    // Создание дополнительного админа
+    const denmakPassword = bcrypt.hashSync('denmak2405', 10);
+    db.run(`INSERT OR IGNORE INTO users (email, password, name, role, is_admin) VALUES (?, ?, ?, ?, ?)`, 
+      ['admin@gmail.com', denmakPassword, 'Denmak', 'admin', 1]);
+    
+    // Создание тестового пользователя
+    const testUserPassword = bcrypt.hashSync('test123', 10);
+    db.run(`INSERT OR IGNORE INTO users (email, password, name, phone, role, is_admin) VALUES (?, ?, ?, ?, ?, ?)`, 
+      ['test@example.com', testUserPassword, 'Тестовый пользователь', '+996 555 123 456', 'user', 0]);
 
     // Добавление тестовых продуктов
     const products = [
@@ -147,18 +226,30 @@ const authenticateToken = (req: any, res: any, next: any) => {
     return res.status(401).json({ message: 'Токен не предоставлен' });
   }
 
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-    if (err) {
-      return res.status(403).json({ message: 'Недействительный токен' });
+  jwt.verify(token, JWT_SECRET, async (err: any, user: any) => {
+  if (err) {
+    return res.status(403).json({ message: 'Недействительный токен' });
+  }
+  
+  // Получаем актуальную информацию о пользователе из базы данных
+  db.get('SELECT id, name, email, phone, address, is_admin FROM users WHERE id = ?', [user.id], (dbErr, dbUser: any) => {
+    if (dbErr || !dbUser) {
+      return res.status(403).json({ message: 'Пользователь не найден' });
     }
-    req.user = user;
+    
+    // Обновляем информацию о пользователе
+    req.user = {
+      ...user,
+      is_admin: dbUser.is_admin === 1
+    };
     next();
   });
+});
 };
 
 // Middleware для проверки роли админа
 const requireAdmin = (req: any, res: any, next: any) => {
-  if (req.user.role !== 'admin') {
+  if (!req.user.is_admin) {
     return res.status(403).json({ message: 'Доступ запрещен' });
   }
   next();
@@ -169,41 +260,31 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Mnogo Rolly API работает' });
 });
 
-// Аутентификация
-app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user: DatabaseUser) => {
+// Получение информации о текущем пользователе
+app.get('/api/user/me', authenticateToken, (req: any, res) => {
+  const userId = req.user.id;
+  
+  db.get('SELECT id, name, email, phone, address, is_admin FROM users WHERE id = ?', [userId], (err, user: any) => {
     if (err) {
-      return res.status(500).json({ message: 'Ошибка сервера' });
+      return res.status(500).json({ message: 'Ошибка получения данных пользователя' });
     }
-
+    
     if (!user) {
-      return res.status(401).json({ message: 'Неверные учетные данные' });
+      return res.status(404).json({ message: 'Пользователь не найден' });
     }
-
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-      return res.status(401).json({ message: 'Неверные учетные данные' });
-    }
-
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
+    
     res.json({
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+      isAdmin: user.is_admin === 1
     });
   });
 });
+
+
 
 // Продукты
 app.get('/api/products', (req, res) => {
@@ -211,70 +292,159 @@ app.get('/api/products', (req, res) => {
     if (err) {
       return res.status(500).json({ message: 'Ошибка загрузки продуктов' });
     }
-    res.json(products);
+    
+    // Добавляем placeholder изображения для товаров без фото
+    const productsWithPlaceholders = products.map((product: any) => {
+      if (!product.image_url || product.image_url === '' || product.image_url.includes('/images/products/')) {
+        // Используем placeholder изображение
+        return {
+          ...product,
+          image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
+        };
+      }
+      return product;
+    });
+    
+    res.json(productsWithPlaceholders);
   });
 });
 
 // Заказы
-app.post('/api/orders', authenticateToken, (req, res) => {
-  const { customer, items, total, paymentMethod, notes, userId } = req.body;
-  const orderNumber = 'MR' + Date.now();
+app.post('/api/orders', authenticateToken, (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const { customer, items, total, paymentMethod, notes } = req.body;
 
-  db.run(
-    `INSERT INTO orders (order_number, user_id, customer_name, customer_phone, customer_address, total_amount, payment_method, notes) 
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [orderNumber, userId, customer.name, customer.phone, customer.address, total, paymentMethod, notes],
-    function(err) {
+    if (!customer || !items || !total || !paymentMethod) {
+      return res.status(400).json({
+        success: false,
+        message: 'Не все обязательные поля заполнены'
+      });
+    }
+
+    const orderNumber = 'MR-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    // Объединяем комментарии: customer.notes + общие notes
+    const combinedNotes = [customer.notes, notes].filter(note => note && note.trim()).join(' | ');
+
+    const sql = `
+      INSERT INTO orders (
+        order_number, user_id, customer_name, customer_phone,
+        delivery_address, total_amount, status, payment_method, notes
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    const params = [
+      orderNumber, userId, customer.name, customer.phone,
+      customer.address || '', total, 'pending', paymentMethod, combinedNotes || ''
+    ];
+
+    db.run(sql, params, function(err) {
       if (err) {
-        return res.status(500).json({ message: 'Ошибка создания заказа' });
+        return res.status(500).json({
+          success: false,
+          message: 'Ошибка создания заказа',
+          error: err.message
+        });
       }
 
       const orderId = this.lastID;
+      let itemsAdded = 0;
+      let totalItems = items.length;
 
-      // Добавляем элементы заказа
-      items.forEach((item: any) => {
-        db.run(
-          'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)',
-          [orderId, item.product.id, item.quantity, item.product.price]
-        );
+      items.forEach((item: any, index: number) => {
+        db.run(`
+          INSERT INTO order_items (order_id, product_id, quantity, price)
+          VALUES (?, ?, ?, ?)
+        `, [orderId, item.product.id, item.quantity, item.product.price], (err) => {
+          if (err) {
+            } else {
+            itemsAdded++;
+          }
+
+          if (itemsAdded === totalItems) {
+            // Отправляем уведомление в Telegram
+            sendNewOrderNotification({
+              id: orderId,
+              orderNumber,
+              customerName: customer.name,
+              customerPhone: customer.phone,
+              deliveryAddress: customer.address,
+              totalAmount: total,
+              status: 'pending',
+              createdAt: new Date().toISOString(),
+              items: items
+            } as any).catch(console.error);
+
+            res.json({
+              success: true,
+              message: 'Заказ успешно создан',
+              data: {
+                orderId,
+                orderNumber
+              }
+            });
+          }
+        });
       });
 
-      // Отправляем уведомление в Telegram
-      sendNewOrderNotification({
-        orderNumber,
-        customerName: customer.name,
-        customerPhone: customer.phone,
-        totalAmount: total,
-        items: items
-      }).catch(console.error);
-
-      res.json({ 
-        message: 'Заказ создан успешно', 
-        orderNumber,
-        orderId 
-      });
-    }
-  );
+      if (totalItems === 0) {
+        res.json({
+          success: true,
+          message: 'Заказ успешно создан',
+          data: {
+            orderId,
+            orderNumber
+          }
+        });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Внутренняя ошибка сервера'
+    });
+  }
 });
 
 // Получение заказов пользователя
-app.get('/api/orders', authenticateToken, (req, res) => {
+app.get('/api/orders', authenticateToken, (req: any, res) => {
   const userId = req.user.id;
 
   db.all(`
-    SELECT o.*, 
-           GROUP_CONCAT(p.name || ' x' || oi.quantity) as items_summary
+    SELECT o.*
     FROM orders o
-    LEFT JOIN order_items oi ON o.id = oi.order_id
-    LEFT JOIN products p ON oi.product_id = p.id
     WHERE o.user_id = ?
-    GROUP BY o.id
     ORDER BY o.created_at DESC
-  `, [userId], (err, orders) => {
+  `, [userId], async (err, orders) => {
     if (err) {
-      return res.status(500).json({ message: 'Ошибка загрузки заказов' });
+      return res.status(500).json({ message: 'Ошибка загрузки заказов', error: err.message });
     }
-    res.json(orders);
+    
+    // Загружаем детали товаров для каждого заказа
+    const ordersWithItems = await Promise.all(orders.map(async (order: any) => {
+      return new Promise((resolve) => {
+        console.log('Loading items for order:', order.id);
+        
+        db.all('SELECT * FROM order_items WHERE order_id = ?', [order.id], (err, items) => {
+          if (err) {
+            resolve({
+              ...order,
+              items: [],
+              items_summary: 'Товары не найдены'
+            });
+          } else {
+            resolve({
+              ...order,
+              items: items || [],
+              items_summary: items && items.length > 0 ? 
+                items.map((item: any) => item.product_name + ' x' + item.quantity).join(', ') : 
+                'Товары не найдены'
+            });
+          }
+        });
+      });
+    }));
+    
+    res.json(ordersWithItems);
   });
 });
 
@@ -283,92 +453,228 @@ app.get('/api/orders/status/:orderNumber', (req, res) => {
   const { orderNumber } = req.params;
 
   db.get(`
-    SELECT o.*, 
-           GROUP_CONCAT(p.name || ' x' || oi.quantity) as items_summary
+    SELECT o.*
     FROM orders o
-    LEFT JOIN order_items oi ON o.id = oi.order_id
-    LEFT JOIN products p ON oi.product_id = p.id
     WHERE o.order_number = ?
-    GROUP BY o.id
   `, [orderNumber], (err, order) => {
     if (err) {
-      return res.status(500).json({ message: 'Ошибка поиска заказа' });
+      return res.status(500).json({ message: 'Ошибка поиска заказа', error: err.message });
     }
     if (!order) {
       return res.status(404).json({ message: 'Заказ не найден' });
     }
-    res.json(order);
+    
+    // Загружаем детали товаров для заказа
+    console.log('Loading items for order:', (order as any).id);
+    
+    db.all('SELECT * FROM order_items WHERE order_id = ?', [(order as any).id], (err, items) => {
+      if (err) {
+        console.error('Error loading items for order:', (order as any).id, err);
+        return res.json({
+          ...(order as any),
+          items: [],
+          items_summary: 'Товары не найдены'
+        });
+      }
+      
+      console.log('Items for order:', (order as any).id, items);
+      const orderWithItems = {
+        ...(order as any),
+        items: items || [],
+        items_summary: items && items.length > 0 ? 
+          items.map((item: any) => item.product_name + ' x' + item.quantity).join(', ') : 
+          'Товары не найдены'
+      };
+      
+      res.json(orderWithItems);
+    });
   });
+});
+
+// Получение фото чека
+app.get('/api/orders/payment-proof/:filename', (req, res) => {
+  const { filename } = req.params;
+  const filePath = path.join(__dirname, '../uploads', filename);
+  
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({ error: 'Файл не найден' });
+  }
 });
 
 // Загрузка чека об оплате
-app.post('/api/orders/payment-proof', upload.single('receipt'), (req, res) => {
+app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
+  console.log('Загрузка фото чека:', { 
+    file: req.file ? req.file.originalname : 'нет файла',
+    body: req.body 
+  });
+  
   if (!req.file) {
-    return res.status(400).json({ message: 'Файл не загружен' });
+    return res.status(400).json({ success: false, error: 'Файл не загружен' });
   }
 
   const { orderId, orderNumber } = req.body;
-  const fileName = `receipt-${Date.now()}-${Math.round(Math.random() * 1E9)}.jpg`;
+  const fileName = 'receipt-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.jpg';
   
-  // В Vercel файлы сохраняются во временную папку
-  const filePath = `/tmp/${fileName}`;
-  
-  fs.writeFileSync(filePath, req.file.buffer);
-
-  db.run(
-    'UPDATE orders SET payment_proof = ?, payment_proof_date = CURRENT_TIMESTAMP WHERE id = ? OR order_number = ?',
-    [fileName, orderId, orderNumber],
-    function(err) {
+  try {
+    // Создаем папку uploads если её нет
+    const uploadsDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    
+    // Сохраняем файл в папку uploads
+    const filePath = path.join(uploadsDir, fileName);
+    fs.writeFileSync(filePath, req.file.buffer);
+    
+    // Создаем URL для файла
+    const fileUrl = 'http://localhost:3001/uploads/' + fileName;
+    
+    console.log('Обновляем заказ в базе:', { orderId, orderNumber, fileUrl });
+    
+    // Обновляем заказ с URL чека
+    // Ищем заказ по ID (основной способ)
+    console.log('Ищем заказ по ID:', { orderId, orderNumber });
+    
+    // Сначала проверим, существует ли заказ
+    db.get('SELECT id, order_number FROM orders WHERE id = ?', [orderId], (err, order) => {
       if (err) {
-        return res.status(500).json({ message: 'Ошибка сохранения чека' });
+        console.error('Ошибка поиска заказа:', err);
+        return res.status(500).json({ success: false, error: 'Ошибка поиска заказа' });
       }
-      res.json({ message: 'Чек успешно загружен' });
-    }
-  );
+      
+      if (!order) {
+        console.error('Заказ не найден по ID:', orderId);
+        return res.status(404).json({ success: false, error: 'Заказ не найден' });
+      }
+      
+      console.log('Найден заказ для обновления:', order);
+      
+      // Теперь обновляем заказ
+      db.run(
+        'UPDATE orders SET payment_proof = ?, payment_proof_date = CURRENT_TIMESTAMP WHERE id = ?',
+        [fileUrl, orderId],
+        function(err) {
+          if (err) {
+            console.error('Ошибка обновления базы:', err);
+            return res.status(500).json({ success: false, error: 'Ошибка сохранения чека в базе данных' });
+          }
+          
+          console.log('Заказ обновлен успешно:', { changes: this.changes, fileUrl });
+          
+          res.json({ 
+            success: true, 
+            message: 'Чек успешно загружен',
+            fileUrl: fileUrl
+          });
+        }
+      );
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Ошибка сохранения файла' });
+  }
 });
 
-// Админ API
-app.get('/api/admin/stats', authenticateToken, requireAdmin, (req, res) => {
-  db.get(`
-    SELECT 
-      COUNT(*) as total_orders,
-      SUM(total_amount) as total_revenue,
-      COUNT(CASE WHEN status = 'pending' OR status = 'processing' THEN 1 END) as active_orders
-    FROM orders
-  `, (err, stats: StatsResult) => {
-    if (err) {
-      return res.status(500).json({ message: 'Ошибка загрузки статистики' });
-    }
-    res.json(stats);
-  });
-});
+
 
 app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
-  const { status, page = 1, limit = 10 } = req.query;
+  const { status, page = 1, limit = 50 } = req.query;
   const offset = (Number(page) - 1) * Number(limit);
   
-  let query = `
-    SELECT o.*, 
-           GROUP_CONCAT(p.name || ' x' || oi.quantity) as items_summary
-    FROM orders o
-    LEFT JOIN order_items oi ON o.id = oi.order_id
-    LEFT JOIN products p ON oi.product_id = p.id
-  `;
-  
+  // Упрощенный запрос без GROUP_CONCAT для лучшей совместимости
+  let query = 'SELECT * FROM orders';
   const params: any[] = [];
+  
   if (status && status !== 'all') {
-    query += ' WHERE o.status = ?';
+    query += ' WHERE status = ?';
     params.push(status);
   }
   
-  query += ' GROUP BY o.id ORDER BY o.created_at DESC LIMIT ? OFFSET ?';
+  query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
   params.push(Number(limit), offset);
+
+  console.log('Executing orders query:', query, params);
 
   db.all(query, params, (err, orders) => {
     if (err) {
-      return res.status(500).json({ message: 'Ошибка загрузки заказов' });
+      console.error('Database error in /api/admin/orders:', err);
+      return res.status(500).json({ 
+        message: 'Ошибка загрузки заказов', 
+        error: err.message 
+      });
     }
-    res.json(orders);
+    
+    console.log('Found orders:', orders.length);
+    console.log('Orders details:', orders.map((o: any) => ({
+      id: o.id,
+      order_number: o.order_number,
+      payment_proof: o.payment_proof,
+      payment_proof_date: o.payment_proof_date,
+      status: o.status
+    })));
+    
+    // Проверяем заказы с чеками
+    const ordersWithProof = orders.filter((o: any) => o.payment_proof && o.payment_proof.trim() !== '');
+    console.log('Заказы с чеками:', ordersWithProof.length);
+    if (ordersWithProof.length > 0) {
+      console.log('Детали заказов с чеками:', ordersWithProof.map((o: any) => ({
+        id: o.id,
+        order_number: o.order_number,
+        payment_proof: o.payment_proof
+      })));
+    }
+    
+    if (!orders || orders.length === 0) {
+      return res.json([]);
+    }
+    
+    // Используем Promise.all для более надежной обработки
+    const ordersWithItemsPromises = orders.map((order: any) => {
+      return new Promise((resolve) => {
+        db.all(`
+          SELECT 
+            oi.*,
+            p.name as product_name,
+            p.image_url as product_image
+          FROM order_items oi
+          LEFT JOIN products p ON oi.product_id = p.id
+          WHERE oi.order_id = ?
+        `, [order.id], (err, items) => {
+          let items_summary = 'Товары не найдены';
+          
+          if (!err && items && items.length > 0) {
+            items_summary = items.map((item: any) => 
+              (item.product_name || 'Неизвестный товар') + ' x' + item.quantity
+            ).join(', ');
+          }
+          
+                  console.log('Заказ с items:', { 
+                    id: order.id, 
+                    order_number: order.order_number,
+                    payment_proof: order.payment_proof,
+                    payment_proof_date: order.payment_proof_date,
+                    items_count: items ? items.length : 0 
+                  });
+        
+        resolve({
+          ...order,
+          items: items || [],
+          items_summary: items_summary
+        });
+        });
+      });
+    });
+    
+    Promise.all(ordersWithItemsPromises)
+      .then((ordersWithItems) => {
+        console.log('Sending response with', ordersWithItems.length, 'orders');
+        res.json(ordersWithItems);
+      })
+      .catch((error) => {
+        console.error('Error processing orders:', error);
+        res.status(500).json({ message: 'Ошибка обработки заказов' });
+      });
   });
 });
 
@@ -376,11 +682,29 @@ app.patch('/api/admin/orders/:id/status', authenticateToken, requireAdmin, (req,
   const { id } = req.params;
   const { status } = req.body;
 
+  console.log('Updating order status:', { id, status });
+
+  if (!status) {
+    return res.status(400).json({ message: 'Статус не указан' });
+  }
+
+  const validStatuses = ['pending', 'preparing', 'ready', 'delivering', 'delivered', 'cancelled'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ message: 'Недопустимый статус' });
+  }
+
   db.run('UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, id], function(err) {
     if (err) {
-      return res.status(500).json({ message: 'Ошибка обновления статуса' });
+      console.error('Database error updating order status:', err);
+      return res.status(500).json({ message: 'Ошибка обновления статуса', error: err.message });
     }
-    res.json({ message: 'Статус обновлен' });
+    
+    if (this.changes === 0) {
+      return res.status(404).json({ message: 'Заказ не найден' });
+    }
+    
+    console.log('Order status updated successfully:', { id, status, changes: this.changes });
+    res.json({ message: 'Статус обновлен', status });
   });
 });
 
@@ -403,5 +727,801 @@ app.post('/api/admin/telegram/test', authenticateToken, requireAdmin, async (req
   }
 });
 
+// API для управления товарами
+app.get('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
+  db.all('SELECT * FROM products ORDER BY created_at DESC', (err, products) => {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка загрузки товаров' });
+    }
+    
+    // Добавляем placeholder изображения для товаров без фото
+    const productsWithPlaceholders = products.map((product: any) => {
+      if (!product.image_url || product.image_url === '' || product.image_url.includes('/images/products/')) {
+        // Используем placeholder изображение
+        return {
+          ...product,
+          image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
+        };
+      }
+      return product;
+    });
+    
+    res.json(productsWithPlaceholders);
+  });
+});
+
+// API для очистки тестовых данных (только для админов)
+app.delete('/api/admin/clear-test-data', authenticateToken, requireAdmin, (req, res) => {
+  // Удаляем все заказы и связанные товары
+  db.run('DELETE FROM order_items', (err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка очистки данных' });
+    }
+    
+    db.run('DELETE FROM orders', (err) => {
+      if (err) {
+        return res.status(500).json({ message: 'Ошибка очистки данных' });
+      }
+      
+      res.json({ message: 'Тестовые данные успешно очищены' });
+    });
+  });
+});
+
+// API для удаления всех товаров (только для админов)
+app.delete('/api/admin/clear-all-products', authenticateToken, requireAdmin, (req, res) => {
+  db.run('DELETE FROM products', (err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка удаления товаров' });
+    }
+    
+    res.json({ message: 'Все товары успешно удалены' });
+  });
+});
+
+// Создание нового товара с загрузкой изображения
+app.post('/api/admin/products', authenticateToken, requireAdmin, upload.single('image'), (req, res) => {
+  const { name, description, price, category, isPopular, isAvailable } = req.body;
+  
+  if (!name || !price) {
+    return res.status(400).json({ message: 'Название и цена обязательны' });
+  }
+
+  let imageUrl = '';
+  
+  // Если загружено изображение, сохраняем его
+  if (req.file) {
+    const fileName = 'product-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.jpg';
+    const filePath = '/tmp/' + fileName;
+    
+    try {
+      fs.writeFileSync(filePath, req.file.buffer);
+      imageUrl = '/uploads/products/' + fileName;
+    } catch (error) {
+      return res.status(500).json({ message: 'Ошибка сохранения изображения' });
+    }
+  }
+
+  db.run(`
+    INSERT INTO products (name, description, price, image_url, category, is_popular, is_available)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `, [name, description, price, imageUrl, category, isPopular ? 1 : 0, isAvailable ? 1 : 0], function(err) {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка создания товара' });
+    }
+    
+    res.json({
+      message: 'Товар создан успешно',
+      productId: this.lastID,
+      imageUrl
+    });
+  });
+});
+
+// Обновление товара с возможностью загрузки нового изображения
+app.put('/api/admin/products/:id', authenticateToken, requireAdmin, upload.single('image'), (req, res) => {
+  const { id } = req.params;
+  const { name, description, price, category, isPopular, isAvailable } = req.body;
+  
+  if (!name || !price) {
+    return res.status(400).json({ message: 'Название и цена обязательны' });
+  }
+
+  let imageUrl = '';
+  
+  // Если загружено новое изображение, сохраняем его
+  if (req.file) {
+    const fileName = 'product-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.jpg';
+    const filePath = '/tmp/' + fileName;
+    
+    try {
+      fs.writeFileSync(filePath, req.file.buffer);
+      imageUrl = '/uploads/products/' + fileName;
+    } catch (error) {
+      return res.status(500).json({ message: 'Ошибка сохранения изображения' });
+    }
+  }
+
+  // Если новое изображение не загружено, оставляем старое
+  if (!imageUrl) {
+    db.get('SELECT image_url FROM products WHERE id = ?', [id], (err, product) => {
+      if (err) {
+        return res.status(500).json({ message: 'Ошибка получения товара' });
+      }
+      imageUrl = (product as any)?.image_url || '';
+      
+      updateProduct();
+    });
+  } else {
+    updateProduct();
+  }
+
+  function updateProduct() {
+    db.run(`
+      UPDATE products 
+      SET name = ?, description = ?, price = ?, image_url = ?, category = ?, is_popular = ?, is_available = ?
+      WHERE id = ?
+    `, [name, description, price, imageUrl, category, isPopular ? 1 : 0, isAvailable ? 1 : 0, id], function(err) {
+      if (err) {
+        return res.status(500).json({ message: 'Ошибка обновления товара' });
+      }
+      
+      res.json({
+        message: 'Товар обновлен успешно',
+        imageUrl
+      });
+    });
+  }
+});
+
+// Удаление товара
+app.delete('/api/admin/products/:id', authenticateToken, requireAdmin, (req, res) => {
+  const { id } = req.params;
+  
+  db.run('DELETE FROM products WHERE id = ?', [id], function(err) {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка удаления товара' });
+    }
+    
+    res.json({ message: 'Товар удален успешно' });
+  });
+});
+
+// API для управления корзиной
+// Получение корзины пользователя
+app.get('/api/cart', authenticateToken, (req: any, res) => {
+  const userId = req.user.id;
+  
+  // Получаем товары в корзине пользователя
+  db.all(`
+    SELECT c.*, p.name, p.price, p.image_url, p.description
+    FROM cart c
+    JOIN products p ON c.product_id = p.id
+    WHERE c.user_id = ?
+    ORDER BY c.created_at DESC
+  `, [userId], (err, cartItems) => {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка загрузки корзины' });
+    }
+    res.json(cartItems);
+  });
+});
+
+// Добавление товара в корзину
+app.post('/api/cart/add', authenticateToken, (req: any, res) => {
+  const userId = req.user.id;
+  const { productId, quantity = 1 } = req.body;
+  
+  if (!productId) {
+    return res.status(400).json({ message: 'ID товара обязателен' });
+  }
+  
+  // Проверяем, есть ли уже товар в корзине
+  db.get('SELECT * FROM cart WHERE user_id = ? AND product_id = ?', [userId, productId], (err, existingItem) => {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка проверки корзины' });
+    }
+    
+          if (existingItem) {
+        // Обновляем количество
+        const newQuantity = (existingItem as any).quantity + quantity;
+        db.run('UPDATE cart SET quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [newQuantity, (existingItem as any).id], function(err) {
+        if (err) {
+          return res.status(500).json({ message: 'Ошибка обновления корзины' });
+        }
+        res.json({ message: 'Количество товара обновлено', quantity: newQuantity });
+      });
+    } else {
+      // Добавляем новый товар
+      db.run('INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)', [userId, productId, quantity], function(err) {
+        if (err) {
+          return res.status(500).json({ message: 'Ошибка добавления в корзину' });
+        }
+        res.json({ message: 'Товар добавлен в корзину', cartItemId: this.lastID });
+      });
+    }
+  });
+});
+
+// Обновление количества товара в корзине
+app.put('/api/cart/:id', authenticateToken, (req: any, res) => {
+  const { id } = req.params;
+  const { quantity } = req.body;
+  const userId = req.user.id;
+  
+  if (quantity <= 0) {
+    return res.status(400).json({ message: 'Количество должно быть больше 0' });
+  }
+  
+  db.run('UPDATE cart SET quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?', [quantity, id, userId], function(err) {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка обновления корзины' });
+    }
+    
+    if (this.changes === 0) {
+      return res.status(404).json({ message: 'Товар в корзине не найден' });
+    }
+    
+    res.json({ message: 'Количество обновлено', quantity });
+  });
+});
+
+// Удаление товара из корзины
+app.delete('/api/cart/:id', authenticateToken, (req: any, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  
+  db.run('DELETE FROM cart WHERE id = ? AND user_id = ?', [id, userId], function(err) {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка удаления из корзины' });
+    }
+    
+    if (this.changes === 0) {
+      return res.status(404).json({ message: 'Товар в корзине не найден' });
+    }
+    
+    res.json({ message: 'Товар удален из корзины' });
+  });
+});
+
+// Очистка корзины пользователя
+app.delete('/api/cart', authenticateToken, (req: any, res) => {
+  const userId = req.user.id;
+  
+  db.run('DELETE FROM cart WHERE user_id = ?', [userId], function(err) {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка очистки корзины' });
+    }
+    
+    res.json({ message: 'Корзина очищена' });
+  });
+});
+
+// API для управления пользователями (только для админов)
+app.get('/api/admin/users', authenticateToken, requireAdmin, (req: any, res) => {
+  db.all('SELECT id, name, email, phone, address, is_admin, created_at FROM users ORDER BY created_at DESC', (err, users) => {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка загрузки пользователей' });
+    }
+    
+    const formattedUsers = users.map((user: any) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+      isAdmin: user.is_admin === 1,
+      createdAt: user.created_at
+    }));
+    
+    res.json(formattedUsers);
+  });
+});
+
+// Обновление прав админа для пользователя
+app.put('/api/admin/users/:id/admin', authenticateToken, requireAdmin, (req: any, res) => {
+  const { id } = req.params;
+  const { isAdmin } = req.body;
+  
+  if (typeof isAdmin !== 'boolean') {
+    return res.status(400).json({ message: 'Поле isAdmin должно быть boolean' });
+  }
+  
+  db.run('UPDATE users SET is_admin = ? WHERE id = ?', [isAdmin ? 1 : 0, id], function(err) {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка обновления прав пользователя' });
+    }
+    
+    if (this.changes === 0) {
+      return res.status(404).json({ message: 'Пользователь не найден' });
+    }
+    
+    res.json({ 
+      message: isAdmin ? 'Admin rights granted successfully' : 'Admin rights revoked successfully',
+      isAdmin 
+    });
+  });
+});
+
+// API для регистрации пользователей
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, email, phone, password, address } = req.body;
+
+    // Проверяем обязательные поля
+    if (!name || !email || !phone || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Все обязательные поля должны быть заполнены' 
+      });
+    }
+
+    // Проверяем, существует ли пользователь с таким email
+    db.get('SELECT id FROM users WHERE email = ?', [email], (err, existingUser) => {
+      if (err) {
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Ошибка проверки пользователя' 
+        });
+      }
+
+      if (existingUser) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Пользователь с таким email уже существует' 
+        });
+      }
+
+      // Хешируем пароль
+      const hashedPassword = bcrypt.hashSync(password, 10);
+
+      // Создаем нового пользователя
+      db.run(
+        'INSERT INTO users (name, email, phone, password, address, role, is_admin) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [name, email, phone, hashedPassword, address || '', 'user', 0],
+        function(err) {
+          if (err) {
+            return res.status(500).json({ 
+              success: false, 
+              message: 'Ошибка создания пользователя' 
+            });
+          }
+
+          // Получаем созданного пользователя
+          db.get('SELECT id, name, email, phone, address, is_admin FROM users WHERE id = ?', [this.lastID], (err, user: any) => {
+            if (err || !user) {
+              return res.status(500).json({ 
+                success: false, 
+                message: 'Ошибка получения данных пользователя' 
+              });
+            }
+
+            // Создаем JWT токен
+            const token = jwt.sign(
+              { id: user.id, email: user.email },
+              JWT_SECRET,
+              { expiresIn: '7d' }
+            );
+
+            res.json({
+              success: true,
+              message: 'Пользователь успешно зарегистрирован',
+              data: {
+                user: {
+                  id: user.id,
+                  name: user.name,
+                  email: user.email,
+                  phone: user.phone,
+                  address: user.address,
+                  isAdmin: user.is_admin === 1
+                },
+                token
+              }
+            });
+          });
+        }
+      );
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Внутренняя ошибка сервера' 
+    });
+  }
+});
+
+// API для входа пользователей
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // Проверяем обязательные поля
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Email и пароль обязательны' 
+      });
+    }
+
+    // Ищем пользователя по email
+    db.get('SELECT id, name, email, phone, address, password, is_admin FROM users WHERE email = ?', [email], (err, user: any) => {
+      if (err) {
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Ошибка поиска пользователя' 
+        });
+      }
+
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: 'Неверный email или пароль' 
+        });
+      }
+
+      // Проверяем пароль
+      const isValidPassword = bcrypt.compareSync(password, user.password);
+      
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: 'Неверный email или пароль' 
+        });
+      }
+
+      // Создаем JWT токен
+      const token = jwt.sign(
+        { id: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      const responseData = {
+        success: true,
+        message: 'Вход выполнен успешно',
+        data: {
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            address: user.address,
+            isAdmin: user.is_admin === 1
+          },
+          token
+        }
+      };
+      
+      res.json(responseData);
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Внутренняя ошибка сервера' 
+    });
+  }
+});
+
+// API для обновления профиля пользователя
+app.put('/api/users/profile', authenticateToken, (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, phone, address } = req.body;
+
+    // Проверяем обязательные поля
+    if (!name || !phone) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Имя и телефон обязательны' 
+      });
+    }
+
+    // Обновляем профиль пользователя
+    db.run(
+      'UPDATE users SET name = ?, phone = ?, address = ? WHERE id = ?',
+      [name, phone, address || '', userId],
+      function(err) {
+        if (err) {
+          return res.status(500).json({ 
+            success: false, 
+            message: 'Ошибка обновления профиля' 
+          });
+        }
+
+        if (this.changes === 0) {
+          return res.status(404).json({ 
+            success: false, 
+            message: 'Пользователь не найден' 
+          });
+        }
+
+        res.json({
+          success: true,
+          message: 'Профиль успешно обновлен'
+        });
+      }
+    );
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Внутренняя ошибка сервера' 
+    });
+  }
+});
+
+// API для получения заказов пользователя
+app.get('/api/orders/user', authenticateToken, (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    // Сначала получаем заказы пользователя
+    db.all(`
+      SELECT 
+        o.id,
+        o.order_number,
+        o.customer_name,
+        o.customer_phone,
+        o.delivery_address,
+        o.total_amount,
+        o.status,
+        o.payment_method,
+        o.created_at
+      FROM orders o
+      WHERE o.user_id = ?
+      ORDER BY o.created_at DESC
+    `, [userId], (err, orders) => {
+      if (err) {
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Ошибка получения заказов',
+          error: err.message
+        });
+      }
+
+      // Если заказов нет, возвращаем пустой массив
+      if (!orders || orders.length === 0) {
+        return res.json([]);
+      }
+
+      // Для каждого заказа получаем элементы
+      const ordersWithItems = orders.map((order: any) => ({
+        id: order.id,
+        orderNumber: order.order_number,
+        customerName: order.customer_name,
+        customerPhone: order.customer_phone,
+        deliveryAddress: order.delivery_address,
+        totalAmount: order.total_amount,
+        status: order.status,
+        paymentMethod: order.payment_method,
+        createdAt: order.created_at,
+        items: [] // Пока оставляем пустым, можно добавить позже
+      }));
+
+      res.json(ordersWithItems);
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Внутренняя ошибка сервера' 
+    });
+  }
+});
+
+// API для создания заказов (авторизованные пользователи)
+app.post('/api/orders', authenticateToken, (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const { customer, items, total, paymentMethod, notes } = req.body;
+
+    // Проверяем обязательные поля
+    if (!customer || !items || !total || !paymentMethod) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Не все обязательные поля заполнены' 
+      });
+    }
+
+    // Генерируем номер заказа
+    const orderNumber = 'MR-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    // Создаем заказ
+    const sql = `
+      INSERT INTO orders (
+        order_number, user_id, customer_name, phone, 
+        delivery_address, total_amount, status, payment_method, notes
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    const params = [
+      orderNumber, userId, customer.name, customer.phone,
+      customer.address || '', total, 'pending', paymentMethod, notes || ''
+    ];
+    
+    db.run(sql, params, function(err) {
+      if (err) {
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Ошибка создания заказа',
+          error: err.message
+        });
+      }
+
+      const orderId = this.lastID;
+      // Добавляем элементы заказа
+      let itemsAdded = 0;
+      let totalItems = items.length;
+
+      items.forEach((item: any) => {
+        db.run(`
+          INSERT INTO order_items (order_id, product_id, quantity, price)
+          VALUES (?, ?, ?, ?)
+        `, [orderId, item.product.id, item.quantity, item.product.price], (err) => {
+          if (err) {
+            } else {
+            itemsAdded++;
+          }
+
+          // Проверяем все ли элементы добавлены
+          if (itemsAdded === totalItems) {
+            // Возвращаем успешный ответ
+            res.json({
+              success: true,
+              message: 'Заказ успешно создан',
+              data: {
+                orderId,
+                orderNumber
+              }
+            });
+          }
+        });
+      });
+
+      // Если элементов нет, сразу возвращаем ответ
+      if (totalItems === 0) {
+        res.json({
+          success: true,
+          message: 'Заказ успешно создан',
+          data: {
+            orderId,
+            orderNumber
+          }
+        });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Внутренняя ошибка сервера' 
+    });
+  }
+});
+
+// API для создания гостевых заказов
+app.post('/api/orders/guest', (req, res) => {
+  try {
+    const { customerName, customerPhone, deliveryAddress, items, totalAmount } = req.body;
+
+    // Проверяем обязательные поля
+    if (!customerName || !customerPhone || !deliveryAddress || !items || !totalAmount) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Не все обязательные поля заполнены' 
+      });
+    }
+
+    // Генерируем номер заказа
+    const orderNumber = 'MR-GUEST-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+
+    // Создаем заказ
+    db.run(`
+      INSERT INTO orders (
+        order_number, customer_name, customer_phone, 
+        delivery_address, total_amount, status, payment_method
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [
+      orderNumber, customerName, customerPhone,
+      deliveryAddress, totalAmount, 'pending', 'cash'
+    ], function(err) {
+      if (err) {
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Ошибка создания заказа' 
+        });
+      }
+
+      const orderId = this.lastID;
+
+      // Добавляем элементы заказа
+      items.forEach((item: any) => {
+        db.run(`
+          INSERT INTO order_items (order_id, product_id, quantity, price)
+          VALUES (?, ?, ?, ?)
+        `, [orderId, item.productId, item.quantity, item.price], (err) => {
+          if (err) {
+            }
+        });
+      });
+
+      // Возвращаем успешный ответ
+      res.json({
+        success: true,
+        message: 'Заказ успешно создан',
+        data: {
+          orderId,
+          orderNumber
+        }
+      });
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Внутренняя ошибка сервера' 
+    });
+  }
+});
+
+// Банковские настройки
+app.get('/api/bank-settings', (req, res) => {
+  db.get('SELECT * FROM bank_settings ORDER BY id DESC LIMIT 1', (err, settings: any) => {
+    if (err) {
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Ошибка сервера' 
+      });
+    }
+    
+    if (!settings) {
+      return res.json({
+        bank_name: 'MBank',
+        bank_link: 'https://app.mbank.kg/qr#00020101021132500012c2c.mbank.kg01020210129965000867861202111302115204999953034175405100005908YBRAI%20S.63048fa2',
+        mbank_hash: '00020101021132500012c2c.mbank.kg01020210129965000867861202111302115204999953034175405100005908YBRAI%20S.63048fa2'
+      });
+    }
+    
+    // Извлекаем hash из ссылки (все что после #)
+    const mbank_hash = settings.bank_link.split('#')[1] || '';
+    
+    res.json({
+      bank_name: settings.bank_name,
+      bank_link: settings.bank_link,
+      mbank_hash: mbank_hash
+    });
+  });
+});
+
+app.post('/api/bank-settings', (req, res) => {
+  const { bank_name, bank_link } = req.body;
+  
+  if (!bank_name || !bank_link) {
+    return res.status(400).json({
+      success: false,
+      message: 'Название банка и ссылка обязательны'
+    });
+  }
+  
+  db.run(`
+    INSERT INTO bank_settings (bank_name, bank_link, updated_at) 
+    VALUES (?, ?, CURRENT_TIMESTAMP)
+  `, [bank_name, bank_link], function(err) {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: 'Ошибка сохранения'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Настройки сохранены',
+      id: this.lastID
+    });
+  });
+});
+
 // Экспортируем для Vercel
 export default app;
+// Запускаем сервер если файл запущен напрямую
+if (require.main === module) {
+  const PORT = process.env.PORT || 3001;
+  
+  app.listen(Number(PORT), '0.0.0.0', () => {
+    console.log('Server started on port:', PORT);
+  });
+}

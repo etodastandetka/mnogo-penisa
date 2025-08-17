@@ -9,9 +9,6 @@ interface PrintReceiptProps {
 
 export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) => {
   const printReceipt = () => {
-    console.log('Данные заказа для печати:', order);
-    console.log('Items:', order.items);
-    console.log('Total amount:', order.totalAmount);
     try {
       // Создаем Blob с HTML контентом
       const receiptContent = `
@@ -113,6 +110,7 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
             margin-bottom: 5px;
           }
           .qr-code {
+
             text-align: center;
             margin: 10px 0;
           }
@@ -187,12 +185,10 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
         </div>
 
                  <div class="footer">
-           <div class="tax-info">НДС включен в стоимость (12%)</div>
-           <div>Форма оплаты: MBank QR-код</div>
            <div>Спасибо за заказ!</div>
            <div>Приятного аппетита!</div>
            <div class="qr-code">
-             [QR-код для проверки чека]
+             [QR-код для проверки чека]image.png
            </div>
            <div>Чек действителен для предъявления в налоговые органы КР</div>
            <div>Фискальный документ №${order.orderNumber || order.id || 'N/A'}</div>
@@ -238,7 +234,6 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
         }
       }, 1000);
     } catch (error) {
-      console.error('Ошибка печати чека:', error);
       alert('Ошибка печати чека. Попробуйте еще раз.');
     }
   };
@@ -257,3 +252,4 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
     </div>
   );
 };
+

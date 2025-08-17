@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAdminStore } from '../store/adminStore';
+import { useUserStore } from '../store/userStore';
 import { AdminLayout } from '../components/admin/AdminLayout';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../components/ui/Card';
@@ -17,38 +17,105 @@ import {
 
 export const AdminDashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const { stats, loading, error, fetchStats } = useAdminStore();
-  const [adminUser, setAdminUser] = useState<any>(null);
+  const { user, isAdmin } = useUserStore();
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    totalRevenue: 0,
+    activeOrders: 0
+  });
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [popularProducts, setPopularProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Получаем данные пользователя из localStorage
-    const userStr = localStorage.getItem('adminUser');
-    if (userStr && userStr !== 'undefined') {
-      try {
-        setAdminUser(JSON.parse(userStr));
-      } catch (error) {
-        console.error('Ошибка парсинга adminUser:', error);
-        localStorage.removeItem('adminUser');
-      }
+    // Проверяем, что пользователь админ
+    if (!user || !isAdmin) {
+      navigate('/');
+      return;
     }
 
     // Загружаем статистику
     fetchStats();
-  }, [fetchStats]);
+  }, [user, isAdmin, navigate]);
+
+  const fetchStats = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Токен не найден');
+        return;
+      }
+
+      const response = await fetch('http://localhost:3001/api/admin/orders', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const orders = await response.json();
+        const totalOrders = orders.length;
+        const totalRevenue = orders.reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0);
+        const activeOrders = orders.filter((order: any) => 
+          order.status !== 'delivered' && order.status !== 'cancelled'
+        ).length;
+
+        // Берем последние 5 заказов
+        const recent = orders.slice(0, 5);
+        setStats({ totalOrders, totalRevenue, activeOrders });
+        setRecentOrders(recent);
+
+        // Загружаем популярные товары
+        fetchPopularProducts();
+      } else {
+        setError('Ошибка загрузки статистики');
+      }
+    } catch (error) {
+      setError('Ошибка соединения с сервером');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    navigate('/admin/login');
+    localStorage.removeItem('token');
+    navigate('/');
   };
 
   const handleRefresh = () => {
     fetchStats();
   };
 
-  if (!adminUser) {
-    return <div>Загрузка...</div>;
-  }
+  const fetchPopularProducts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('http://localhost:3001/api/admin/products', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const products = await response.json();
+        // Берем товары с флагом is_popular или первые 5
+        const popular = products.filter((p: any) => p.is_popular).slice(0, 5);
+        if (popular.length === 0) {
+          setPopularProducts(products.slice(0, 5));
+        } else {
+          setPopularProducts(popular);
+        }
+      }
+    } catch (error) {
+      }
+  };
+
+
 
   return (
     <AdminLayout>
@@ -97,7 +164,7 @@ export const AdminDashboardPage: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Всего заказов</p>
                   <p className="text-3xl font-bold text-gray-900 mt-2">
-                    {loading ? '...' : stats?.totalOrders || 0}
+                    {loading ? '...' : stats.totalOrders || 0}
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -114,7 +181,7 @@ export const AdminDashboardPage: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Общая выручка</p>
                   <p className="text-3xl font-bold text-gray-900 mt-2">
-                    {loading ? '...' : `${stats?.totalRevenue?.toLocaleString() || 0} сом`}
+                    {loading ? '...' : `${stats.totalRevenue.toLocaleString() || 0} сом`}
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
@@ -131,7 +198,7 @@ export const AdminDashboardPage: React.FC = () => {
                 <div>
                                       <p className="text-sm font-medium text-gray-600">Средний чек</p>
                     <p className="text-3xl font-bold text-gray-900 mt-2">
-                      {loading ? '...' : `${stats?.averageOrderValue?.toLocaleString() || 0} сом`}
+                      {loading ? '...' : `${Math.round((stats.totalRevenue || 0) / Math.max(stats.totalOrders || 1, 1)).toLocaleString()} сом`}
                     </p>
                 </div>
                 <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -148,7 +215,7 @@ export const AdminDashboardPage: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">В обработке</p>
                   <p className="text-3xl font-bold text-gray-900 mt-2">
-                    {loading ? '...' : stats?.recentOrders?.filter(o => o.status === 'preparing').length || 0}
+                    {loading ? '...' : stats.activeOrders || 0}
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
@@ -164,7 +231,18 @@ export const AdminDashboardPage: React.FC = () => {
           {/* Последние заказы */}
           <Card className="border-0 shadow-soft">
             <CardHeader>
-              <h3 className="text-lg font-semibold text-gray-900">Последние заказы</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Последние заказы</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/admin/orders')}
+                  className="text-xs"
+                >
+                  Все заказы
+                  <ArrowRight className="h-3 w-3 ml-1" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -176,30 +254,39 @@ export const AdminDashboardPage: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              ) : stats?.recentOrders?.length ? (
-                <div className="space-y-4">
-                  {stats.recentOrders.slice(0, 5).map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-japanese-indigo/10 rounded-lg flex items-center justify-center">
-                          <Package className="w-5 h-5 text-japanese-indigo" />
+              ) : recentOrders.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">Нет заказов</p>
+              ) : (
+                <div className="space-y-3">
+                  {recentOrders.map((order) => (
+                    <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <Badge variant="primary" className="text-xs">
+                            #{order.order_number || order.id}
+                          </Badge>
+                          <Badge className={getStatusColor(order.status)}>
+                            {getStatusText(order.status)}
+                          </Badge>
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-900">#{order.orderNumber}</p>
-                          <p className="text-sm text-gray-600">{order.customerName}</p>
-                        </div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {order.customer_name || 'Клиент'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {order.customer_phone || order.phone || 'Телефон не указан'}
+                        </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-gray-900">{order.totalAmount} сом</p>
-                        <Badge className={getStatusColor(order.status)}>
-                          {getStatusText(order.status)}
-                        </Badge>
+                        <p className="text-sm font-bold text-gray-900">
+                          {order.total_amount?.toLocaleString() || 0} сом
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {order.created_at ? new Date(order.created_at).toLocaleDateString('ru-RU') : 'Дата не указана'}
+                        </p>
                       </div>
                     </div>
                   ))}
                 </div>
-              ) : (
-                <p className="text-gray-500 text-center py-8">Нет заказов</p>
               )}
             </CardContent>
           </Card>
@@ -207,7 +294,18 @@ export const AdminDashboardPage: React.FC = () => {
           {/* Популярные товары */}
           <Card className="border-0 shadow-soft">
             <CardHeader>
-              <h3 className="text-lg font-semibold text-gray-900">Популярные товары</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Популярные товары</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/admin/products')}
+                  className="text-xs"
+                >
+                  Все товары
+                  <ArrowRight className="h-3 w-3 ml-1" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -219,29 +317,37 @@ export const AdminDashboardPage: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              ) : stats?.popularProducts?.length ? (
-                <div className="space-y-4">
-                  {stats.popularProducts.slice(0, 5).map((product) => (
-                    <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-japanese-red/10 rounded-lg flex items-center justify-center">
-                          <Package className="w-5 h-5 text-japanese-red" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{product.name}</p>
-                          <p className="text-sm text-gray-600">Продаж: {product.salesCount}</p>
-                        </div>
+              ) : popularProducts.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">Нет товаров</p>
+              ) : (
+                <div className="space-y-3">
+                  {popularProducts.map((product) => (
+                    <div key={product.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <Package className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">
+                          {product.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {product.category || 'Без категории'}
+                        </p>
                       </div>
                       <div className="text-right">
-                        <Badge className="bg-green-100 text-green-800">
-                          Популярный
+                        <p className="text-sm font-bold text-gray-900">
+                          {product.price?.toLocaleString() || 0} сом
+                        </p>
+                        <Badge 
+                          variant={product.is_available ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {product.is_available ? 'В наличии' : 'Нет в наличии'}
                         </Badge>
                       </div>
                     </div>
                   ))}
                 </div>
-              ) : (
-                <p className="text-gray-500 text-center py-8">Нет данных</p>
               )}
             </CardContent>
           </Card>

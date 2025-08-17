@@ -117,3 +117,27 @@ ios/Pods/
 uploads/
 public/uploads/
 
+# Backup files
+*.backup
+*.bak
+
+# Test files
+test_*.js
+test*.js
+*test*.py
+*test*.html
+cleanup-debug.js
+
+# Database fix scripts
+*fix*.js
+check*.js
+create*.js
+restore*.js
+
+# Build info
+*.tsbuildinfo
+
+# Temporary files
+1win.py
+test.py
+

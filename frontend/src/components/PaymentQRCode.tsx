@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from './ui/Card';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
-import { QrCode, Copy, Check, ExternalLink } from 'lucide-react';
+import { QrCode, Check } from 'lucide-react';
 import { formatPrice } from '../utils/format';
 
 interface PaymentQRCodeProps {
@@ -11,63 +11,47 @@ interface PaymentQRCodeProps {
   onPaymentComplete?: () => void;
 }
 
-// Банки и их ссылки
+// Банки и их ссылки (без эмодзи)
 const banks = [
   {
     name: 'MBank',
-    logo: '🏦',
     color: 'bg-blue-500',
-    hoverColor: 'hover:bg-blue-600',
-    link: 'https://mbank.kg'
+    hoverColor: 'hover:bg-blue-600'
   },
   {
     name: 'Bakai Bank',
-    logo: '🏛️',
     color: 'bg-green-500',
-    hoverColor: 'hover:bg-green-600',
-    link: 'https://bakai.kg'
+    hoverColor: 'hover:bg-green-600'
   },
   {
     name: 'Demir Bank',
-    logo: '🏢',
     color: 'bg-purple-500',
-    hoverColor: 'hover:bg-purple-600',
-    link: 'https://demirbank.kg'
+    hoverColor: 'hover:bg-purple-600'
   },
   {
     name: 'Optima Bank',
-    logo: '🏦',
     color: 'bg-orange-500',
-    hoverColor: 'hover:bg-orange-600',
-    link: 'https://optima.kg'
+    hoverColor: 'hover:bg-orange-600'
   },
   {
     name: 'MegaPay',
-    logo: '💳',
     color: 'bg-red-500',
-    hoverColor: 'hover:bg-red-600',
-    link: 'https://megapay.kg'
+    hoverColor: 'hover:bg-red-600'
   },
   {
     name: 'O! Bank',
-    logo: '📱',
     color: 'bg-yellow-500',
-    hoverColor: 'hover:bg-yellow-600',
-    link: 'https://obank.kg'
+    hoverColor: 'hover:bg-yellow-600'
   },
   {
     name: 'Balance.kg',
-    logo: '💰',
     color: 'bg-indigo-500',
-    hoverColor: 'hover:bg-indigo-600',
-    link: 'https://balance.kg'
+    hoverColor: 'hover:bg-indigo-600'
   },
   {
     name: 'Companion',
-    logo: '🤝',
     color: 'bg-teal-500',
-    hoverColor: 'hover:bg-teal-600',
-    link: 'https://companion.kg'
+    hoverColor: 'hover:bg-teal-600'
   }
 ];
 
@@ -76,7 +60,6 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
   amount, 
   onPaymentComplete 
 }) => {
-  const [copied, setCopied] = useState(false);
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
 
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
@@ -101,7 +84,6 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
           `)}`);
         }
       } catch (error) {
-        console.error('Ошибка получения QR-кода:', error);
         // Fallback к простому QR-коду
         const qrData = `order:${orderId}|amount:${amount}|bank:${selectedBank || 'any'}`;
         setQrCodeUrl(`data:image/svg+xml;base64,${btoa(`
@@ -116,16 +98,7 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
     fetchQRCode();
   }, [orderId, amount, selectedBank]);
 
-  const copyToClipboard = async () => {
-    const paymentLink = `https://mnogo-rolly.kg/pay/${orderId}`;
-    try {
-      await navigator.clipboard.writeText(paymentLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Ошибка копирования:', err);
-    }
-  };
+
 
   const handleBankSelect = (bankName: string) => {
     setSelectedBank(bankName);
@@ -154,7 +127,6 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
         alert('Ошибка при обновлении статуса оплаты: ' + result.message);
       }
     } catch (error) {
-      console.error('Ошибка при обновлении статуса оплаты:', error);
       alert('Ошибка при обновлении статуса оплаты. Попробуйте еще раз.');
     }
   };
@@ -197,26 +169,7 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
             </p>
           </div>
 
-          {/* Кнопка копирования ссылки */}
-          <div className="mb-6">
-            <Button
-              onClick={copyToClipboard}
-              variant="outline"
-              className="w-full"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-4 h-4 mr-2" />
-                  Ссылка скопирована!
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4 mr-2" />
-                  Скопировать ссылку для оплаты
-                </>
-              )}
-            </Button>
-          </div>
+
 
           {/* Банковские кнопки */}
           <div className="mb-6">
@@ -232,7 +185,6 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
                     selectedBank === bank.name ? 'ring-2 ring-offset-2 ring-blue-500' : ''
                   }`}
                 >
-                  <span className="text-lg mr-2">{bank.logo}</span>
                   {bank.name}
                 </Button>
               ))}

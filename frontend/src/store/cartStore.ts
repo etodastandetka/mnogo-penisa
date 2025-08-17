@@ -1,12 +1,21 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { CartItem, Product } from '../types';
+
+export interface CartItem {
+  product: {
+    id: string | number;
+    name: string;
+    price: number;
+    image_url?: string;
+  };
+  quantity: number;
+}
 
 interface CartStore {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: string) => void;
+  addItem: (product: any, quantity?: number) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  removeItem: (productId: string) => void;
   clearCart: () => void;
   getTotal: () => number;
   getItemCount: () => number;
@@ -17,70 +26,105 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
-      
-      addItem: (product: Product, quantity = 1) => {
-        set((state) => {
-          const existingItem = state.items.find(item => item.product.id === product.id);
+
+      addItem: (product: any, quantity: number = 1) => {
+        try {
+          const { items } = get();
+          const existingItem = items.find(item => String(item.product.id) === String(product.id));
           
           if (existingItem) {
-            return {
-              items: state.items.map(item =>
-                item.product.id === product.id
-                  ? { ...item, quantity: item.quantity + quantity }
-                  : item
-              ),
+            const updatedItems = items.map(item =>
+              String(item.product.id) === String(product.id)
+                ? { ...item, quantity: item.quantity + quantity }
+                : item
+            );
+            set({ items: updatedItems });
+            } else {
+            const newItem: CartItem = {
+              product: {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image_url: product.image_url
+              },
+              quantity
             };
+            const updatedItems = [...items, newItem];
+            set({ items: updatedItems });
+            }
+        } catch (error) {
+          }
+      },
+
+      updateQuantity: (productId: string, quantity: number) => {
+        try {
+          if (quantity <= 0) {
+            get().removeItem(productId);
+            return;
           }
           
-          return {
-            items: [...state.items, { product, quantity }],
-          };
-        });
-      },
-      
-      removeItem: (productId: string) => {
-        set((state) => ({
-          items: state.items.filter(item => item.product.id !== productId),
-        }));
-      },
-      
-      updateQuantity: (productId: string, quantity: number) => {
-        if (quantity <= 0) {
-          get().removeItem(productId);
-          return;
-        }
-        
-        set((state) => ({
-          items: state.items.map(item =>
-            item.product.id === productId
+          const { items } = get();
+          const updatedItems = items.map(item =>
+            String(item.product.id) === productId
               ? { ...item, quantity }
               : item
-          ),
-        }));
+          );
+          set({ items: updatedItems });
+          } catch (error) {
+          }
       },
-      
+
+      removeItem: (productId: string) => {
+        try {
+          const { items } = get();
+          const updatedItems = items.filter(item => String(item.product.id) !== productId);
+          set({ items: updatedItems });
+          } catch (error) {
+          }
+      },
+
       clearCart: () => {
-        set({ items: [] });
+        try {
+          set({ items: [] });
+          } catch (error) {
+          }
       },
-      
+
       getTotal: () => {
-        const { items } = get();
-        return items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+        try {
+          const { items } = get();
+          const total = items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+          return total;
+        } catch (error) {
+          return 0;
+        }
       },
-      
+
       getItemCount: () => {
-        const { items } = get();
-        return items.reduce((count, item) => count + item.quantity, 0);
+        try {
+          const { items } = get();
+          const count = items.reduce((count, item) => count + item.quantity, 0);
+          return count;
+        } catch (error) {
+          return 0;
+        }
       },
-      
+
       getItemQuantity: (productId: string) => {
-        const { items } = get();
-        const item = items.find(item => item.product.id === productId);
-        return item ? item.quantity : 0;
+        try {
+          const { items } = get();
+          const item = items.find(item => String(item.product.id) === productId);
+          const quantity = item ? item.quantity : 0;
+          return quantity;
+        } catch (error) {
+          return 0;
+        }
       },
     }),
     {
       name: 'mnogo-rolly-cart',
+      onRehydrateStorage: () => (state) => {
+        },
     }
   )
 );

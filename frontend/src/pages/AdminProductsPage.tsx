@@ -3,7 +3,8 @@ import { AdminLayout } from '../components/admin/AdminLayout';
 import { Card, CardContent, CardHeader } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { client } from '../api/client';
-import { adminApi } from '../api/admin';
+import { getProducts, createProduct, updateProduct, deleteProduct } from '../api/admin';
+
 import { 
   Package, 
   Plus, 
@@ -57,11 +58,10 @@ export const AdminProductsPage: React.FC = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const productsData = await adminApi.getProducts();
+        const productsData = await getProducts();
         setProducts(productsData);
         setError(null);
       } catch (err) {
-        console.error('Ошибка загрузки товаров:', err);
         setError('Ошибка загрузки товаров');
       } finally {
         setLoading(false);
@@ -88,18 +88,48 @@ export const AdminProductsPage: React.FC = () => {
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Проверяем размер файла (максимум 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Размер файла не должен превышать 5MB');
-        return;
-      }
+      handleFileSelect(file);
+    }
+  };
 
-      setSelectedImage(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleFileSelect = (file: File) => {
+    // Проверяем размер файла (максимум 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Размер файла не должен превышать 5MB');
+      return;
+    }
+
+    // Проверяем тип файла
+    if (!file.type.startsWith('image/')) {
+      alert('Пожалуйста, выберите изображение');
+      return;
+    }
+
+    setSelectedImage(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.currentTarget.classList.add('border-red-400', 'bg-red-50');
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('border-red-400', 'bg-red-50');
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('border-red-400', 'bg-red-50');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFileSelect(files[0]);
     }
   };
 
@@ -157,7 +187,6 @@ export const AdminProductsPage: React.FC = () => {
         try {
           imageUrl = await compressImage(selectedImage);
         } catch (err) {
-          console.error('Ошибка сжатия изображения:', err);
           alert('Ошибка при обработке изображения');
           return;
         }
@@ -168,7 +197,7 @@ export const AdminProductsPage: React.FC = () => {
         image_url: imageUrl
       };
 
-      const result = await adminApi.createProduct(productData);
+      const result = await createProduct(productData);
       
       // Обновляем список товаров
       const newProduct = {
@@ -191,7 +220,6 @@ export const AdminProductsPage: React.FC = () => {
       setImagePreview('');
       alert('Товар успешно добавлен!');
     } catch (err) {
-      console.error('Ошибка добавления товара:', err);
       alert('Ошибка при добавлении товара');
     }
   };
@@ -227,7 +255,7 @@ export const AdminProductsPage: React.FC = () => {
     if (!editingProduct) return;
 
     try {
-      await adminApi.updateProduct(editingProduct.id, editForm);
+              await updateProduct(String(editingProduct.id), editForm);
       
       // Обновляем список товаров
       const updatedProducts = products.map(p => 
@@ -241,7 +269,6 @@ export const AdminProductsPage: React.FC = () => {
       setEditingProduct(null);
       alert('Товар успешно обновлен!');
     } catch (err) {
-      console.error('Ошибка обновления товара:', err);
       alert('Ошибка при обновлении товара');
     }
   };
@@ -262,13 +289,12 @@ export const AdminProductsPage: React.FC = () => {
   const handleDeleteProduct = async (productId: number) => {
     if (window.confirm('Вы уверены, что хотите удалить этот товар?')) {
       try {
-        await adminApi.deleteProduct(productId);
+        await deleteProduct(String(productId));
         // Обновляем список товаров
         const updatedProducts = products.filter(p => p.id !== productId);
         setProducts(updatedProducts);
         alert('Товар успешно удален!');
       } catch (err) {
-        console.error('Ошибка удаления товара:', err);
         alert('Ошибка при удалении товара');
       }
     }
@@ -669,11 +695,16 @@ export const AdminProductsPage: React.FC = () => {
                     Изображение товара
                   </label>
                   <p className="text-xs text-gray-500 mb-3">
-                    Максимальный размер файла: 5MB. Изображение будет автоматически сжато до 800x600 пикселей.
+                    Максимальный размер файла: 5MB. Поддерживаемые форматы: JPG, PNG, GIF
                   </p>
                   <div className="space-y-3">
-                    {/* Кнопка выбора файла */}
-                    <div>
+                    {/* Drag & Drop зона */}
+                    <div 
+                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-red-400 transition-colors"
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    >
                       <input
                         type="file"
                         accept="image/*"
@@ -683,12 +714,17 @@ export const AdminProductsPage: React.FC = () => {
                       />
                       <label
                         htmlFor="image-upload"
-                        className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        className="cursor-pointer flex flex-col items-center"
                       >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
-                        Выбрать изображение
+                        <span className="text-sm text-gray-600">
+                          {selectedImage ? 'Файл выбран' : 'Нажмите для выбора файла'}
+                        </span>
+                        <span className="text-xs text-gray-500 mt-1">
+                          или перетащите файл сюда
+                        </span>
                       </label>
                     </div>
 
@@ -698,7 +734,7 @@ export const AdminProductsPage: React.FC = () => {
                         <img
                           src={imagePreview}
                           alt="Предварительный просмотр"
-                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                          className="w-full max-w-md h-auto rounded-lg border border-gray-300"
                         />
                         <button
                           onClick={() => {

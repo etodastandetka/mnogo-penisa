@@ -8,9 +8,10 @@ export enum OrderStatus {
 
 // Категории товаров
 export enum ProductCategory {
-  ROLLS = 'rolls',
+  SUSHI_ROLLS = 'sushi_rolls', // Объединенная категория суши и роллов
   SETS = 'sets',
-  SUSHI = 'sushi',
+  WINGS = 'wings', // Крылья
+  PIZZA = 'pizza', // Пицца
   DRINKS = 'drinks',
   SAUCES = 'sauces',
 }
@@ -62,6 +63,15 @@ export interface Order {
   updatedAt: string;
   estimatedDelivery?: string;
   notes?: string;
+  items_summary?: string; // for backend compatibility
+  payment_proof?: string;
+  payment_proof_date?: string;
+}
+
+export interface OrderDetail extends Order {
+  items_summary?: string;
+  payment_proof?: string;
+  payment_proof_date?: string;
 }
 
 // Пользователь
@@ -72,6 +82,7 @@ export interface User {
   email?: string;
   address?: string;
   token?: string;
+  isAdmin?: boolean;
 }
 
 // Аналитика
@@ -99,4 +110,6 @@ export interface PaginatedResponse<T> {
   limit: number;
   totalPages: number;
 }
+
+
 

@@ -9,7 +9,7 @@ import { productsApi } from '../api/products';
 import { Product } from '../types';
 import { 
   ShoppingCart, Clock, MapPin, Phone, Star, Truck, Shield, Heart,
-  ArrowRight, ChefHat, Utensils, Sparkles, Zap, Award
+  ArrowRight, ChefHat, Utensils, Sparkles, Zap, Award, Instagram
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
@@ -24,8 +24,7 @@ export const LandingPage: React.FC = () => {
         const productsData = await productsApi.getAll();
         setProducts(productsData);
       } catch (error) {
-        console.error('Ошибка загрузки товаров:', error);
-      } finally {
+        } finally {
         setLoading(false);
       }
     };
@@ -100,7 +99,7 @@ export const LandingPage: React.FC = () => {
             <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-yellow-300 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
           </div>
         </div>
-        
+
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Левая колонка - основной контент */}
@@ -114,31 +113,31 @@ export const LandingPage: React.FC = () => {
                 </Badge>
               </div>
               
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
                 Вкусные роллы
                 <span className="block text-yellow-300">с доставкой</span>
-              </h1>
+            </h1>
               
               <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
                 Свежие ингредиенты, оригинальные рецепты и быстрая доставка прямо к вашему столу
-              </p>
+            </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <Button 
-                  onClick={() => navigate('/menu')}
+              <Button 
+                onClick={() => navigate('/menu')}
                   className="bg-white text-red-600 hover:bg-gray-100 font-semibold text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                >
-                  <ShoppingCart className="w-5 h-5 mr-2" />
-                  Заказать сейчас
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => navigate('/contact')}
-                  className="border-white/30 text-white hover:bg-white/10 font-semibold text-lg px-8 py-4 rounded-xl backdrop-blur-sm"
-                >
-                  <Phone className="w-5 h-5 mr-2" />
+              >
+                <ShoppingCart className="w-5 h-5 mr-2" />
+                Заказать сейчас
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => navigate('/contact')}
+                  className="bg-black/20 border-white text-white hover:bg-white hover:text-red-600 font-semibold text-lg px-8 py-4 rounded-xl backdrop-blur-sm transition-all duration-300 shadow-lg"
+              >
+                <Phone className="w-5 h-5 mr-2" />
                   Позвонить
-                </Button>
+              </Button>
               </div>
               
               <div className="flex items-center gap-8 text-white/80">
@@ -223,14 +222,14 @@ export const LandingPage: React.FC = () => {
               Выберите из нашего разнообразного меню свежих роллов, сетов и других блюд японской кухни
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickMenu.map((product) => (
               <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer" onClick={() => navigate('/menu')}>
                 <div className="relative overflow-hidden rounded-t-xl">
                   <img
                     src={product.image_url || product.image || 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'}
-                    alt={product.name}
+                      alt={product.name}
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
@@ -241,37 +240,37 @@ export const LandingPage: React.FC = () => {
                     <div className="absolute top-3 left-3">
                       <Badge variant="primary" className="bg-red-500 text-white">
                         Популярное
-                      </Badge>
-                    </div>
+                    </Badge>
+                  </div>
                   )}
                 </div>
                 <CardContent className="p-4">
                   <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
-                    {product.name}
-                  </h3>
+                      {product.name}
+                    </h3>
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                     {product.description}
                   </p>
-                  <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between">
                     <span className="text-xl font-bold text-red-600">
                       {formatPrice(product.price)}
                     </span>
-                    <Button 
-                      size="sm"
+                      <Button 
+                        size="sm"
                       className="bg-red-600 hover:bg-red-700 text-white"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate('/menu');
-                      }}
-                    >
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate('/menu');
+                        }}
+                      >
                       <ShoppingCart className="w-4 h-4" />
-                    </Button>
+                      </Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-          
+
           <div className="text-center mt-8">
             <Button 
               onClick={() => navigate('/menu')}
@@ -295,7 +294,7 @@ export const LandingPage: React.FC = () => {
               Мы заботимся о качестве каждого блюда и комфорте наших клиентов
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <div key={index} className="text-center group">
@@ -325,7 +324,7 @@ export const LandingPage: React.FC = () => {
               Выберите категорию и найдите свои любимые блюда
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {popularCategories.map((category, index) => (
               <Card key={index} className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer" onClick={() => navigate('/menu')}>
@@ -348,8 +347,18 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-red-600 to-orange-600 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative py-16 bg-gradient-to-br from-red-500 via-orange-500 to-yellow-500 text-white overflow-hidden">
+        {/* Фоновые элементы */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500/90 via-orange-500/90 to-yellow-500/90"></div>
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-10 left-10 w-32 h-32 bg-red-300 rounded-full blur-2xl animate-pulse"></div>
+            <div className="absolute top-20 right-20 w-24 h-24 bg-orange-300 rounded-full blur-xl animate-pulse" style={{animationDelay: '1s'}}></div>
+            <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-yellow-300 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
+          </div>
+        </div>
+        
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Готовы заказать вкусные роллы?
           </h2>
@@ -359,7 +368,7 @@ export const LandingPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               onClick={() => navigate('/menu')}
-              className="bg-white text-red-600 hover:bg-gray-100 font-semibold text-lg px-8 py-4 rounded-xl"
+              className="bg-white text-red-600 hover:bg-gray-100 font-semibold text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
               Заказать сейчас
@@ -367,11 +376,154 @@ export const LandingPage: React.FC = () => {
             <Button 
               variant="outline"
               onClick={() => navigate('/contact')}
-              className="border-white/30 text-white hover:bg-white/10 font-semibold text-lg px-8 py-4 rounded-xl"
+              className="border-white/30 text-white hover:bg-white/10 font-semibold text-lg px-8 py-4 rounded-xl backdrop-blur-sm"
             >
               <Phone className="w-5 h-5 mr-2" />
               Связаться с нами
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Events & Corporate Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Доставка еды для мероприятий
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Организуем питание для любых событий: от детских праздников до корпоративных мероприятий
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div className="group bg-white rounded-xl p-6 border border-gray-100 shadow-soft hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <div className="text-white">
+                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">
+                Детские праздники
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed text-center mb-4">
+                Вкусные роллы и суши для детских дней рождения, выпускных и других праздников
+              </p>
+              <Button 
+                onClick={() => navigate('/contact')}
+                className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-medium py-2 rounded-lg transition-all duration-300"
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                Связаться с нами
+              </Button>
+            </div>
+            
+            <div className="group bg-white rounded-xl p-6 border border-gray-100 shadow-soft hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <div className="text-white">
+                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5h2zm0 4h2v2H7V9h2zm0 4h2v2H7v-2z" clipRule="evenodd"/>
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">
+                Корпоративы
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed text-center mb-4">
+                Питание для офисных мероприятий, встреч с клиентами и корпоративных обедов
+              </p>
+              <Button 
+                onClick={() => navigate('/contact')}
+                className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-medium py-2 rounded-lg transition-all duration-300"
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                Связаться с нами
+              </Button>
+            </div>
+            
+            <div className="group bg-white rounded-xl p-6 border border-gray-100 shadow-soft hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-yellow-500 to-red-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <div className="text-white">
+                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/>
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">
+                Свадьбы и торжества
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed text-center mb-4">
+                Элегантные наборы суши и роллов для свадеб, юбилеев и других торжественных событий
+              </p>
+              <Button 
+                onClick={() => navigate('/contact')}
+                className="w-full bg-gradient-to-r from-yellow-500 to-red-500 hover:from-yellow-600 hover:to-red-600 text-white font-medium py-2 rounded-lg transition-all duration-300"
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                Связаться с нами
+              </Button>
+            </div>
+          </div>
+          
+          <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                Заказать питание для мероприятия
+              </h3>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Свяжитесь с нами для обсуждения деталей, расчета стоимости и составления индивидуального меню
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                    <Phone className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">Телефон для заказа</p>
+                    <p className="text-red-600 font-bold text-lg">+996 555 123 456</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">Время работы</p>
+                    <p className="text-gray-600">Ежедневно 10:00-23:00</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <Truck className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">Доставка</p>
+                    <p className="text-gray-600">По всему городу, время согласовывается</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <Button 
+                  onClick={() => navigate('/contact')}
+                  className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-semibold text-lg px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                >
+                  <Phone className="w-5 h-5 mr-2" />
+                  Заказать для мероприятия
+                </Button>
+                <p className="text-sm text-gray-500 mt-2">
+                  Менеджер свяжется с вами в течение 15 минут
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -392,6 +544,12 @@ export const LandingPage: React.FC = () => {
                 <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
                   <MapPin className="w-5 h-5" />
                 </div>
+                <button 
+                  onClick={() => window.open('https://www.instagram.com/mnogo_rolly', '_blank')}
+                  className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
+                >
+                  <Instagram className="w-5 h-5" />
+                </button>
               </div>
             </div>
             

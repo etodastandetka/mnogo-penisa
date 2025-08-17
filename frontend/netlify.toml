@@ -2,10 +2,15 @@
   publish = "dist"
   command = "npm run build"
 
+[build.environment]
+  NODE_VERSION = "18"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-[build.environment]
-  VITE_API_URL = "https://testo-2fjc.vercel.app/api"
+[dev]
+  command = "npm run dev"
+  port = 3000
+  publish = "dist"

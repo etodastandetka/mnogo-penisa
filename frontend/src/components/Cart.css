@@ -1,0 +1,41 @@
+.cart-delete-button:hover {
+  background-color: #fef2f2 !important;
+  color: #dc2626 !important;
+  transform: scale(1.1);
+}
+
+.cart-delete-button:active {
+  transform: scale(0.9);
+}
+
+.cart-button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.cart-button:hover {
+  background-color: #fef2f2 !important;
+  color: #dc2626 !important;
+}
+
+.cart-button:active {
+  transform: scale(0.95);
+}
+
+.cart-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+}
+
+.cart-delete-button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease;
+}
+
+
+

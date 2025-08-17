@@ -1,62 +1,65 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  role: 'user' | 'admin';
-}
+import { User } from '../types';
+import { getUserInfo } from '../api/user';
 
 interface UserStore {
   user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  login: (user: User, token: string) => void;
-  logout: () => void;
-  updateUser: (user: Partial<User>) => void;
+  isLoading: boolean;
+  error: string | null;
+  isAdmin: boolean;
+  setUser: (user: User | null) => void;
+  fetchUserInfo: () => Promise<void>;
+  clearUser: () => void;
+  setError: (error: string | null) => void;
 }
 
 export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
       user: null,
-      token: null,
-      isAuthenticated: false,
+      isLoading: false,
+      error: null,
+      isAdmin: false,
       
-      login: (user: User, token: string) => {
-        set({
-          user,
-          token,
-          isAuthenticated: true,
+      setUser: (user: User | null) => {
+        set({ 
+          user, 
+          isAdmin: user?.isAdmin || false,
+          error: null 
         });
       },
       
-      logout: () => {
-        set({
-          user: null,
-          token: null,
-          isAuthenticated: false,
-        });
-      },
-      
-      updateUser: (userData: Partial<User>) => {
-        const currentUser = get().user;
-        if (currentUser) {
-          set({
-            user: { ...currentUser, ...userData },
+      fetchUserInfo: async () => {
+        try {
+          set({ isLoading: true, error: null });
+          const userInfo = await getUserInfo();
+          set({ 
+            user: userInfo, 
+            isAdmin: userInfo.isAdmin || false,
+            isLoading: false 
+          });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Ошибка получения данных пользователя',
+            isLoading: false 
           });
         }
       },
+      
+      clearUser: () => {
+        set({ user: null, isAdmin: false, error: null });
+      },
+      
+      setError: (error: string | null) => {
+        set({ error });
+      },
     }),
     {
-      name: 'user-storage',
-      partialize: (state) => ({
+      name: 'mnogo-rolly-user',
+      partialize: (state) => ({ 
         user: state.user,
-        token: state.token,
-        isAuthenticated: state.isAuthenticated,
+        isAdmin: state.isAdmin 
       }),
     }
   )

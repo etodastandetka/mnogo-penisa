@@ -8,7 +8,6 @@ export const productsApi = {
       const response = await client.get('/products');
       return response.data;
     } catch (error) {
-      console.error('Ошибка загрузки товаров:', error);
       return [];
     }
   },
@@ -19,7 +18,6 @@ export const productsApi = {
       const response = await client.get(`/products?category=${category}`);
       return response.data;
     } catch (error) {
-      console.error('Ошибка загрузки товаров по категории:', error);
       return [];
     }
   },
@@ -31,7 +29,6 @@ export const productsApi = {
       // Возвращаем первые 6 товаров как популярные
       return response.data.slice(0, 6);
     } catch (error) {
-      console.error('Ошибка загрузки популярных товаров:', error);
       return [];
     }
   },
@@ -42,7 +39,6 @@ export const productsApi = {
       const response = await client.get(`/products/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Ошибка загрузки товара:', error);
       throw new Error('Продукт не найден');
     }
   },
@@ -53,7 +49,6 @@ export const productsApi = {
       const response = await client.get(`/products?search=${encodeURIComponent(query)}`);
       return response.data;
     } catch (error) {
-      console.error('Ошибка поиска товаров:', error);
       return [];
     }
   },

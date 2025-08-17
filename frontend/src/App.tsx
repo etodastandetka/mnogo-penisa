@@ -8,13 +8,13 @@ import { CheckoutPage } from './pages/CheckoutPage';
 import { ContactPage } from './pages/ContactPage';
 import { AuthPage } from './pages/AuthPage';
 import { ProfilePage } from './pages/ProfilePage';
-import { AdminLoginPage } from './pages/AdminLoginPage';
+
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminOrdersPage } from './pages/AdminOrdersPage';
 import { AdminProductsPage } from './pages/AdminProductsPage';
-import { AdminCustomersPage } from './pages/AdminCustomersPage';
 import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage';
 import { AdminSettingsPage } from './pages/AdminSettingsPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { PageWithNavigation } from './components/PageWithNavigation';
 import './index.css';
 
@@ -42,14 +42,37 @@ function App() {
             <Route path="/profile" element={<PageWithNavigation><ProfilePage /></PageWithNavigation>} />
             
             {/* Админ-панель */}
-            <Route path="/admin" element={<AdminLoginPage />} />
-            <Route path="/admin/login" element={<AdminLoginPage />} />
-            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-            <Route path="/admin/orders" element={<AdminOrdersPage />} />
-            <Route path="/admin/products" element={<AdminProductsPage />} />
-            <Route path="/admin/customers" element={<AdminCustomersPage />} />
-            <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
-            <Route path="/admin/settings" element={<AdminSettingsPage />} />
+            <Route path="/admin" element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminDashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminDashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/orders" element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminOrdersPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/products" element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminProductsPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/analytics" element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminAnalyticsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/settings" element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminSettingsPage />
+              </ProtectedRoute>
+            } />
           </Routes>
           
           {/* Уведомления */}

@@ -39,7 +39,6 @@ export const AdminCustomersPage: React.FC = () => {
         setCustomers(response.data);
         setError(null);
       } catch (err) {
-        console.error('Ошибка загрузки клиентов:', err);
         setError('Ошибка загрузки клиентов');
       } finally {
     setLoading(false);

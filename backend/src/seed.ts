@@ -3,15 +3,11 @@ import bcrypt from 'bcryptjs';
 
 const db = new sqlite3.Database('./data/mnogo_rolly.db', (err) => {
   if (err) {
-    console.error('❌ Ошибка открытия базы данных:', err);
-  } else {
-    console.log('✅ База данных открыта');
-  }
+    } else {
+    }
 });
 
 async function seed() {
-  console.log('🌱 Заполнение базы данных тестовыми данными...');
-
   // Создаем папку data если её нет
   const fs = require('fs');
   if (!fs.existsSync('./data')) {
@@ -19,8 +15,6 @@ async function seed() {
   }
 
   // Создаем таблицы
-  console.log('📋 Создание таблиц...');
-  
   db.serialize(() => {
     // Таблица пользователей
     db.run(`CREATE TABLE IF NOT EXISTS users (
@@ -34,10 +28,8 @@ async function seed() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`, function(err) {
       if (err) {
-        console.error('❌ Ошибка создания таблицы users:', err);
-      } else {
-        console.log('✅ Таблица users создана');
-      }
+        } else {
+        }
     });
 
     // Таблица продуктов
@@ -52,10 +44,8 @@ async function seed() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`, function(err) {
       if (err) {
-        console.error('❌ Ошибка создания таблицы products:', err);
-      } else {
-        console.log('✅ Таблица products создана');
-      }
+        } else {
+        }
     });
 
     // Таблица заказов
@@ -72,10 +62,8 @@ async function seed() {
       FOREIGN KEY (user_id) REFERENCES users (id)
     )`, function(err) {
       if (err) {
-        console.error('❌ Ошибка создания таблицы orders:', err);
-      } else {
-        console.log('✅ Таблица orders создана');
-      }
+        } else {
+        }
     });
 
     // Таблица элементов заказа
@@ -89,10 +77,8 @@ async function seed() {
       FOREIGN KEY (product_id) REFERENCES products (id)
     )`, function(err) {
       if (err) {
-        console.error('❌ Ошибка создания таблицы order_items:', err);
-      } else {
-        console.log('✅ Таблица order_items создана');
-      }
+        } else {
+        }
     });
   });
 
@@ -108,49 +94,56 @@ async function seed() {
     VALUES (?, ?, 'admin')
   `, ['admin@mnogo-rolly.ru', adminPassword], function(err) {
     if (err) {
-      console.error('❌ Ошибка создания админа:', err);
-    } else {
-      console.log('✅ Админ создан');
-    }
+      } else {
+      }
   });
 
   // Тестовые продукты
   const products = [
+    // Суши и роллы
     {
       name: 'Филадельфия ролл',
       description: 'Лосось, сливочный сыр, огурец',
       price: 450,
-      category: 'rolls',
+      category: 'sushi_rolls',
       image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
     },
     {
       name: 'Калифорния ролл',
       description: 'Краб, авокадо, огурец',
       price: 380,
-      category: 'rolls',
+      category: 'sushi_rolls',
       image_url: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=300&fit=crop'
     },
     {
       name: 'Дракон ролл',
       description: 'Угорь, огурец, соус унаги',
       price: 520,
-      category: 'rolls',
+      category: 'sushi_rolls',
       image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
     },
     {
       name: 'Нигири с лососем',
       description: 'Рис, лосось, васаби',
       price: 120,
-      category: 'sushi',
+      category: 'sushi_rolls',
       image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
     },
     {
       name: 'Нигири с тунцом',
       description: 'Рис, тунец, васаби',
       price: 130,
-      category: 'sushi',
+      category: 'sushi_rolls',
       image_url: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=300&fit=crop'
     },
+    {
+      name: 'Спайси ролл',
+      description: 'Лосось, спайси соус, огурец',
+      price: 420,
+      category: 'sushi_rolls',
+      image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
+    },
+    // Сеты
     {
       name: 'Сет "Семейный"',
       description: 'Филадельфия, Калифорния, Дракон, 6 нигири',
@@ -165,13 +158,58 @@ async function seed() {
       category: 'sets',
       image_url: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=300&fit=crop'
     },
+    // Крылья
     {
-      name: 'Мисо суп',
-      description: 'Традиционный японский суп',
-      price: 150,
-      category: 'soups',
-      image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
+      name: 'Крылья BBQ',
+      description: 'Куриные крылья в соусе BBQ, 8 шт',
+      price: 350,
+      category: 'wings',
+      image_url: 'https://images.unsplash.com/photo-1567620832904-9fc6debc209f?w=400&h=300&fit=crop'
     },
+    {
+      name: 'Крылья Buffalo',
+      description: 'Куриные крылья в остром соусе Buffalo, 8 шт',
+      price: 380,
+      category: 'wings',
+      image_url: 'https://images.unsplash.com/photo-1567620832904-9fc6debc209f?w=400&h=300&fit=crop'
+    },
+    {
+      name: 'Крылья Honey Mustard',
+      description: 'Куриные крылья в медово-горчичном соусе, 8 шт',
+      price: 360,
+      category: 'wings',
+      image_url: 'https://images.unsplash.com/photo-1567620832904-9fc6debc209f?w=400&h=300&fit=crop'
+    },
+    // Пицца
+    {
+      name: 'Пицца Маргарита',
+      description: 'Томатный соус, моцарелла, базилик',
+      price: 450,
+      category: 'pizza',
+      image_url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop'
+    },
+    {
+      name: 'Пицца Пепперони',
+      description: 'Томатный соус, моцарелла, пепперони',
+      price: 520,
+      category: 'pizza',
+      image_url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop'
+    },
+    {
+      name: 'Пицца Четыре сыра',
+      description: 'Моцарелла, пармезан, горгонзола, рикотта',
+      price: 580,
+      category: 'pizza',
+      image_url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop'
+    },
+    {
+      name: 'Пицца Гавайская',
+      description: 'Томатный соус, моцарелла, ветчина, ананас',
+      price: 490,
+      category: 'pizza',
+      image_url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop'
+    },
+    // Напитки
     {
       name: 'Зеленый чай',
       description: 'Традиционный японский чай',
@@ -185,6 +223,35 @@ async function seed() {
       price: 200,
       category: 'drinks',
       image_url: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=300&fit=crop'
+    },
+    {
+      name: 'Кока-Кола',
+      description: 'Газированный напиток',
+      price: 120,
+      category: 'drinks',
+      image_url: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=300&fit=crop'
+    },
+    // Соусы
+    {
+      name: 'Соус васаби',
+      description: 'Острый японский соус',
+      price: 50,
+      category: 'sauces',
+      image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
+    },
+    {
+      name: 'Соус имбирь',
+      description: 'Маринованный имбирь',
+      price: 40,
+      category: 'sauces',
+      image_url: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=300&fit=crop'
+    },
+    {
+      name: 'Соевый соус',
+      description: 'Традиционный соевый соус',
+      price: 30,
+      category: 'sauces',
+      image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
     }
   ];
 
@@ -195,10 +262,8 @@ async function seed() {
       VALUES (?, ?, ?, ?, ?)
     `, [product.name, product.description, product.price, product.category, product.image_url], function(err) {
       if (err) {
-        console.error(`❌ Ошибка создания продукта ${product.name}:`, err);
-      } else {
-        console.log(`✅ Продукт "${product.name}" создан`);
-      }
+        } else {
+        }
       
       // Если это последний продукт, создаем тестовые заказы
       if (index === products.length - 1) {
@@ -254,10 +319,9 @@ function createTestOrders() {
       VALUES (?, ?, ?, ?, ?)
     `, [order.user_id, order.total_amount, order.status, order.delivery_address, order.phone], function(err) {
       if (err) {
-        console.error(`❌ Ошибка создания заказа:`, err);
-      } else {
+        } else {
         const orderId = this.lastID;
-        console.log(`✅ Заказ #${orderId} создан (${order.status})`);
+        `);
         
         // Добавляем элементы заказа
         addOrderItems(orderId);
@@ -268,14 +332,8 @@ function createTestOrders() {
         setTimeout(() => {
           db.close((err) => {
             if (err) {
-              console.error('❌ Ошибка при закрытии базы данных:', err);
-            } else {
-              console.log('✅ База данных заполнена и закрыта');
-              console.log('');
-              console.log('🔑 Тестовые данные:');
-              console.log('   Email: admin@mnogo-rolly.ru');
-              console.log('   Пароль: admin123');
-            }
+              } else {
+              }
           });
         }, 2000);
       }
@@ -299,9 +357,9 @@ function addOrderItems(orderId: number) {
       VALUES (?, ?, ?, ?)
     `, [orderId, item.product_id, item.quantity, item.price], function(err) {
       if (err) {
-        console.error(`❌ Ошибка создания элемента заказа:`, err);
+        console.error('Error inserting order item:', err);
       } else {
-        console.log(`✅ Элемент заказа #${orderId} создан`);
+        console.log('Order item inserted successfully');
       }
     });
   });

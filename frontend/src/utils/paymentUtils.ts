@@ -1,118 +1,103 @@
-import CryptoJS from 'crypto-js';
-
-interface PaymentData {
-  amount: number; // сумма в сомах
-  orderNumber: string;
-  customerPhone?: string;
-  customerName?: string;
-}
-
-// Генерируем базовый payload для всех банков
-const generateBasePayload = (paymentData: PaymentData): string => {
-  const { amount, orderNumber } = paymentData;
+// Простая функция для генерации ссылок на банки
+export const generateBankLinks = (amount: number, transactionId: string) => {
+  // Ваш хеш для всех банков
+  const qrHash = "00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a";
   
-  // Конвертируем сумму в тыйны (1 сом = 100 тыйнов)
-  const amountInTiyin = Math.round(amount * 100);
+  const banks = {
+    dengi: {
+      name: "О деньги",
+      url: "https://api.dengi.o.kg/ru/qr/"
+    },
+    bakai: {
+      name: "Bakai",
+      url: "https://bakai24.app/"
+    },
+    balance: {
+      name: "Balance.kg",
+      url: "https://balance.kg/"
+    },
+    megapay: {
+      name: "Mega",
+      url: "https://megapay.kg/get"
+    },
+    mbank: {
+      name: "Mbank",
+      url: "https://app.mbank.kg/qr/"
+    },
+    demirbank: {
+      name: "Demirbank",
+      url: "https://retail.demirbank.kg/"
+    },
+    companion: {
+      name: "Companion",
+      url: "https://payqr.kg/qr/"
+    }
+  };
   
-  // Формируем сумму как строку (например, 85000 -> "85000")
-  const amountStr = amountInTiyin.toString();
-  const amountLenStr = amountStr.length.toString().padStart(2, '0'); // "05" для 85000
+  const bankLinks: Record<string, any> = {};
   
-  // Используем твою рабочую ссылку как шаблон и заменяем только сумму
-  // Рабочая: 00020101021232890012c2b.mbank.kg010201101610305200303852221131QrKRbdrg6GYLuGskMRu2fDXp5aag1rA12021213021252049999530341754038005911Mnogo%20rolly63046524
-  // Разбираем: 5403800 = 54 + 03 + 800 (где 03 = длина, 800 = 8 сом в тыйнах)
-  // Заменяем 5403800 на 54{amountLenStr}{amountStr}
-  
-  const basePayload = "00020101021232890012c2b.mbank.kg010201101610305200303852221131QrKRbdrg6GYLuGskMRu2fDXp5aag1rA12021213021252049999530341754";
-  const amountField = `${amountLenStr}${amountStr}`;
-  const endPayload = "5911Mnogo rolly"; // ПРОБЕЛ, не %20
-  
-  // Формируем payload без контрольной суммы
-  const payload = basePayload + amountField + endPayload;
-  
-  // Вычисляем контрольную сумму (SHA-256, последние 4 символа)
-  const checksum = calculateChecksum(payload);
-  
-  // Формируем финальный payload
-  const fullPayload = payload + "6304" + checksum;
-  
-  // В URL кодируем только пробелы
-  const urlSafePayload = fullPayload.replace(" ", "%20");
-  
-  return urlSafePayload;
-};
-
-export const generateMBankQR = (paymentData: PaymentData): string => {
-  const payload = generateBasePayload(paymentData);
-  return `https://app.mbank.kg/qr#${payload}`;
-};
-
-// Функции для других банков
-export const generateMegaPayQR = (paymentData: PaymentData): string => {
-  const payload = generateBasePayload(paymentData);
-  return `https://megapay.kg/get#${payload}`;
-};
-
-export const generateDengiQR = (paymentData: PaymentData): string => {
-  const payload = generateBasePayload(paymentData);
-  return `https://api.dengi.o.kg/ru/qr#${payload}`;
-};
-
-export const generateBalanceQR = (paymentData: PaymentData): string => {
-  const payload = generateBasePayload(paymentData);
-  return `https://balance.kg#${payload}`;
-};
-
-export const generateBakai24QR = (paymentData: PaymentData): string => {
-  const payload = generateBasePayload(paymentData);
-  return `https://bakai24.app#${payload}`;
-};
-
-export const generateDemirQR = (paymentData: PaymentData): string => {
-  const payload = generateBasePayload(paymentData);
-  return `https://retail.demirbank.kg#${payload}`;
-};
-
-export const generateOptimaQR = (paymentData: PaymentData): string => {
-  const payload = generateBasePayload(paymentData);
-  return `https://optimabank.kg/index.php?lang=ru#${payload}`;
-};
-
-export const generatePayQR = (paymentData: PaymentData): string => {
-  const payload = generateBasePayload(paymentData);
-  return `https://pay.payqr.kg#${payload}`;
-};
-
-
-
-const calculateChecksum = (dataString: string): string => {
-  // 1. Преобразуем строку в UTF-8 байты
-  const bytes = CryptoJS.enc.Utf8.parse(dataString);
-  
-  // 2. Вычисляем SHA-256 хеш
-  const hash = CryptoJS.SHA256(bytes);
-  
-  // 3. Преобразуем в строку и убираем дефисы
-  const hashString = hash.toString().replace(/-/g, '');
-  
-  // 4. Берем последние 4 символа
-  return hashString.slice(-4);
-};
-
-// Функция для создания QR-кода с помощью библиотеки qrcode
-export const generateQRCode = async (text: string): Promise<string> => {
-  try {
-    const QRCode = await import('qrcode');
-    return await QRCode.toDataURL(text, {
-      width: 300,
-      margin: 2,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-      }
-    });
-  } catch (error) {
-    console.error('Ошибка генерации QR-кода:', error);
-    throw error;
+  // Каждый банк получает прямую ссылку с вашим хешем
+  for (const [bankCode, bankInfo] of Object.entries(banks)) {
+    bankLinks[bankCode] = {
+      name: bankInfo.name,
+      url: bankInfo.url,
+      fullLink: `${bankInfo.url}${qrHash}`
+    };
   }
+  
+  return bankLinks;
+};
+
+
+
+
+
+// Функция для проверки валидности QR-хэша
+export const validateQRHash = (qrHash: string): boolean => {
+  try {
+    // Проверяем базовую структуру
+    if (!qrHash.startsWith('000201')) {
+      return false;
+    }
+    
+    // Проверяем наличие обязательных полей
+    const requiredFields = ['54', '59', '63'];
+    for (const field of requiredFields) {
+      if (!qrHash.includes(field)) {
+        return false;
+      }
+    }
+    
+    // Проверяем контрольную сумму
+    const checksumMatch = qrHash.match(/6304([A-Fa-f0-9]{4})$/);
+    if (!checksumMatch) {
+      return false;
+    }
+    
+    // Проверяем, что контрольная сумма имеет правильную длину
+    const checksum = checksumMatch[1];
+    if (checksum.length !== 4) {
+      return false;
+    }
+    
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+// Функция для форматирования суммы для отображения
+export const formatAmount = (amount: number): string => {
+  return new Intl.NumberFormat('ru-RU', {
+    style: 'currency',
+    currency: 'KGS',
+    minimumFractionDigits: 2
+  }).format(amount);
+};
+
+// Функция для генерации уникального ID транзакции
+export const generateTransactionId = (): string => {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substr(2, 5);
+  return `tx_${timestamp}_${random}`;
 };

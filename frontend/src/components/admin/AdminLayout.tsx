@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUserStore } from '../../store/userStore';
 import { AdminNavigation } from './AdminNavigation';
 import { Menu, X } from 'lucide-react';
 
@@ -9,12 +10,13 @@ interface AdminLayoutProps {
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
+  const { user, clearUser } = useUserStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    navigate('/admin/login');
+    localStorage.removeItem('token');
+    clearUser();
+    navigate('/');
   };
 
   const handleNavigationClick = () => {
@@ -69,9 +71,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             </div>
             
             <div className="flex items-center space-x-4">
-                             <div className="text-sm text-gray-700">
-                 Добро пожаловать, <span className="font-medium text-indigo-600">Администратор</span>
-               </div>
+              <div className="text-sm text-gray-700">
+                Добро пожаловать, <span className="font-medium text-indigo-600">{user?.name || 'Администратор'}</span>
+              </div>
             </div>
           </div>
         </div>

@@ -19,7 +19,6 @@ const navigationItems = [
   { name: 'Дашборд', href: '/admin/dashboard', icon: TrendingUp },
   { name: 'Заказы', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Товары', href: '/admin/products', icon: Package },
-  { name: 'Клиенты', href: '/admin/customers', icon: Users },
   { name: 'Аналитика', href: '/admin/analytics', icon: BarChart3 },
   { name: 'Настройки', href: '/admin/settings', icon: Settings },
 ];
@@ -79,3 +78,5 @@ export const AdminNavigation: React.FC<AdminNavigationProps> = ({ onLogout, onNa
     </nav>
   );
 };
+
+

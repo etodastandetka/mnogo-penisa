@@ -1,147 +1,398 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAdminStore } from '../store/adminStore';
+import { useUserStore } from '../store/userStore';
 import { AdminLayout } from '../components/admin/AdminLayout';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { 
-  ShoppingCart, 
-  Search, 
-  Filter, 
-  Eye, 
+import { OrderDetailModal } from '../components/admin/OrderDetailModal';
+import {
+  Filter,
+  Search,
   RefreshCw,
+  Package,
   Calendar,
-  User,
-  MapPin,
   Phone,
-  Package
+  MapPin,
+  Clock,
+  Printer,
+  Eye,
+  Receipt
 } from 'lucide-react';
-import { PrintReceipt } from '../components/PrintReceipt';
+
+interface Order {
+  id: number;
+  order_number: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_address?: string;
+  delivery_address?: string;
+  total_amount: number;
+  status: string;
+  payment_method: string;
+  payment_status: string;
+  created_at: string;
+  items_summary?: string;
+  payment_proof?: string;
+  notes?: string;
+  items?: Array<{
+    id: number;
+    product_name: string;
+    quantity: number;
+    price: number;
+    total: number;
+  }>;
+}
 
 export const AdminOrdersPage: React.FC = () => {
   const navigate = useNavigate();
-  const { 
-    orders, 
-    selectedOrder, 
-    loading, 
-    error, 
-    fetchOrders, 
-    fetchOrder, 
-    updateOrderStatus,
-    setSelectedOrder 
-  } = useAdminStore();
+  const { user, isAdmin } = useUserStore();
   
-  const [adminUser, setAdminUser] = useState<any>(null);
-  const [statusError, setStatusError] = useState<string | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
   const [filters, setFilters] = useState({
     status: '',
     dateFrom: '',
     dateTo: '',
     search: ''
   });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   useEffect(() => {
-    const userStr = localStorage.getItem('adminUser');
-    if (userStr) {
-      setAdminUser(JSON.parse(userStr));
+    // Проверяем, что пользователь админ
+    if (!user || !isAdmin) {
+      navigate('/');
+      return;
     }
-    fetchOrders();
-  }, [fetchOrders]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    navigate('/admin/login');
+    // Загружаем заказы
+    fetchOrders();
+  }, [user, isAdmin, navigate]);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Токен не найден');
+        return;
+      }
+
+      const response = await fetch('http://localhost:3001/api/admin/orders', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const ordersData = await response.json();
+        ordersData.forEach((order: Order) => {
+          });
+        setOrders(ordersData);
+      } else {
+        setError('Ошибка загрузки заказов');
+      }
+    } catch (error) {
+      setError('Ошибка соединения с сервером');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId: number, newStatus: string) => {
+    try {
+      setUpdatingOrderId(orderId);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Токен не найден');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:3001/api/admin/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (response.ok) {
+        // Обновляем статус в локальном состоянии
+        setOrders(prev => prev.map(order => 
+          order.id === orderId ? { ...order, status: newStatus } : order
+        ));
+        setError(''); // Очищаем предыдущие ошибки
+      } else {
+        const errorData = await response.text();
+        setError(`Ошибка обновления статуса: ${response.status} - ${errorData}`);
+      }
+    } catch (error) {
+      setError('Ошибка соединения с сервером');
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
+  const printReceipt = (order: Order) => {
+    // Подсчитываем количество товаров
+    const itemsCount = order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+    const itemsText = order.items?.map(item => `${item.product_name} x${item.quantity}`).join(', ') || order.items_summary || 'Детали заказа';
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Чек заказа #${order.order_number}</title>
+            <style>
+              body { 
+                font-family: 'Arial', sans-serif; 
+                font-size: 13px; 
+                line-height: 1.4;
+                margin: 0;
+                padding: 15px;
+                max-width: 380px;
+                margin: 0 auto;
+              }
+              .header {
+                text-align: center;
+                border-bottom: 2px solid #333;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+              }
+              .logo {
+                font-size: 24px;
+                font-weight: bold;
+                color: #e53e3e;
+                margin-bottom: 5px;
+              }
+              .company-info {
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 10px;
+              }
+              .order-info {
+                margin-bottom: 20px;
+                padding: 10px;
+                background: #f8f8f8;
+                border-radius: 5px;
+              }
+              .section {
+                margin-bottom: 12px;
+                padding-bottom: 8px;
+                border-bottom: 1px dashed #ccc;
+              }
+              .section-title {
+                font-weight: bold;
+                color: #333;
+                margin-bottom: 5px;
+              }
+              .total {
+                font-size: 18px;
+                font-weight: bold;
+                text-align: center;
+                padding: 10px;
+                background: #e53e3e;
+                color: white;
+                border-radius: 5px;
+                margin: 20px 0;
+              }
+              .footer {
+                text-align: center;
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 2px solid #333;
+              }
+              .tips-section {
+                text-align: center;
+                margin-top: 15px;
+                padding: 12px;
+                background: #f0f8ff;
+                border-radius: 8px;
+                border: 2px dashed #4a90e2;
+              }
+              .qr-image {
+                width: 100px;
+                height: 100px;
+                margin: 8px auto;
+                display: block;
+                border-radius: 8px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+              }
+              .thanks-text {
+                background: #fff8e1;
+                padding: 12px;
+                border-radius: 6px;
+                margin: 15px 0;
+                border-left: 4px solid #ff9800;
+              }
+              @media print {
+                body { margin: 0; padding: 10px; }
+                .tips-section { break-inside: avoid; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <div class="logo">🍕 Mnogo Rolly</div>
+              <div class="company-info">
+                ИП Султанкулов Адилет Б<br>
+                📍 г. Бишкек, ул. Ахунбаева 182<br>
+                📞 +996 709 611 043
+              </div>
+            </div>
+
+            <div class="order-info">
+              <div style="display: flex; justify-content: space-between;">
+                <div><strong>Заказ:</strong> #${order.order_number}</div>
+                <div><strong>Дата:</strong> ${new Date(order.created_at).toLocaleDateString('ru-RU')}</div>
+              </div>
+              <div style="text-align: center; margin-top: 5px;">
+                <strong>Время:</strong> ${new Date(order.created_at).toLocaleTimeString('ru-RU')}
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">👤 КЛИЕНТ:</div>
+              <div><strong>Имя:</strong> ${order.customer_name}</div>
+              <div><strong>Телефон:</strong> ${order.customer_phone}</div>
+              <div><strong>Адрес доставки:</strong> ${order.customer_address || order.delivery_address || 'Не указан'}</div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">🛒 ДЕТАЛИ ЗАКАЗА:</div>
+              <div style="background: white; padding: 8px; border-radius: 5px; margin-top: 8px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                  <thead>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                      <th style="text-align: left; padding: 4px; font-weight: bold;">Наименование</th>
+                      <th style="text-align: center; padding: 4px; font-weight: bold; width: 40px;">К-во</th>
+                      <th style="text-align: right; padding: 4px; font-weight: bold; width: 60px;">Цена</th>
+                      <th style="text-align: right; padding: 4px; font-weight: bold; width: 70px;">Сумма</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${order.items && order.items.length > 0 ? 
+                      order.items.map(item => `
+                        <tr style="border-bottom: 1px dashed #eee;">
+                          <td style="padding: 4px 4px 4px 0; line-height: 1.3;">${item.product_name}</td>
+                          <td style="text-align: center; padding: 4px;">${item.quantity}</td>
+                          <td style="text-align: right; padding: 4px;">${item.price ? item.price.toLocaleString() : '0'}</td>
+                          <td style="text-align: right; padding: 4px; font-weight: bold;">${item.price ? (item.price * item.quantity).toLocaleString() : '0'}</td>
+                        </tr>
+                      `).join('') : 
+                      `<tr><td colspan="4" style="text-align: center; padding: 8px; color: #666;">${order.items_summary || 'Информация о товарах недоступна'}</td></tr>`
+                    }
+                  </tbody>
+                </table>
+                <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #ddd;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span><strong>Количество позиций:</strong></span>
+                    <span>${itemsCount} шт.</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span><strong>Способ оплаты:</strong></span>
+                    <span>${order.payment_method === 'cash' ? 'Наличные' : order.payment_method === 'card' ? 'Карта' : order.payment_method}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span><strong>Статус:</strong></span>
+                    <span>${getStatusText(order.status)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="total">
+              💰 ИТОГО: ${order.total_amount.toLocaleString()} сом
+            </div>
+
+            <div class="thanks-text">
+              <div style="font-weight: bold; color: #ff9800; margin-bottom: 8px;">🎉 Спасибо за ваш заказ!</div>
+              <div style="font-size: 12px; color: #666;">
+                📞 По всем вопросам: +996 709 611 043
+              </div>
+            </div>
+
+
+
+            <div class="footer">
+              <div style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                ⭐ Оцените нас в социальных сетях!<br>
+                📱 Instagram: @mnogo_rolly
+              </div>
+              <div style="font-size: 12px; color: #999;">
+                Приходите к нам снова! До встречи в Mnogo Rolly! 👋
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
   };
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  // Автоматическое применение фильтров при изменении
-  useEffect(() => {
-    // Пропускаем первый рендер
-    const isInitialRender = !filters.search && !filters.status && !filters.dateFrom && !filters.dateTo;
-    if (isInitialRender) return;
-
-    const timeoutId = setTimeout(() => {
-      setCurrentPage(1);
-      console.log('Автоматическое применение фильтров:', filters);
-      fetchOrders(filters);
-    }, 500); // Задержка 500мс
-
-    return () => clearTimeout(timeoutId);
-  }, [filters, fetchOrders]);
-
-  const handleApplyFilters = () => {
-    setCurrentPage(1);
-    console.log('Применяем фильтры:', filters);
-    // Фильтры применяются автоматически через useEffect
-  };
-
   const handleClearFilters = () => {
     setFilters({ status: '', dateFrom: '', dateTo: '', search: '' });
-    setCurrentPage(1);
-    // После очистки фильтров загружаем все заказы
-    fetchOrders();
   };
 
-  // Функции для пагинации
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(orders.length / itemsPerPage);
-  
-  // Отладочная информация
-  console.log('Пагинация:', {
-    totalOrders: orders.length,
-    itemsPerPage,
-    currentPage,
-    totalPages,
-    currentOrdersCount: currentOrders.length,
-    indexOfFirstItem,
-    indexOfLastItem
-  });
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
+  const openOrderDetail = (order: Order) => {
+    setSelectedOrder(order);
+    setIsDetailModalOpen(true);
   };
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+  const closeOrderDetail = () => {
+    setIsDetailModalOpen(false);
+    setSelectedOrder(null);
+  };
+
+  const handleOrderUpdate = (updatedOrder: any) => {
+    setOrders(prevOrders => 
+      prevOrders.map(order => 
+        order.id === updatedOrder.id ? { ...order, ...updatedOrder } : order
+      )
+    );
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'preparing': return 'bg-blue-100 text-blue-800';
+      case 'ready': return 'bg-green-100 text-green-800';
+      case 'delivering': return 'bg-purple-100 text-purple-800';
+      case 'delivered': return 'bg-gray-100 text-gray-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleViewOrder = async (orderId: number) => {
-    await fetchOrder(orderId);
-  };
-
-  const handleStatusUpdate = async (orderId: number, newStatus: string) => {
-    try {
-      setStatusError(null);
-      await updateOrderStatus(orderId, newStatus);
-    } catch (error) {
-      console.error('Ошибка обновления статуса:', error);
-      setStatusError('Ошибка обновления статуса заказа');
-      // Автоматически скрываем ошибку через 3 секунды
-      setTimeout(() => setStatusError(null), 3000);
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending': return 'Ожидает';
+      case 'preparing': return 'Готовится';
+      case 'ready': return 'Готов';
+      case 'delivering': return 'В доставке';
+      case 'delivered': return 'Доставлен';
+      case 'cancelled': return 'Отменен';
+      default: return status;
     }
   };
 
   const statusOptions = [
     { value: '', label: 'Все статусы' },
-    { value: 'pending', label: 'Ожидает оплаты' },
-    { value: 'paid', label: 'Оплачен' },
+    { value: 'pending', label: 'Ожидает' },
     { value: 'preparing', label: 'Готовится' },
     { value: 'ready', label: 'Готов' },
     { value: 'delivering', label: 'В доставке' },
@@ -149,470 +400,129 @@ export const AdminOrdersPage: React.FC = () => {
     { value: 'cancelled', label: 'Отменен' }
   ];
 
-  if (!adminUser) {
-    return <div>Загрузка...</div>;
-  }
-
-  // Обработка ошибок - предотвращаем белый экран
-  if (error) {
-    return (
-      <AdminLayout>
-        <div className="p-4 sm:p-6 lg:p-8">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-red-600 mb-4">Произошла ошибка</h3>
-            <p className="text-red-600 mb-4">{error}</p>
-            <Button 
-              onClick={() => window.location.reload()} 
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Перезагрузить страницу
-            </Button>
-          </div>
-        </div>
-      </AdminLayout>
-    );
-  }
+  // Фильтрация заказов
+  const filteredOrders = orders.filter(order => {
+    if (filters.status && order.status !== filters.status) return false;
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      return (
+        order.order_number.toLowerCase().includes(searchLower) ||
+        order.customer_name.toLowerCase().includes(searchLower) ||
+        order.customer_phone.includes(searchLower)
+      );
+    }
+    if (filters.dateFrom && new Date(order.created_at) < new Date(filters.dateFrom)) return false;
+    if (filters.dateTo && new Date(order.created_at) > new Date(filters.dateTo)) return false;
+    return true;
+  });
 
   return (
     <AdminLayout>
       <div className="p-4 sm:p-6 lg:p-8">
-        {/* Заголовок и кнопки */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Заказы</h2>
-            <p className="text-gray-600 mt-1">Управление всеми заказами</p>
-          </div>
-          
-          <Button
-            variant="outline"
-            onClick={() => fetchOrders()}
-            disabled={loading}
-            className="flex items-center space-x-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            <span>Обновить</span>
-          </Button>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Заказы</h1>
+          <p className="text-gray-600 mt-2">Управление заказами клиентов</p>
         </div>
-
-        {/* Ошибка */}
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
-            <p className="text-red-600">{error}</p>
-          </div>
-        )}
-
-        {/* Ошибка статуса */}
-        {statusError && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
-            <p className="text-red-600">{statusError}</p>
-          </div>
-        )}
-
-        {/* Фильтры */}
-        <Card className="border-0 shadow-soft mb-6">
-          <CardHeader>
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Filter className="h-5 w-5 text-gray-500" />
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Фильтры
-                  {(filters.search || filters.status || filters.dateFrom || filters.dateTo) && (
-                    <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      Активны
-                    </span>
-                  )}
-                </h3>
-              </div>
+              <p className="text-red-600">{error}</p>
               <Button
                 variant="outline"
-                onClick={handleClearFilters}
                 size="sm"
-                className={`border-gray-300 hover:bg-gray-50 text-gray-600 transition-all duration-200 ${
-                  (filters.search || filters.status || filters.dateFrom || filters.dateTo) 
-                    ? 'border-red-300 text-red-600 hover:bg-red-50 hover:scale-105' 
-                    : 'hover:scale-105'
-                }`}
+                onClick={() => setError('')}
+                className="text-red-600 hover:bg-red-100"
               >
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Очистить
+                ✕
               </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Статус */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Статус
-                </label>
-                <select
-                  value={filters.status}
-                  onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-japanese-indigo focus:border-transparent"
-                >
-                  {statusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Дата от */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Дата от
-                </label>
-                <input
-                  type="date"
-                  value={filters.dateFrom}
-                  onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-japanese-indigo focus:border-transparent"
-                />
-              </div>
-
-              {/* Дата до */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Дата до
-                </label>
-                <input
-                  type="date"
-                  value={filters.dateTo}
-                  onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-japanese-indigo focus:border-transparent"
-                />
-              </div>
-
-              {/* Поиск */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Поиск
-                </label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={filters.search}
-                    onChange={(e) => handleFilterChange('search', e.target.value)}
-                    placeholder="Номер заказа, клиент..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-japanese-indigo focus:border-transparent"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end mt-4">
-              <Button
-                onClick={handleApplyFilters}
-                className="bg-japanese-indigo hover:bg-japanese-indigo/90 flex items-center space-x-2"
-              >
-                <Filter className="w-4 h-4" />
-                Применить фильтры
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Список заказов */}
-        <Card className="border-0 shadow-soft">
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Список заказов ({orders.length})
-            </h3>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-japanese-indigo mx-auto mb-4"></div>
-                <p className="text-gray-600">Загрузка заказов...</p>
-              </div>
-            ) : currentOrders.length === 0 ? (
-              <div className="text-center py-8">
-                <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">Заказы не найдены</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {currentOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="bg-japanese-indigo text-white rounded-full p-2">
-                          <ShoppingCart className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900">
-                            Заказ #{order.orderNumber}
-                          </h4>
-                          <p className="text-sm text-gray-600">
-                            {new Date(order.createdAt).toLocaleString('ru-RU')}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge
-                          className={`${
-                            order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            order.status === 'paid' ? 'bg-blue-100 text-blue-800' :
-                            order.status === 'preparing' ? 'bg-orange-100 text-orange-800' :
-                            order.status === 'ready' ? 'bg-green-100 text-green-800' :
-                            order.status === 'delivering' ? 'bg-purple-100 text-purple-800' :
-                            order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                            'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          {order.status === 'pending' ? 'Ожидает оплаты' :
-                           order.status === 'paid' ? 'Оплачен' :
-                           order.status === 'preparing' ? 'Готовится' :
-                           order.status === 'ready' ? 'Готов' :
-                           order.status === 'delivering' ? 'В доставке' :
-                           order.status === 'delivered' ? 'Доставлен' :
-                           'Отменен'}
-                        </Badge>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewOrder(order.id)}
-                          className="flex items-center space-x-1"
-                        >
-                          <Eye className="w-4 h-4" />
-                          <span>Просмотр</span>
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div className="flex items-center space-x-2">
-                        <User className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-600">
-                          {order.customerName || 'Гость'}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-600">
-                          {order.customerPhone || 'Не указан'}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Package className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-600">
-                          {order.items?.length || 0} товар(ов)
-                        </span>
-                      </div>
-                    </div>
-
-                    {order.deliveryAddress && (
-                      <div className="flex items-center space-x-2 mt-2 text-sm">
-                        <MapPin className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-600">{order.deliveryAddress}</span>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
-                      <div className="text-lg font-semibold text-gray-900">
-                        {order.totalAmount} сом
-                      </div>
-                      <div className="flex items-center space-x-2">
-                                                 <PrintReceipt order={order} onClose={() => {}} />
-                        <select
-                          value={order.status}
-                          onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
-                          className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-japanese-indigo focus:border-transparent"
-                        >
-                          {statusOptions.slice(1).map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Пагинация */}
-            {orders.length > 0 && (
-              <div className="mt-6 flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="text-sm text-gray-600">
-                    Показано {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, orders.length)} из {orders.length} заказов (страница {currentPage} из {totalPages})
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">На странице:</span>
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => {
-                        setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1);
-                      }}
-                      className="px-2 py-1 border border-gray-300 rounded text-sm"
-                    >
-                      <option value={3}>3</option>
-                      <option value={5}>5</option>
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={handlePrevPage}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                  >
-                    Назад
-                  </button>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`px-3 py-1 rounded-lg text-sm ${
-                        currentPage === page
-                          ? 'bg-red-600 text-white'
-                          : 'border border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                  
-                  <button
-                    onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                  >
-                    Вперед
-                  </button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Модальное окно деталей заказа */}
-        {selectedOrder && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    Заказ #{selectedOrder.orderNumber}
-                  </h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelectedOrder(null)}
-                  >
-                    ✕
-                  </Button>
-                </div>
-
-                <div className="space-y-4">
-                  {/* Информация о клиенте */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Информация о клиенте</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                      <div className="flex items-center space-x-2">
-                        <User className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-600">
-                          {selectedOrder.customerName || 'Гость'}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-600">
-                          {selectedOrder.customerPhone || 'Не указан'}
-                        </span>
-                      </div>
-                      {selectedOrder.deliveryAddress && (
-                        <div className="flex items-center space-x-2 md:col-span-2">
-                          <MapPin className="w-4 h-4 text-gray-500" />
-                          <span className="text-gray-600">{selectedOrder.deliveryAddress}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Товары */}
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Товары</h4>
-                    <div className="space-y-2">
-                      {selectedOrder.items?.map((item: any, index: number) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900">{item.productName}</p>
-                            <p className="text-sm text-gray-600">Количество: {item.quantity}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold text-gray-900">{item.price} сом</p>
-                            <p className="text-sm text-gray-600">Итого: {item.price * item.quantity} сом</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Фото чека */}
-                  {(selectedOrder as any).paymentProof && (
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-3">Фото чека</h4>
-                      <div className="space-y-2">
-                        <img
-                          src={(selectedOrder as any).paymentProof}
-                          alt="Фото чека"
-                          className="w-full rounded-lg border border-gray-300"
-                          onError={(e) => {
-                            console.error('Ошибка загрузки фото чека:', (selectedOrder as any).paymentProof);
-                            const target = e.target as HTMLImageElement;
-                            target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNjc3NDhCIj5GdG90byBjaGVrYSBub3QgZm91bmQ8L3RleHQ+Cjwvc3ZnPgo=';
-                          }}
-                        />
-                        <p className="text-xs text-gray-600">
-                          Загружено: {new Date((selectedOrder as any).paymentProofDate || selectedOrder.createdAt).toLocaleString('ru-RU')}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          URL: {(selectedOrder as any).paymentProof}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Отладочная информация */}
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <h4 className="font-semibold text-gray-900 mb-2">Отладочная информация</h4>
-                    <div className="text-xs text-gray-600 space-y-1">
-                      <p>Payment Proof: {(selectedOrder as any).paymentProof || 'Не загружено'}</p>
-                      <p>Payment Proof Date: {(selectedOrder as any).paymentProofDate || 'Не указано'}</p>
-                      <p>Order ID: {selectedOrder.id}</p>
-                      <p>Order Number: {selectedOrder.orderNumber}</p>
-                    </div>
-                  </div>
-
-                  {/* Итого */}
-                  <div className="border-t border-gray-200 pt-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-semibold text-gray-900">Итого:</span>
-                      <span className="text-2xl font-bold text-red-600">
-                        {selectedOrder.totalAmount} сом
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         )}
+
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+            <p className="mt-2 text-gray-600">Загрузка заказов...</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div className="p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Список заказов ({filteredOrders.length})
+              </h2>
+              
+              {filteredOrders.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Заказы не найдены</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredOrders.map((order) => (
+                    <div key={order.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-4">
+                            <div>
+                              <h3 className="font-medium text-gray-900">
+                                #{order.order_number}
+                              </h3>
+                              <p className="text-sm text-gray-600">
+                                {order.customer_name} • {order.customer_phone}
+                              </p>
+                            </div>
+                            <div>
+                              <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(order.status)}`}>
+                                {getStatusText(order.status)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-2">
+                            <p className="text-sm text-gray-600">
+                              <strong>Товары:</strong> {order.items_summary || 'Информация о товарах недоступна'}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              <strong>Сумма:</strong> {order.total_amount?.toLocaleString() || 'Не указана'} сом
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              <strong>Дата:</strong> {new Date(order.created_at).toLocaleDateString('ru-RU')} {new Date(order.created_at).toLocaleTimeString('ru-RU')}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openOrderDetail(order)}
+                          >
+                            Подробнее
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => printReceipt(order)}
+                          >
+                            Печать
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
+      
+      <OrderDetailModal
+        order={selectedOrder}
+        isOpen={isDetailModalOpen}
+        onClose={closeOrderDetail}
+        onOrderUpdate={handleOrderUpdate}
+      />
     </AdminLayout>
   );
 };
+

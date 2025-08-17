@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Создаем экземпляр axios с базовой конфигурацией
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
+  baseURL: 'http://localhost:3001/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -12,7 +12,7 @@ const client = axios.create({
 // Интерцептор для добавления токена авторизации
 client.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -29,11 +29,10 @@ client.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Если получаем 401, перенаправляем на страницу входа
+    // Если получаем 401, перенаправляем на главную страницу
     if (error.response?.status === 401) {
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('adminUser');
-      window.location.href = '/admin/login';
+      localStorage.removeItem('token');
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }

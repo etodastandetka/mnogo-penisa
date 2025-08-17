@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from './ui/Card';
 import { Button } from './ui/Button';
@@ -6,10 +6,16 @@ import { Badge } from './ui/Badge';
 import { Trash2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { formatPrice } from '../utils/format';
+import './Cart.css';
 
 export const Cart: React.FC = () => {
   const navigate = useNavigate();
   const { items, updateQuantity, removeItem, clearCart, getTotal, getItemCount } = useCartStore();
+  
+  // Отладочная информация
+  // Отслеживаем изменения в корзине
+  useEffect(() => {
+    }, [items]);
 
   if (items.length === 0) {
     return (
@@ -44,68 +50,82 @@ export const Cart: React.FC = () => {
         </div>
 
         <div className="max-h-80 overflow-y-auto">
-          {items.map((item) => (
-            <div
-              key={item.product.id}
-              className="flex items-start gap-3 p-3 border-b border-gray-50 last:border-b-0 hover:bg-gray-50 transition-colors"
-            >
-              <div className="relative flex-shrink-0">
-                <img
-                  src={item.product.image_url || item.product.image || 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'}
-                  alt={item.product.name}
-                  className="w-12 h-12 object-cover rounded-lg shadow-sm"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
-                  }}
-                />
-                {item.product.isPopular && (
-                  <div className="absolute -top-1 -right-1">
-                    <Badge variant="primary" className="bg-red-500 text-white text-xs px-1 py-0">
-                      Поп
-                    </Badge>
+          {items.map((item) => {
+            return (
+              <div key={item.product.id} className="p-4 border-b border-gray-100 last:border-b-0">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <img
+                      src={item.product.image_url || '/placeholder-product.jpg'}
+                      alt={item.product.name}
+                      className="w-16 h-16 object-cover rounded-lg"
+                    />
                   </div>
-                )}
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-gray-900 truncate text-xs">
-                  {item.product.name}
-                </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {formatPrice(item.product.price)} × {item.quantity}
-                </p>
-              </div>
-              
-              <div className="flex flex-col items-end gap-1">
-                <div className="flex items-center border border-gray-200 rounded-md bg-white">
-                  <button
-                    onClick={() => updateQuantity(item.product.id.toString(), item.quantity - 1)}
-                    className="px-1.5 py-0.5 text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors rounded-l-md text-xs"
-                    disabled={item.quantity <= 1}
-                  >
-                    -
-                  </button>
-                  <span className="px-2 py-0.5 font-semibold min-w-[1.5rem] text-center text-gray-900 text-xs">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => updateQuantity(item.product.id.toString(), item.quantity + 1)}
-                    className="px-1.5 py-0.5 text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors rounded-r-md text-xs"
-                  >
-                    +
-                  </button>
+                  
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold text-gray-900 truncate">
+                      {item.product.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {formatPrice(item.product.price)}
+                    </p>
+                    
+                    <div className="flex items-center gap-2 mt-3">
+                      <button
+                        onClick={() => {
+                          try {
+                            const newQuantity = item.quantity - 1;
+                            if (newQuantity >= 0 && typeof updateQuantity === 'function') {
+                              updateQuantity(String(item.product.id), newQuantity);
+                            }
+                          } catch (error) {
+                            }
+                        }}
+                        className="cart-button px-1.5 py-0.5 text-gray-600 rounded-l-md text-xs"
+                        disabled={item.quantity <= 1}
+                        type="button"
+                      >
+                        -
+                      </button>
+                      <span className="px-2 py-0.5 font-semibold min-w-[1.5rem] text-center text-gray-900 text-xs">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => {
+                          try {
+                            const newQuantity = item.quantity + 1;
+                            if (typeof updateQuantity === 'function') {
+                              updateQuantity(String(item.product.id), newQuantity);
+                            }
+                          } catch (error) {
+                            }
+                        }}
+                        className="cart-button px-1.5 py-0.5 text-gray-600 rounded-r-md text-xs"
+                        type="button"
+                      >
+                        +
+                      </button>
+                    </div>
+                    
+                    <button
+                      onClick={() => {
+                        try {
+                          if (typeof removeItem === 'function') {
+                            removeItem(String(item.product.id));
+                          }
+                        } catch (error) {
+                          }
+                      }}
+                      className="cart-delete-button p-1 text-gray-400 rounded text-xs"
+                      type="button"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
-                
-                <button
-                  onClick={() => removeItem(item.product.id.toString())}
-                  className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors rounded text-xs"
-                >
-                  <Trash2 className="w-3 h-3" />
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
 
@@ -120,14 +140,28 @@ export const Cart: React.FC = () => {
         <div className="flex gap-3 w-full">
           <Button
             variant="outline"
-            onClick={clearCart}
+            onClick={() => {
+              try {
+                if (typeof clearCart === 'function') {
+                  clearCart();
+                }
+              } catch (error) {
+                }
+            }}
             className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
           >
             Очистить
           </Button>
           <Button 
             className="flex-1 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-semibold"
-            onClick={() => navigate('/checkout')}
+            onClick={() => {
+              try {
+                if (typeof navigate === 'function') {
+                  navigate('/checkout');
+                }
+              } catch (error) {
+                }
+            }}
           >
             Оформить заказ
           </Button>

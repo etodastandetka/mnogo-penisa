@@ -7,7 +7,6 @@ import {
   MapPin, 
   Clock, 
   Mail, 
-  MessageCircle,
   Instagram,
   Facebook,
   Twitter
@@ -17,7 +16,7 @@ export const ContactPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-red-500 via-orange-500 to-yellow-500 text-white overflow-hidden pt-16">
+      <div className="relative bg-gradient-to-br from-red-500 via-orange-500 to-yellow-500 text-white overflow-hidden">
         {/* Фоновые элементы как на главной */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-red-500/90 via-orange-500/90 to-yellow-500/90"></div>
@@ -122,6 +121,7 @@ export const ContactPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   className="w-12 h-12 p-0 rounded-xl hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                  onClick={() => window.open('https://www.instagram.com/mnogo_rolly', '_blank')}
                 >
                   <Instagram className="w-5 h-5" />
                 </Button>
@@ -129,59 +129,7 @@ export const ContactPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Форма обратной связи */}
-          <div>
-            <Card className="border-0 shadow-soft">
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Напишите нам</h2>
-                <form className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Имя
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
-                      placeholder="Ваше имя"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Тема
-                    </label>
-                    <select className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200">
-                      <option>Выберите тему</option>
-                      <option>Заказ и доставка</option>
-                      <option>Качество блюд</option>
-                      <option>Жалоба</option>
-                      <option>Предложение</option>
-                      <option>Другое</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Сообщение
-                    </label>
-                    <textarea
-                      rows={5}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 resize-none"
-                      placeholder="Опишите ваш вопрос или предложение..."
-                    />
-                  </div>
-                  
-                  <Button
-                    type="submit"
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:shadow-lg"
-                  >
-                    <MessageCircle className="w-5 h-5 mr-2" />
-                    Отправить сообщение
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
+
         </div>
 
         {/* FAQ секция */}

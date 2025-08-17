@@ -2,6 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tawk.to виджет - исправляем позиционирование */
+#tawkto-container {
+  z-index: 1000 !important;
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+}
+
+/* Убираем конфликтующие стили */
+.tawk-minimized {
+  z-index: 1000 !important;
+}
+
+.tawk-maximized {
+  z-index: 1001 !important;
+}
+
+/* Обеспечиваем, чтобы виджет не перекрывал важные элементы */
+.tawk-container {
+  pointer-events: auto !important;
+}
+
+/* Исправляем для мобильных устройств */
+@media (max-width: 768px) {
+  #tawkto-container {
+    bottom: 10px !important;
+    right: 10px !important;
+  }
+}
+
+/* Дополнительные исправления для конфликтов */
+.tawk-iframe {
+  z-index: 1000 !important;
+}
+
+/* Убираем конфликты с модальными окнами */
+.modal, .modal-overlay {
+  z-index: 9999 !important;
+}
+
+/* Убираем конфликты с выпадающими меню */
+.dropdown, .dropdown-menu {
+  z-index: 9998 !important;
+}
+
+/* Убираем конфликты с тултипами */
+.tooltip {
+  z-index: 9997 !important;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -15,6 +65,12 @@
 
   html {
     scroll-behavior: smooth;
+  }
+
+  /* Стабильность для header */
+  header {
+    position: relative;
+    z-index: 40;
   }
 }
 
@@ -157,4 +213,62 @@
 
 .float-animation {
   animation: float 3s ease-in-out infinite;
+}
+
+/* Анимации для графика */
+@keyframes barGrow {
+  from {
+    height: 0%;
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.bar-animate {
+  animation: barGrow 0.6s ease-out forwards;
+}
+
+/* Градиенты для графика */
+.chart-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.chart-gradient-red {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+}
+
+.chart-gradient-orange {
+  background: linear-gradient(135deg, #ffa726 0%, #ff7043 100%);
+}
+
+/* Анимации для отзывов */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+/* Анимация для карточек отзывов */
+@keyframes card-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.card-float {
+  animation: card-float 3s ease-in-out infinite;
 }

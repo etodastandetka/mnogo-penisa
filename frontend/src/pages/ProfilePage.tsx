@@ -6,44 +6,63 @@ import { Badge } from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
 import { 
   User, Phone, MapPin, Mail, Edit, Save, X, LogOut, 
-  Package, Clock, CheckCircle, Truck, AlertCircle, QrCode
+  Package, Clock, CheckCircle, Truck, AlertCircle, QrCode,
+  ShoppingBag, CreditCard
 } from 'lucide-react';
 import { useUserStore } from '../store/userStore';
 import { formatPrice } from '../utils/format';
 import { PaymentQR } from '../components/PaymentQR';
-import { PrintReceipt } from '../components/PrintReceipt';
+import { Navigation } from '../components/Navigation';
 
 export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, token, logout, updateUser } = useUserStore();
+  const { user, clearUser, setUser } = useUserStore();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  
+  const handlePayOrder = (order: any) => {
+    setSelectedOrder(order);
+  };
+  
   const [editData, setEditData] = useState({
-    name: user?.name || '',
-    phone: user?.phone || '',
-    address: user?.address || ''
+    name: '',
+    phone: '',
+    address: ''
   });
+
+  // Обновляем editData когда user загружается
+  useEffect(() => {
+    if (user) {
+      setEditData({
+        name: user.name || '',
+        phone: user.phone || '',
+        address: user.address || ''
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (token) {
+      if (user) {
         try {
-          const response = await fetch('http://localhost:3001/api/orders', {
-            headers: {
-              'Authorization': `Bearer ${token}`
+          const token = localStorage.getItem('token');
+          if (token) {
+            const response = await fetch('http://localhost:3001/api/orders/user', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              setOrders(data);
             }
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            setOrders(data);
           }
         } catch (error) {
-          console.error('Ошибка загрузки заказов:', error);
-        } finally {
+          } finally {
           setLoading(false);
         }
       } else {
@@ -52,36 +71,57 @@ export const ProfilePage: React.FC = () => {
     };
 
     fetchOrders();
-  }, [token]);
+  }, [user]);
 
   const handleSaveProfile = async () => {
-    if (token) {
+    if (user) {
       try {
-        const response = await fetch('http://localhost:3001/api/users/profile', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(editData)
-        });
+        const token = localStorage.getItem('token');
+        if (token) {
+                      const response = await fetch('http://localhost:3001/api/user/profile', {
+              method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(editData)
+          });
 
-        if (response.ok) {
-          updateUser(editData);
-          setEditing(false);
-          alert('Профиль успешно обновлен!');
-        } else {
-          alert('Ошибка при обновлении профиля');
+          if (response.ok) {
+            setEditing(false);
+            // Обновляем данные в store
+            if (user) {
+              const updatedUser = {
+                ...user,
+                name: editData.name,
+                phone: editData.phone,
+                address: editData.address
+              };
+              setUser(updatedUser);
+              
+              // Обновляем локальное состояние editData
+              setEditData({
+                name: editData.name,
+                phone: editData.phone,
+                address: editData.address
+              });
+            }
+            alert('Профиль успешно обновлен!');
+          } else {
+            alert('Ошибка при обновлении профиля');
+          }
         }
       } catch (error) {
-        console.error('Ошибка обновления профиля:', error);
         alert('Ошибка при обновлении профиля');
       }
     }
   };
 
   const handleLogout = () => {
-    logout();
+    localStorage.removeItem('token');
+    // Очищаем store пользователя
+    clearUser();
+    // Перенаправляем на главную страницу
     navigate('/');
   };
 
@@ -140,214 +180,135 @@ export const ProfilePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Заголовок */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Профиль</h1>
-          <p className="text-gray-600">Управление личными данными и заказами</p>
-        </div>
+        <Navigation />
+        
+        {user ? (
+          <div className="space-y-8">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-gray-900">Мой профиль</h1>
+              <p className="text-gray-600 mt-2">Управляйте вашими заказами и настройками</p>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Информация о пользователе */}
-          <div className="lg:col-span-1">
-            <Card className="shadow-soft border-0">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900">Личные данные</h2>
-                  {!editing ? (
-                    <Button
-                      onClick={() => setEditing(true)}
-                      variant="outline"
-                      size="sm"
-                      className="text-gray-600 hover:text-gray-800"
-                    >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Изменить
-                    </Button>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card>
+                <CardHeader>
+                  <h2 className="text-xl font-semibold">Информация профиля</h2>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Имя</label>
+                    <p className="text-lg">{user.name}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Email</label>
+                    <p className="text-lg">{user.email}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Телефон</label>
+                    <p className="text-lg">{user.phone || 'Не указан'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Роль</label>
+                    <Badge variant={user.isAdmin ? 'default' : 'secondary'}>
+                      {user.isAdmin ? 'Администратор' : 'Пользователь'}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <h2 className="text-xl font-semibold">Мои заказы</h2>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
+                      <p className="mt-2 text-gray-600">Загрузка заказов...</p>
+                    </div>
+                  ) : orders.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <ShoppingBag className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                      <p>У вас пока нет заказов</p>
+                      <Button 
+                        onClick={() => navigate('/menu')}
+                        className="mt-4"
+                      >
+                        Перейти к меню
+                      </Button>
+                    </div>
                   ) : (
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={handleSaveProfile}
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        <Save className="w-4 h-4 mr-1" />
-                        Сохранить
-                      </Button>
-                      <Button
-                        onClick={() => setEditing(false)}
-                        variant="outline"
-                        size="sm"
-                        className="text-gray-600 hover:text-gray-800"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-red-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Имя</p>
-                    {editing ? (
-                      <Input
-                        value={editData.name}
-                        onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
-                        className="mt-1"
-                      />
-                    ) : (
-                      <p className="font-medium text-gray-900">{user.name}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Phone className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Телефон</p>
-                    {editing ? (
-                      <Input
-                        value={editData.phone}
-                        onChange={(e) => setEditData(prev => ({ ...prev, phone: e.target.value }))}
-                        className="mt-1"
-                      />
-                    ) : (
-                      <p className="font-medium text-gray-900">{user.phone}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <MapPin className="w-6 h-6 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Адрес</p>
-                    {editing ? (
-                      <Input
-                        value={editData.address}
-                        onChange={(e) => setEditData(prev => ({ ...prev, address: e.target.value }))}
-                        className="mt-1"
-                      />
-                    ) : (
-                      <p className="font-medium text-gray-900">{user.address || 'Не указан'}</p>
-                    )}
-                  </div>
-                </div>
-
-                {user.email && (
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                      <Mail className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Email</p>
-                      <p className="font-medium text-gray-900">{user.email}</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="pt-4 border-t border-gray-200">
-                  <Button
-                    onClick={handleLogout}
-                    variant="outline"
-                    className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Выйти
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* История заказов */}
-          <div className="lg:col-span-2">
-            <Card className="shadow-soft border-0">
-              <CardHeader>
-                <h2 className="text-xl font-semibold text-gray-900">История заказов</h2>
-              </CardHeader>
-              
-              <CardContent>
-                {loading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                    <p className="text-gray-500 mt-2">Загрузка заказов...</p>
-                  </div>
-                ) : orders.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Заказов пока нет</h3>
-                    <p className="text-gray-500 mb-4">Сделайте свой первый заказ!</p>
-                    <Button 
-                      onClick={() => navigate('/menu')}
-                      className="bg-red-600 hover:bg-red-700 text-white"
-                    >
-                      Перейти к меню
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {orders.map((order) => (
-                      <div key={order.id} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center space-x-3">
-                            <h3 className="font-semibold text-gray-900">Заказ #{order.orderNumber}</h3>
-                            <Badge className={`${getStatusColor(order.status)} flex items-center space-x-1`}>
-                              {getStatusIcon(order.status)}
-                              <span>{getStatusText(order.status)}</span>
-                            </Badge>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold text-red-600">{formatPrice(order.totalAmount)}</p>
-                            <p className="text-sm text-gray-500">
-                              {new Date(order.createdAt).toLocaleDateString('ru-RU')}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2 mb-4">
-                          {order.items.map((item: any, index: number) => (
-                            <div key={index} className="flex justify-between text-sm">
-                              <span>{item.product.name} × {item.quantity}</span>
-                              <span>{formatPrice(item.product.price * item.quantity)}</span>
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                      {orders.map((order) => (
+                        <div 
+                          key={order.id} 
+                          className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <p className="font-medium">Заказ #{order.order_number}</p>
+                              <p className="text-sm text-gray-600">
+                                {new Date(order.created_at).toLocaleDateString('ru-RU')}
+                              </p>
                             </div>
-                          ))}
-                        </div>
+                            <div className="text-right">
+                              <p className="font-semibold">{order.total_amount} сом</p>
+                              <Badge variant={
+                                order.status === 'pending' ? 'secondary' :
+                                order.status === 'preparing' ? 'default' :
+                                order.status === 'ready' ? 'default' :
+                                order.status === 'delivered' ? 'default' : 'secondary'
+                              }>
+                                {order.status === 'pending' ? 'Ожидает' :
+                                 order.status === 'preparing' ? 'Готовится' :
+                                 order.status === 'ready' ? 'Готов' :
+                                 order.status === 'delivered' ? 'Доставлен' : order.status}
+                              </Badge>
+                              {order.paymentStatus && (
+                                <Badge variant="secondary" className="ml-1">
+                                  {order.paymentStatus}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="text-sm text-gray-600 mb-3">
+                            <p>Способ оплаты: {order.payment_method}</p>
+                            {order.items_summary && (
+                              <p>Товары: {order.items_summary}</p>
+                            )}
+                          </div>
 
-                        <div className="flex justify-end space-x-2">
-                          <PrintReceipt order={order} onClose={() => {}} />
-                          {order.status === 'pending' && (
-                            <Button
-                              onClick={() => {
-                                setSelectedOrder(order);
-                                setShowPayment(true);
-                              }}
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
                               size="sm"
-                              className="bg-green-600 hover:bg-green-700 text-white"
+                              onClick={() => handlePayOrder(order)}
+                              disabled={order.status === 'delivered'}
                             >
-                              <QrCode className="w-4 h-4 mr-1" />
+                              <CreditCard className="h-4 w-4 mr-1" />
                               Оплатить
                             </Button>
-                          )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="text-center py-16">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Необходима авторизация</h2>
+            <p className="text-gray-600 mb-8">Войдите в систему чтобы просмотреть профиль</p>
+            <Button onClick={() => navigate('/auth')}>
+              Войти
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Модальное окно оплаты */}
       {showPayment && selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <PaymentQR
@@ -368,4 +329,3 @@ export const ProfilePage: React.FC = () => {
     </div>
   );
 };
-

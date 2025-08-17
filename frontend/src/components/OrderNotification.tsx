@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Package, X, QrCode } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
-import { Package, X, QrCode } from 'lucide-react';
 import { useUserStore } from '../store/userStore';
 import { PaymentQR } from './PaymentQR';
 import { PrintReceipt } from './PrintReceipt';
+
+interface Order {
+  id: string;
+  orderNumber: string;
+  status: string;
+  totalAmount: number;
+  customerName: string;
+  customerPhone: string;
+  deliveryAddress: string;
+  items: any[];
+  createdAt: string;
+}
 
 interface OrderNotificationProps {
   onClose: () => void;
@@ -13,71 +25,102 @@ interface OrderNotificationProps {
 
 export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose }) => {
   const navigate = useNavigate();
-  const { user, token } = useUserStore();
-  const [orders, setOrders] = useState<any[]>([]);
+  const { user } = useUserStore();
+  const [latestOrder, setLatestOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      if (token) {
-        try {
-          const response = await fetch('http://localhost:3001/api/orders', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            setOrders(data);
-          }
-        } catch (error) {
-          console.error('Ошибка загрузки заказов:', error);
-        } finally {
+    const fetchLatestOrder = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
           setLoading(false);
+          return;
         }
-      } else {
+
+        const response = await fetch('http://localhost:3001/api/orders/user', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data && data.data.length > 0) {
+            // Берем самый последний заказ
+            const latest = data.data[0];
+            setLatestOrder(latest);
+          }
+        }
+      } catch (error) {
+        } finally {
         setLoading(false);
       }
     };
 
-    fetchOrders();
-  }, [token]);
-
-  // Получаем последний заказ
-  const latestOrder = orders.length > 0 ? orders[0] : null;
+    fetchLatestOrder();
+  }, [user]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'preparing': return 'bg-blue-100 text-blue-800';
-      case 'delivering': return 'bg-purple-100 text-purple-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'confirmed':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'preparing':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'delivering':
+        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      case 'completed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending': return '⏳';
-      case 'preparing': return '👨‍🍳';
-      case 'delivering': return '🚚';
-      case 'completed': return '✅';
-      case 'cancelled': return '❌';
-      default: return '📦';
+      case 'pending':
+        return '⏳';
+      case 'confirmed':
+        return '✅';
+      case 'preparing':
+        return '👨‍🍳';
+      case 'delivering':
+        return '🚚';
+      case 'completed':
+        return '🎉';
+      case 'cancelled':
+        return '❌';
+      default:
+        return '📋';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'pending': return 'Ожидает';
-      case 'preparing': return 'Готовится';
-      case 'delivering': return 'Доставляется';
-      case 'completed': return 'Доставлен';
-      case 'cancelled': return 'Отменен';
-      default: return status;
+      case 'pending':
+        return 'Ожидает подтверждения';
+      case 'confirmed':
+        return 'Подтвержден';
+      case 'preparing':
+        return 'Готовится';
+      case 'delivering':
+        return 'Доставляется';
+      case 'completed':
+        return 'Завершен';
+      case 'cancelled':
+        return 'Отменен';
+      default:
+        return status;
     }
   };
 

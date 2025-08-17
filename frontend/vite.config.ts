@@ -9,10 +9,18 @@ export default defineConfig({
     host: true,
     hmr: {
       port: 3000,
+      overlay: false,
     },
   },
   define: {
     global: 'globalThis',
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
   },
 })
 

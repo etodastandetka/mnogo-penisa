@@ -1,185 +1,250 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUserStore } from '../store/userStore';
 import { AdminLayout } from '../components/admin/AdminLayout';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../components/ui/Card';
+import { Badge } from '../components/ui/Badge';
 import { 
-  Bot, 
-  CheckCircle, 
-  XCircle, 
-  RefreshCw,
   Settings,
-  Info
+  Bot,
+  CreditCard,
+  RefreshCw,
+  Save
 } from 'lucide-react';
-import { adminApi } from '../api/admin';
 
 export const AdminSettingsPage: React.FC = () => {
   const navigate = useNavigate();
-  const [adminUser, setAdminUser] = useState<any>(null);
-  const [telegramInfo, setTelegramInfo] = useState<any>(null);
-  const [testResult, setTestResult] = useState<string | null>(null);
+  const { user, isAdmin } = useUserStore();
+  
   const [loading, setLoading] = useState(false);
-  const [testLoading, setTestLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [settings, setSettings] = useState({
+    telegram: {
+      botToken: '',
+      chatId: '',
+      enabled: false
+    },
+    bank: {
+      bankLink: 'https://app.mbank.kg/qr#',
+      megaPayLink: 'https://megapay.kg/get#',
+      dengiLink: 'https://api.dengi.o.kg/ru/qr#',
+      balanceLink: 'https://balance.kg#',
+      bakaiLink: 'https://bakai24.app#',
+      demirLink: 'https://retail.demirbank.kg#',
+      optimaLink: 'https://optimabank.kg/index.php?lang=ru#'
+    }
+  });
 
   useEffect(() => {
-    const userStr = localStorage.getItem('adminUser');
-    if (userStr) {
-      setAdminUser(JSON.parse(userStr));
+    // Проверяем, что пользователь админ
+    if (!user || !isAdmin) {
+      navigate('/');
+      return;
     }
-    fetchTelegramInfo();
-  }, []);
 
-  const fetchTelegramInfo = async () => {
+    // Загружаем банковские настройки
+    loadBankSettings();
+  }, [user, isAdmin, navigate]);
+
+  const loadBankSettings = async () => {
     try {
-      setLoading(true);
-      const info = await adminApi.getTelegramInfo();
-      setTelegramInfo(info);
+      const response = await fetch('http://localhost:3001/api/bank-settings');
+      if (response.ok) {
+        const data = await response.json();
+        setSettings(prev => ({
+          ...prev,
+          bank: {
+            ...prev.bank,
+            bankLink: data.bank_link || 'https://app.mbank.kg/qr#'
+          }
+        }));
+      }
     } catch (error) {
-      console.error('Ошибка получения информации о Telegram боте:', error);
+      }
+  };
+
+  const handleSettingChange = (category: string, key: string, value: any) => {
+    setSettings(prev => ({
+      ...prev,
+      [category]: {
+        ...prev[category as keyof typeof prev],
+        [key]: value
+      }
+    }));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    
+    try {
+      // Отправляем настройки на сервер
+      const response = await fetch('http://localhost:3001/api/bank-settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bank_name: 'MBank',
+          bank_link: settings.bank.bankLink
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('Настройки успешно сохранены!');
+      } else {
+        alert('Ошибка сохранения: ' + result.message);
+      }
+    } catch (error) {
+      alert('Ошибка соединения с сервером');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const handleTestTelegram = async () => {
-    try {
-      setTestLoading(true);
-      setTestResult(null);
-      const result = await adminApi.testTelegramBot();
-      setTestResult(result.message);
-    } catch (error) {
-      console.error('Ошибка тестирования Telegram бота:', error);
-      setTestResult('Ошибка отправки тестового сообщения');
-    } finally {
-      setTestLoading(false);
-    }
+  const handleReset = () => {
+    // Сброс к значениям по умолчанию
+    setSettings({
+      telegram: {
+        botToken: '',
+        chatId: '',
+        enabled: false
+      },
+      bank: {
+        bankLink: 'https://app.mbank.kg/qr#',
+        megaPayLink: '',
+        dengiLink: '',
+        balanceLink: '',
+        bakaiLink: '',
+        demirLink: '',
+        optimaLink: ''
+      }
+    });
   };
-
-  if (!adminUser) {
-    return <div>Загрузка...</div>;
-  }
 
   return (
     <AdminLayout>
       <div className="p-4 sm:p-6 lg:p-8">
         {/* Заголовок */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Настройки</h2>
-          <p className="text-gray-600 mt-1">Управление системными настройками</p>
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Настройки</h2>
+              <p className="text-gray-600 mt-1">
+                Управление настройками системы и уведомлений
+              </p>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                disabled={saving}
+                className="flex items-center space-x-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                <span>Сбросить</span>
+              </Button>
+              
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center space-x-2 bg-red-600 hover:bg-red-700"
+              >
+                <Save className="h-4 w-4" />
+                <span>{saving ? 'Сохранение...' : 'Сохранить'}</span>
+              </Button>
+            </div>
+          </div>
         </div>
 
-        {/* Telegram Bot Settings */}
+        {/* Настройки Telegram бота */}
         <Card className="border-0 shadow-soft mb-6">
           <CardHeader>
             <div className="flex items-center space-x-2">
-              <Bot className="h-5 w-5 text-gray-500" />
-              <h3 className="text-lg font-semibold text-gray-900">Telegram Bot</h3>
+              <Bot className="h-5 w-5 text-blue-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Telegram бот</h3>
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {/* Статус бота */}
-              <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2">
-                  {telegramInfo?.isConfigured ? (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-red-500" />
-                  )}
-                  <span className="font-medium">
-                    Статус: {telegramInfo?.isConfigured ? 'Настроен' : 'Не настроен'}
-                  </span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Включить уведомления</label>
+                  <p className="text-xs text-gray-500">Отправлять уведомления о заказах в Telegram</p>
                 </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.telegram.enabled}
+                    onChange={(e) => handleSettingChange('telegram', 'enabled', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                </label>
               </div>
 
-              {/* Информация о боте */}
-              {telegramInfo?.isConfigured && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <div className="flex items-center space-x-2 text-green-800">
-                    <Info className="h-4 w-4" />
-                    <span className="text-sm font-medium">Chat ID: {telegramInfo.chatId}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Предупреждение если не настроен */}
-              {!telegramInfo?.isConfigured && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <div className="flex items-center space-x-2 text-yellow-800">
-                    <Info className="h-4 w-4" />
-                    <span className="text-sm">
-                      Для настройки Telegram бота установите переменные окружения TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* Кнопки действий */}
-              <div className="flex items-center space-x-3">
-                <Button
-                  onClick={handleTestTelegram}
-                  disabled={!telegramInfo?.isConfigured || testLoading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
-                >
-                  {testLoading ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                      <span>Отправка...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Bot className="h-4 w-4" />
-                      <span>Тест Telegram бота</span>
-                    </>
-                  )}
-                </Button>
-
-                <Button
-                  onClick={fetchTelegramInfo}
-                  disabled={loading}
-                  variant="outline"
-                  className="flex items-center space-x-2"
-                >
-                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                  <span>Обновить статус</span>
-                </Button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Токен бота
+                </label>
+                <input
+                  type="text"
+                  value={settings.telegram.botToken}
+                  onChange={(e) => handleSettingChange('telegram', 'botToken', e.target.value)}
+                  placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Получите токен у @BotFather в Telegram
+                </p>
               </div>
 
-              {/* Результат теста */}
-              {testResult && (
-                <div className={`p-3 rounded-lg ${
-                  testResult.includes('Ошибка') 
-                    ? 'bg-red-50 border border-red-200 text-red-800' 
-                    : 'bg-green-50 border border-green-200 text-green-800'
-                }`}>
-                  <span className="text-sm">{testResult}</span>
-                </div>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  ID чата
+                </label>
+                <input
+                  type="text"
+                  value={settings.telegram.chatId}
+                  onChange={(e) => handleSettingChange('telegram', 'chatId', e.target.value)}
+                  placeholder="-1001234567890"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  ID группы или канала для уведомлений
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Системная информация */}
+        {/* Настройки MBank */}
         <Card className="border-0 shadow-soft">
           <CardHeader>
             <div className="flex items-center space-x-2">
-              <Settings className="h-5 w-5 text-gray-500" />
-              <h3 className="text-lg font-semibold text-gray-900">Системная информация</h3>
+              <CreditCard className="h-5 w-5 text-green-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Настройки MBank</h3>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Версия приложения:</span>
-                <span className="font-medium">1.0.0</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Среда выполнения:</span>
-                <span className="font-medium">Production</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Последнее обновление:</span>
-                <span className="font-medium">{new Date().toLocaleDateString('ru-RU')}</span>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ссылка MBank
+                </label>
+                <input
+                  type="text"
+                  value={settings.bank.bankLink}
+                  onChange={(e) => handleSettingChange('bank', 'bankLink', e.target.value)}
+                  placeholder="https://app.mbank.kg/qr#"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Базовая ссылка для генерации QR-кодов MBank
+                </p>
               </div>
             </div>
           </CardContent>

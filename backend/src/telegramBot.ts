@@ -30,7 +30,6 @@ interface Order {
 
 export async function sendNewOrderNotification(order: Order): Promise<void> {
   if (!bot || !TELEGRAM_CHAT_ID) {
-    console.log('Telegram бот не настроен, пропускаем уведомление');
     return;
   }
 
@@ -40,15 +39,12 @@ export async function sendNewOrderNotification(order: Order): Promise<void> {
       parse_mode: 'HTML',
       disable_web_page_preview: true
     });
-    console.log(`✅ Уведомление о заказе #${order.orderNumber} отправлено в Telegram`);
-  } catch (error) {
-    console.error('❌ Ошибка отправки уведомления в Telegram:', error);
-  }
+    } catch (error) {
+    }
 }
 
 export async function sendStatusUpdateNotification(order: any, oldStatus: string): Promise<void> {
   if (!bot || !TELEGRAM_CHAT_ID) {
-    console.log('Telegram бот не настроен, пропускаем уведомление');
     return;
   }
 
@@ -58,10 +54,8 @@ export async function sendStatusUpdateNotification(order: any, oldStatus: string
       parse_mode: 'HTML',
       disable_web_page_preview: true
     });
-    console.log(`✅ Уведомление об обновлении статуса заказа #${order.orderNumber} отправлено в Telegram`);
-  } catch (error) {
-    console.error('❌ Ошибка отправки уведомления об обновлении статуса в Telegram:', error);
-  }
+    } catch (error) {
+    }
 }
 
 function formatOrderMessage(order: Order): string {
@@ -159,9 +153,7 @@ export async function testTelegramBot(): Promise<void> {
       parse_mode: 'HTML',
       disable_web_page_preview: true
     });
-    console.log('✅ Тестовое сообщение отправлено в Telegram');
-  } catch (error) {
-    console.error('❌ Ошибка отправки тестового сообщения:', error);
+    } catch (error) {
     throw error;
   }
 }
