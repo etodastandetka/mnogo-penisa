@@ -534,28 +534,28 @@ app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
     console.log('Обновляем заказ в базе:', { orderId, orderNumber, fileUrl });
     
     // Обновляем заказ с URL чека
-    // Ищем заказ по ID (основной способ)
     console.log('Ищем заказ по ID:', { orderId, orderNumber });
     
-    // Сначала проверим, существует ли заказ
-    db.get('SELECT id, order_number FROM orders WHERE id = ?', [orderId], (err, order) => {
-      if (err) {
-        console.error('Ошибка поиска заказа:', err);
-        return res.status(500).json({ success: false, error: 'Ошибка поиска заказа' });
-      }
-      
-      if (!order) {
-        console.error('Заказ не найден по ID:', orderId);
-        return res.status(404).json({ success: false, error: 'Заказ не найден' });
-      }
-      
-      console.log('Найден заказ для обновления:', order);
-      
-      // Теперь обновляем заказ
-      db.run(
-        'UPDATE orders SET payment_proof = ?, payment_proof_date = CURRENT_TIMESTAMP WHERE id = ?',
-        [fileUrl, orderId],
-        function(err) {
+    if (orderId && orderId !== 'temp') {
+      // Сначала проверим, существует ли заказ
+      db.get('SELECT id, order_number FROM orders WHERE id = ?', [orderId], (err, order) => {
+        if (err) {
+          console.error('Ошибка поиска заказа:', err);
+          return res.status(500).json({ success: false, error: 'Ошибка поиска заказа' });
+        }
+        
+        if (!order) {
+          console.error('Заказ не найден по ID:', orderId);
+          return res.status(404).json({ success: false, error: 'Заказ не найден' });
+        }
+        
+        console.log('Найден заказ для обновления:', order);
+        
+        // Теперь обновляем заказ
+        db.run(
+          'UPDATE orders SET payment_proof = ?, payment_proof_date = CURRENT_TIMESTAMP WHERE id = ?',
+          [fileUrl, orderId],
+          function(err) {
           if (err) {
             console.error('Ошибка обновления базы:', err);
             return res.status(500).json({ success: false, error: 'Ошибка сохранения чека в базе данных' });
@@ -571,9 +571,18 @@ app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
         }
       );
     });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Ошибка сохранения файла' });
+  } else {
+    // Если orderId нет, просто возвращаем успех
+    console.log('Чек загружен без привязки к заказу:', { fileUrl });
+    res.json({ 
+      success: true, 
+      message: 'Чек успешно загружен',
+      fileUrl: fileUrl
+    });
   }
+} catch (error) {
+  res.status(500).json({ success: false, error: 'Ошибка сохранения файла' });
+}
 });
 
 

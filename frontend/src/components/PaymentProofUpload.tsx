@@ -3,8 +3,8 @@ import { Button } from './ui/Button';
 import { Upload, X, CheckCircle } from 'lucide-react';
 
 interface PaymentProofUploadProps {
-  orderId: string;
-  orderNumber?: string; // Добавляем номер заказа
+  orderId?: string; // Делаем необязательным
+  orderNumber?: string;
   onClose: () => void;
   onUploadComplete: (proofUrl: string) => void;
 }
@@ -42,7 +42,9 @@ export const PaymentProofUpload: React.FC<PaymentProofUploadProps> = ({
     try {
       const formData = new FormData();
       formData.append('file', selectedFile);
-      formData.append('orderId', orderId);
+      if (orderId) {
+        formData.append('orderId', orderId);
+      }
       if (orderNumber) {
         formData.append('orderNumber', orderNumber);
       }

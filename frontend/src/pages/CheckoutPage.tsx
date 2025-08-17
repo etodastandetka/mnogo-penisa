@@ -363,20 +363,12 @@ export const CheckoutPage: React.FC = () => {
                         🔗 Перейти к оплате
                       </Button>
                       
-                      {/* Кнопка "Я оплатил" */}
+                      {/* Кнопка загрузки чека */}
                       <Button
                         onClick={() => setShowProofUpload(true)}
-                        disabled={!orderId || orderId === 'temp'}
-                        className={`w-full ${
-                          orderId && orderId !== 'temp' 
-                            ? 'bg-green-600 hover:bg-green-700 text-white' 
-                            : 'bg-gray-400 cursor-not-allowed text-gray-200'
-                        }`}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
                       >
-                        {orderId && orderId !== 'temp' 
-                          ? '📸 Загрузить чек об оплате' 
-                          : 'Сначала оформите заказ'
-                        }
+                        📸 Загрузить чек об оплате
                       </Button>
                     </div>
                   </div>
@@ -384,10 +376,24 @@ export const CheckoutPage: React.FC = () => {
                 
                 <Button
                   onClick={handleSubmit}
-                  disabled={!customerData.name || !customerData.phone || !customerData.address || loading}
-                  className="w-full mt-6 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white"
+                  disabled={
+                    !customerData.name || 
+                    !customerData.phone || 
+                    !customerData.address || 
+                    loading ||
+                    (paymentMethod === PaymentMethod.CARD && !customerData.paymentProof)
+                  }
+                  className={`w-full mt-6 ${
+                    paymentMethod === PaymentMethod.CARD && !customerData.paymentProof
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700'
+                  } text-white`}
                 >
-                  {loading ? 'Оформление...' : 'Оформить заказ'}
+                  {loading ? 'Оформление...' : 
+                   paymentMethod === PaymentMethod.CARD && !customerData.paymentProof
+                     ? 'Сначала загрузите чек об оплате'
+                     : 'Оформить заказ'
+                  }
                 </Button>
               </CardContent>
             </Card>
@@ -453,18 +459,12 @@ export const CheckoutPage: React.FC = () => {
       )}
 
       {/* Модальное окно загрузки фото чека */}
-      {showProofUpload && orderId && orderId !== 'temp' && (
+      {showProofUpload && (
         <PaymentProofUpload
-          orderId={orderId}
-          orderNumber={`#MR-${orderId}`}
           onClose={() => setShowProofUpload(false)}
           onUploadComplete={(proofUrl) => {
             console.log('Фото чека загружено:', proofUrl);
-            console.log('Детали загрузки:', {
-              orderId,
-              orderNumber: `#MR-${orderId}`,
-              proofUrl
-            });
+            console.log('Детали загрузки:', { proofUrl });
             setShowProofUpload(false);
             // Обновляем URL изображения в форме
             setCustomerData(prev => ({ ...prev, paymentProof: proofUrl }));
