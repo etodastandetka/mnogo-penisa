@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { client } from '../api/client';
 import { getProducts, createProduct, updateProduct, deleteProduct } from '../api/admin';
+import { ProductImageUpload } from '../components/ProductImageUpload';
 
 import { 
   Package, 
@@ -11,7 +12,8 @@ import {
   Edit, 
   Trash2,
   Search,
-  Filter
+  Filter,
+  Upload
 } from 'lucide-react';
 
 interface Product {
@@ -53,6 +55,8 @@ export const AdminProductsPage: React.FC = () => {
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [showImageUploadModal, setShowImageUploadModal] = useState(false);
+  const [currentProductForImage, setCurrentProductForImage] = useState<Product | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -286,6 +290,31 @@ export const AdminProductsPage: React.FC = () => {
     });
   };
 
+  const handleImageUpload = (product: Product) => {
+    setCurrentProductForImage(product);
+    setShowImageUploadModal(true);
+  };
+
+  const handleImageUploadComplete = (imageUrl: string) => {
+    if (currentProductForImage) {
+      // Обновляем товар с новым фото
+      const updatedProducts = products.map(p => 
+        p.id === currentProductForImage.id 
+          ? { ...p, image_url: imageUrl }
+          : p
+      );
+      setProducts(updatedProducts);
+      
+      // Обновляем в базе данных
+      updateProduct(String(currentProductForImage.id), {
+        ...currentProductForImage,
+        image_url: imageUrl
+      });
+    }
+    setShowImageUploadModal(false);
+    setCurrentProductForImage(null);
+  };
+
   const handleDeleteProduct = async (productId: number) => {
     if (window.confirm('Вы уверены, что хотите удалить этот товар?')) {
       try {
@@ -440,6 +469,13 @@ export const AdminProductsPage: React.FC = () => {
                     <div className="text-right">
                       <p className="font-semibold text-gray-900">{product.price.toLocaleString()} сом</p>
                       <div className="flex items-center space-x-2 mt-2">
+                        <button 
+                          onClick={() => handleImageUpload(product)}
+                          className="p-2 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors duration-200"
+                          title="Загрузить фото"
+                        >
+                          <Upload className="w-4 h-4 text-blue-600" />
+                        </button>
                         <button 
                           onClick={() => handleEditProduct(product)}
                           className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
@@ -800,6 +836,18 @@ export const AdminProductsPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Модальное окно загрузки фото товара */}
+      {showImageUploadModal && currentProductForImage && (
+        <ProductImageUpload
+          onImageUpload={handleImageUploadComplete}
+          onClose={() => {
+            setShowImageUploadModal(false);
+            setCurrentProductForImage(null);
+          }}
+          currentImageUrl={currentProductForImage.image_url}
+        />
       )}
     </AdminLayout>
   );

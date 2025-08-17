@@ -503,6 +503,46 @@ app.get('/api/orders/payment-proof/:filename', (req, res) => {
   }
 });
 
+// Загрузка фото товара
+app.post('/api/upload/product-image', upload.single('file'), (req, res) => {
+  console.log('Загрузка фото товара:', { 
+    file: req.file ? req.file.originalname : 'нет файла',
+    body: req.body 
+  });
+  
+  if (!req.file) {
+    return res.status(400).json({ success: false, error: 'Файл не загружен' });
+  }
+
+  const fileName = 'product-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.jpg';
+  
+  try {
+    // Создаем папку uploads если её нет
+    const uploadsDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    
+    // Сохраняем файл в папку uploads
+    const filePath = path.join(uploadsDir, fileName);
+    fs.writeFileSync(filePath, req.file.buffer);
+    
+    // Создаем URL для файла
+    const fileUrl = 'http://localhost:3001/uploads/' + fileName;
+    
+    console.log('Фото товара сохранено:', { fileName, fileUrl });
+    
+    res.json({ 
+      success: true, 
+      message: 'Фото товара успешно загружено',
+      fileUrl: fileUrl
+    });
+  } catch (error) {
+    console.error('Ошибка сохранения фото товара:', error);
+    res.status(500).json({ success: false, error: 'Ошибка сохранения файла' });
+  }
+});
+
 // Загрузка чека об оплате
 app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
   console.log('Загрузка фото чека:', { 

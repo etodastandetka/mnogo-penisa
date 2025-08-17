@@ -35,7 +35,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
       <div className="relative overflow-hidden rounded-t-xl">
         <img
-          src={product.image_url || product.image || 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'}
+          src={`${product.image_url || product.image || 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'}?t=${Date.now()}`}
           alt={product.name}
           className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
           onError={(e) => {
