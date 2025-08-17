@@ -380,20 +380,11 @@ export const CheckoutPage: React.FC = () => {
                     !customerData.name || 
                     !customerData.phone || 
                     !customerData.address || 
-                    loading ||
-                    (paymentMethod === PaymentMethod.CARD && !customerData.paymentProof)
+                    loading
                   }
-                  className={`w-full mt-6 ${
-                    paymentMethod === PaymentMethod.CARD && !customerData.paymentProof
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700'
-                  } text-white`}
+                  className="w-full mt-6 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white"
                 >
-                  {loading ? 'Оформление...' : 
-                   paymentMethod === PaymentMethod.CARD && !customerData.paymentProof
-                     ? 'Сначала загрузите чек об оплате'
-                     : 'Оформить заказ'
-                  }
+                  {loading ? 'Оформление...' : 'Оформить заказ'}
                 </Button>
               </CardContent>
             </Card>

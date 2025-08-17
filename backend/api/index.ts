@@ -612,11 +612,11 @@ app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
       );
     });
   } else {
-    // Если orderId нет, просто возвращаем успех
-    console.log('Чек загружен без привязки к заказу:', { fileUrl });
+    // Если orderId нет или равен 'temp', просто возвращаем успех
+    console.log('Чек загружен без привязки к заказу (заказ еще не создан):', { fileUrl });
     res.json({ 
       success: true, 
-      message: 'Чек успешно загружен',
+      message: 'Чек успешно загружен (будет привязан к заказу при его создании)',
       fileUrl: fileUrl
     });
   }
