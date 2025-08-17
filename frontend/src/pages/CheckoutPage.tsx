@@ -11,7 +11,7 @@ import { PaymentMethod } from '../types';
 import { PaymentQR } from '../components/PaymentQR';
 import { PaymentProofUpload } from '../components/PaymentProofUpload';
 import { formatPrice } from '../utils/format';
-import { Navigation } from '../components/Navigation';
+
 
 export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -212,7 +212,6 @@ export const CheckoutPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>

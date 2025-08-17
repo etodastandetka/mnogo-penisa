@@ -12,7 +12,7 @@ import {
 import { useUserStore } from '../store/userStore';
 import { formatPrice } from '../utils/format';
 import { PaymentQR } from '../components/PaymentQR';
-import { Navigation } from '../components/Navigation';
+
 
 export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -180,7 +180,6 @@ export const ProfilePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Navigation />
         
         {user ? (
           <div className="space-y-8">
