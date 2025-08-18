@@ -32,6 +32,7 @@ export interface Product {
   price: number;
   image_url?: string;
   image?: string; // для совместимости
+  original_image_url?: string; // Добавляем для отладки
   category: ProductCategory | string;
   ingredients?: string[];
   weight?: number;

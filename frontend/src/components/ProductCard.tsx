@@ -16,6 +16,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const quantity = getItemQuantity(product.id.toString());
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
 
   // Функция для получения URL изображения с кеш-бастером
   const getImageUrl = (imageUrl: string | undefined) => {
@@ -54,8 +55,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     console.error('❌ Ошибка загрузки изображения для товара:', product.name, 'URL:', e.currentTarget.src);
     setImageError(true);
     setImageLoading(false);
+    
+    // Пробуем загрузить placeholder
     const target = e.target as HTMLImageElement;
-    target.src = 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
+    if (target.src !== 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop') {
+      console.log('🔄 Пробуем загрузить placeholder...');
+      target.src = 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
+    }
   };
 
   const handleAddToCart = () => {
@@ -96,6 +102,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           onLoad={handleImageLoad}
           onError={handleImageError}
           loading="lazy"
+          crossOrigin="anonymous"
         />
         
         {/* Fallback для ошибок изображения */}

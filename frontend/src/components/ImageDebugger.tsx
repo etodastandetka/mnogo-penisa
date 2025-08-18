@@ -80,7 +80,10 @@ export const ImageDebugger: React.FC = () => {
                 onError={(e) => {
                   console.error('❌ Ошибка изображения:', product.name, e.currentTarget.src);
                   e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling!.style.display = 'block';
+                  const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (nextElement) {
+                    nextElement.style.display = 'block';
+                  }
                 }}
               />
               <div 
