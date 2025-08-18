@@ -99,13 +99,13 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
     switch (ext) {
       case '.jpg':
       case '.jpeg':
-        res.setHeader('Content-Type', 'image/jpeg');
+      res.setHeader('Content-Type', 'image/jpeg');
         break;
       case '.png':
-        res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Content-Type', 'image/png');
         break;
       case '.gif':
-        res.setHeader('Content-Type', 'image/gif');
+      res.setHeader('Content-Type', 'image/gif');
         break;
       case '.webp':
         res.setHeader('Content-Type', 'image/webp');
@@ -472,24 +472,21 @@ app.get('/api/products', (req, res) => {
       return res.status(500).json({ message: 'Ошибка загрузки продуктов' });
     }
     
-    console.log('📦 Загружено товаров из БД:', products.length);
+
     
     // Обрабатываем изображения для каждого товара (упрощенная логика как в russkii-portal)
     const productsWithImages = products.map((product: any) => {
-      console.log('🖼️ Обработка товара:', product.name, 'image_url:', product.image_url);
       
       let processedImageUrl = product.image_url;
       
       // Если есть относительный путь к изображению, делаем его полным
       if (product.image_url && product.image_url.startsWith('/uploads/')) {
         processedImageUrl = `https://45.144.221.227:3444${product.image_url}`;
-        console.log('🔗 Локальный файл, полный URL:', processedImageUrl);
       }
       
       // Если это внешний URL (Unsplash или другие), оставляем как есть
       if (product.image_url && (product.image_url.startsWith('http://') || product.image_url.startsWith('https://'))) {
         processedImageUrl = product.image_url;
-        console.log('🌐 Внешний URL изображения:', processedImageUrl);
       }
       
               // Если это base64 изображение, оставляем как есть
@@ -500,17 +497,16 @@ app.get('/api/products', (req, res) => {
       // Если нет изображения, добавляем placeholder
       if (!product.image_url || product.image_url === '') {
         processedImageUrl = 'https://45.144.221.227:3444/images/placeholder.svg';
-        console.log('🖼️ Добавлен placeholder для товара:', product.name);
       }
       
-      return {
-        ...product,
+        return {
+          ...product,
         image_url: processedImageUrl,
         original_image_url: product.image_url // сохраняем оригинальный URL для отладки
       };
     });
     
-    console.log('✅ Отправляем товары в меню:', productsWithImages.length, 'шт.');
+
     
     // Добавляем отладочную информацию в заголовки
     res.setHeader('X-Products-Count', productsWithImages.length);

@@ -53,18 +53,20 @@ const startHttpsServer = () => {
       key: fs.readFileSync(keyFile)
     };
     
-    // Запускаем основной сервер
-    const server = spawn('npx', ['ts-node', 'api/index.ts'], {
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        PORT: '3001',
-        HTTPS_PORT: '3443'
-      }
-    });
-    
-    // Создаем HTTPS прокси
+    // Создаем HTTPS сервер напрямую
     const httpsServer = https.createServer(options, (req, res) => {
+      // Добавляем CORS заголовки
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      
+      // Обрабатываем preflight запросы
+      if (req.method === 'OPTIONS') {
+        res.writeHead(200);
+        res.end();
+        return;
+      }
+      
       // Проксируем запросы на HTTP сервер
       const proxyReq = http.request({
         hostname: 'localhost',
@@ -75,6 +77,12 @@ const startHttpsServer = () => {
       }, (proxyRes) => {
         res.writeHead(proxyRes.statusCode, proxyRes.headers);
         proxyRes.pipe(res);
+      });
+      
+      proxyReq.on('error', (err) => {
+        console.log('❌ Ошибка прокси:', err.message);
+        res.writeHead(500);
+        res.end('Internal Server Error');
       });
       
       req.pipe(proxyReq);
