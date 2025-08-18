@@ -19,8 +19,12 @@ const client = axios.create({
 client.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+    console.log('🔍 API Request:', config.url, 'Token:', token ? 'Present' : 'Missing');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('✅ Token added to request');
+    } else {
+      console.log('❌ No token found in localStorage');
     }
     return config;
   },
@@ -35,6 +39,7 @@ client.interceptors.response.use(
     return response;
   },
   (error) => {
+    console.log('🚨 API Error:', error.response?.status, error.response?.data);
     // Если получаем 401, перенаправляем на главную страницу
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
