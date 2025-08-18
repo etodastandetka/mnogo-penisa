@@ -68,7 +68,7 @@ export const ProfilePage: React.FC = () => {
   const handleSaveProfile = async () => {
     if (user) {
       try {
-        const response = await client.patch('/user/profile', editData);
+        const response = await client.put('/users/profile', editData);
         
         if (response.status === 200) {
           setEditing(false);

@@ -6,7 +6,7 @@ import { Badge } from './ui/Badge';
 import { useUserStore } from '../store/userStore';
 import { PaymentQR } from './PaymentQR';
 import { PrintReceipt } from './PrintReceipt';
-import { getUserOrders } from '../api/user';
+import { ordersApi } from '../api/orders';
 
 interface Order {
   id: string;
@@ -39,9 +39,8 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
       }
 
       try {
-        const orders = await getUserOrders();
+        const orders = await ordersApi.getUserOrders();
         if (orders && orders.length > 0) {
-          // Берем самый последний заказ
           const latest = orders[0];
           setLatestOrder(latest);
         }
@@ -116,18 +115,14 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
     if (user) {
       navigate('/profile');
     } else {
-      // Для гостей можно добавить логику открытия модального окна
-      // Пока просто закрываем уведомление
       onClose();
     }
   };
 
-  // Если нет заказов или загрузка, не показываем уведомление
   if (loading || !latestOrder) {
     return null;
   }
 
-  // Показываем уведомление только для активных заказов (не завершенных и не отмененных)
   if (latestOrder.status === 'completed' || latestOrder.status === 'cancelled') {
     return null;
   }
@@ -183,6 +178,7 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X className="w-4 h-4" />
+                Закрыть
               </Button>
             </div>
           </div>

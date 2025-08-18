@@ -1,59 +1,59 @@
 import { client } from './client';
-import { Order, OrderStatus, PaymentMethod } from '../types';
+import { Order, PaymentMethod, CartItem } from '../types';
 
 export interface CreateOrderRequest {
-  items: Array<{
-    productId: string;
-    quantity: number;
-  }>;
+  items: CartItem[];
   customer: {
     name: string;
     phone: string;
     address: string;
+    notes?: string;
   };
+  total: number;
   paymentMethod: PaymentMethod;
   notes?: string;
 }
 
-export interface UpdateOrderStatusRequest {
-  status: OrderStatus;
+export interface CreateOrderResponse {
+  orderId: number;
+  orderNumber: string;
 }
 
 export const ordersApi = {
-  // Создать заказ
-  create: async (orderData: CreateOrderRequest): Promise<Order> => {
-    const response = await client.post('/orders', orderData);
-    return response.data.data;
-  },
-
-  // Получить заказ по ID
-  getById: async (id: string): Promise<Order> => {
-    const response = await client.get(`/orders/${id}`);
-    return response.data.data;
-  },
-
-  // Обновить статус заказа
-  updateStatus: async (id: string, status: OrderStatus): Promise<Order> => {
-    const response = await client.put(`/orders/${id}/status`, { status });
-    return response.data.data;
-  },
-
-  // Получить QR-код для оплаты
-  getQrCode: async (id: string): Promise<{ qrCode: string; amount: number }> => {
-    const response = await client.get(`/orders/${id}/qr`);
-    return response.data.data;
-  },
-
-  // Получить чек
-  getReceipt: async (id: string): Promise<{ pdfUrl: string }> => {
-    const response = await client.get(`/orders/${id}/receipt`);
+  // Создать заказ (для авторизованного пользователя)
+  create: async (orderData: CreateOrderRequest): Promise<CreateOrderResponse> => {
+    const payload = {
+      customer: {
+        name: orderData.customer.name,
+        phone: orderData.customer.phone,
+        address: orderData.customer.address,
+        notes: orderData.customer.notes,
+      },
+      items: orderData.items.map((item) => ({
+        product: {
+          id: item.product.id,
+          price: item.product.price,
+        },
+        quantity: item.quantity,
+      })),
+      total: orderData.total,
+      paymentMethod: orderData.paymentMethod,
+      notes: orderData.notes,
+    };
+    const response = await client.post('/orders', payload);
     return response.data.data;
   },
 
   // Получить заказы пользователя
-  getUserOrders: async (): Promise<Order[]> => {
-    const response = await client.get('/orders/my');
-    return response.data.data;
+  getUserOrders: async (): Promise<any[]> => {
+    const response = await client.get('/orders/user');
+    return response.data;
+  },
+
+  // Обновить статус заказа (админ)
+  updateStatusAdmin: async (id: number, status: string): Promise<any> => {
+    const response = await client.patch(`/admin/orders/${id}/status`, { status });
+    return response.data;
   },
 };
 

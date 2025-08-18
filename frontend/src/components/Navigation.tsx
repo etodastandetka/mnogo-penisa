@@ -9,7 +9,7 @@ import { useGuestOrderStore } from '../store/guestOrderStore';
 
 import { OrderNotification } from './OrderNotification';
 import { AdminPanelButton } from './AdminPanelButton';
-import { getUserOrders } from '../api/user';
+import { ordersApi } from '../api/orders';
 
 export const Navigation: React.FC = () => {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ export const Navigation: React.FC = () => {
     const checkActiveOrders = async () => {
       if (user) {
         try {
-          const orders = await getUserOrders();
+          const orders = await ordersApi.getUserOrders();
           setUserOrders(orders);
           
           if (orders.length > 0) {
@@ -131,8 +131,6 @@ export const Navigation: React.FC = () => {
             {/* Правая часть - кнопки и пользователь */}
             <div className="flex items-center gap-3 lg:gap-4">
               
-
-
               {/* Корзина на странице меню */}
               {isMenuPage && (
                 <Button
@@ -153,8 +151,8 @@ export const Navigation: React.FC = () => {
                 </Button>
               )}
 
-                          {/* Пользователь */}
-            {user ? (
+              {/* Пользователь */}
+              {user ? (
                 <div className="flex items-center gap-2">
                   {/* Кнопка админ панели */}
                   <AdminPanelButton />
@@ -252,8 +250,6 @@ export const Navigation: React.FC = () => {
                 Контакты
               </button>
 
-
-
               {/* Разделитель */}
               <div className="border-t border-gray-200 pt-3">
                 {user ? (
@@ -313,7 +309,6 @@ export const Navigation: React.FC = () => {
           </div>
         )}
       </header>
-
 
     </>
   );

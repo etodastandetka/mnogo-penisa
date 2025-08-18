@@ -103,11 +103,9 @@ export const CheckoutPage: React.FC = () => {
       if (user) {
         // Заказ для авторизованного пользователя
         result = await ordersApi.create({
-          customer: customerData,
-          items: items.map(item => ({
-            productId: item.product.id.toString(),
-            quantity: item.quantity
-          })),
+          customer: { ...customerData, notes: customerData.notes },
+          items: items.map(ci => ({ product: ci.product, quantity: ci.quantity } as any)) as any,
+          total: getTotal(),
           paymentMethod: paymentMethod,
           notes: customerData.notes
         });
@@ -119,16 +117,19 @@ export const CheckoutPage: React.FC = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            customerName: customerData.name,
-            customerPhone: customerData.phone,
-            deliveryAddress: customerData.address,
+            customer: {
+              name: customerData.name,
+              phone: customerData.phone,
+              address: customerData.address,
+              notes: customerData.notes,
+            },
             items: items.map(item => ({
-              productId: item.product.id,
-              quantity: item.quantity,
-              price: item.product.price
+              product: { id: item.product.id, price: item.product.price },
+              quantity: item.quantity
             })),
-            totalAmount: getTotal(),
-            paymentProof: customerData.paymentProof
+            total: getTotal(),
+            paymentMethod: paymentMethod,
+            notes: customerData.notes
           })
         });
         
