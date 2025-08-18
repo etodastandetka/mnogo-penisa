@@ -586,7 +586,7 @@ app.post('/api/upload/product-image', upload.single('file'), (req, res) => {
     fs.writeFileSync(filePath, req.file.buffer);
     
     // Создаем URL для файла
-    const fileUrl = 'http://localhost:3001/uploads/' + fileName;
+    const fileUrl = 'https://45.144.221.227:3443/uploads/' + fileName;
     
     console.log('Фото товара сохранено:', { fileName, fileUrl });
     
@@ -627,7 +627,7 @@ app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
     fs.writeFileSync(filePath, req.file.buffer);
     
     // Создаем URL для файла
-    const fileUrl = 'http://localhost:3001/uploads/' + fileName;
+    const fileUrl = 'https://45.144.221.227:3443/uploads/' + fileName;
     
     console.log('Обновляем заказ в базе:', { orderId, orderNumber, fileUrl });
     
@@ -712,7 +712,7 @@ app.post('/api/admin/orders/:orderNumber/payment-proof', upload.single('file'), 
     fs.writeFileSync(filePath, req.file.buffer);
     
     // Создаем URL для файла
-    const fileUrl = 'http://localhost:3001/uploads/' + fileName;
+    const fileUrl = 'https://45.144.221.227:3443/uploads/' + fileName;
     
     // Ищем заказ по номеру
     db.get('SELECT id, order_number FROM orders WHERE order_number = ?', [orderNumber], (err, order) => {

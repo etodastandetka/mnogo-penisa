@@ -68,7 +68,7 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
   React.useEffect(() => {
     const fetchQRCode = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/api/orders/${orderId}/qr`);
+        const response = await fetch(`https://45.144.221.227:3443/api/orders/${orderId}/qr`);
         const result = await response.json();
         
         if (result.success) {
@@ -107,7 +107,7 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
   const handlePaymentComplete = async () => {
     try {
       // Отправляем статус оплаты на сервер
-      const response = await fetch(`http://localhost:3001/api/orders/${orderId}/payment`, {
+      const response = await fetch(`https://45.144.221.227:3443/api/orders/${orderId}/payment`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

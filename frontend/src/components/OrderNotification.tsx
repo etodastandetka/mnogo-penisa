@@ -44,7 +44,7 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
           return;
         }
 
-        const response = await fetch('http://localhost:3001/api/orders/user', {
+        const response = await fetch('https://45.144.221.227:3443/api/orders/user', {
           headers: {
             'Authorization': `Bearer ${token}`
           }

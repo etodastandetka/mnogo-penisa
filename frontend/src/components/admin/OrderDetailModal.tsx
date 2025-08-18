@@ -433,7 +433,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                       size="lg"
                       onClick={() => {
                         // Пытаемся найти чек по номеру заказа
-                        const searchUrl = `http://localhost:3001/uploads/receipt-*${order.order_number}*.jpg`;
+                        const searchUrl = `https://45.144.221.227:3443/uploads/receipt-*${order.order_number}*.jpg`;
                         console.log('Ищем чек по URL:', searchUrl);
                         alert(`Поиск чека:\n\nНомер заказа: ${order.order_number}\n\nПопробуйте проверить в папке uploads файлы:\nreceipt-*${order.order_number}*.jpg`);
                       }}
