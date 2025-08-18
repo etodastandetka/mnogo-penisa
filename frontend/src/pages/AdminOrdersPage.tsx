@@ -19,19 +19,19 @@ import {
   Eye,
   Receipt
 } from 'lucide-react';
-import { Order, OrderStatus } from '../types';
+import { OrderStatus } from '../types';
 import { formatPrice } from '../utils/format';
-import { getOrders, updateOrderStatus } from '../api/admin';
+import { getOrders, updateOrderStatus, AdminOrder } from '../api/admin';
 
 
 export const AdminOrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAdmin } = useUserStore();
   
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
   const [filters, setFilters] = useState({
@@ -81,17 +81,17 @@ export const AdminOrdersPage: React.FC = () => {
     }
   };
 
-  const printReceipt = (order: Order) => {
+  const printReceipt = (order: AdminOrder) => {
     // Подсчитываем количество товаров
-    const itemsCount = order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-    const itemsText = order.items?.map(item => `${item.product_name} x${item.quantity}`).join(', ') || order.items_summary || 'Детали заказа';
+    const itemsCount = order.items?.reduce((sum: number, item: any) => sum + item.quantity, 0) || 0;
+    const itemsText = order.items?.map((item: any) => `${item.productName} x${item.quantity}`).join(', ') || 'Детали заказа';
 
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Чек заказа #${order.order_number}</title>
+            <title>Чек заказа #${order.orderNumber}</title>
             <style>
               body { 
                 font-family: 'Arial', sans-serif; 
@@ -192,19 +192,19 @@ export const AdminOrdersPage: React.FC = () => {
 
             <div class="order-info">
               <div style="display: flex; justify-content: space-between;">
-                <div><strong>Заказ:</strong> #${order.order_number}</div>
-                <div><strong>Дата:</strong> ${new Date(order.created_at).toLocaleDateString('ru-RU')}</div>
+                <div><strong>Заказ:</strong> #${order.orderNumber}</div>
+                <div><strong>Дата:</strong> ${new Date(order.createdAt).toLocaleDateString('ru-RU')}</div>
               </div>
               <div style="text-align: center; margin-top: 5px;">
-                <strong>Время:</strong> ${new Date(order.created_at).toLocaleTimeString('ru-RU')}
+                <strong>Время:</strong> ${new Date(order.createdAt).toLocaleTimeString('ru-RU')}
               </div>
             </div>
 
             <div class="section">
               <div class="section-title">👤 КЛИЕНТ:</div>
-              <div><strong>Имя:</strong> ${order.customer_name}</div>
-              <div><strong>Телефон:</strong> ${order.customer_phone}</div>
-              <div><strong>Адрес доставки:</strong> ${order.customer_address || order.delivery_address || 'Не указан'}</div>
+              <div><strong>Имя:</strong> ${order.customerName}</div>
+              <div><strong>Телефон:</strong> ${order.customerPhone}</div>
+              <div><strong>Адрес доставки:</strong> ${order.deliveryAddress || 'Не указан'}</div>
             </div>
 
             <div class="section">
@@ -221,15 +221,15 @@ export const AdminOrdersPage: React.FC = () => {
                   </thead>
                   <tbody>
                     ${order.items && order.items.length > 0 ? 
-                      order.items.map(item => `
+                      order.items.map((item: any) => `
                         <tr style="border-bottom: 1px dashed #eee;">
-                          <td style="padding: 4px 4px 4px 0; line-height: 1.3;">${item.product_name}</td>
+                          <td style="padding: 4px 4px 4px 0; line-height: 1.3;">${item.productName}</td>
                           <td style="text-align: center; padding: 4px;">${item.quantity}</td>
-                          <td style="text-align: right; padding: 4px;">${item.price ? item.price.toLocaleString() : '0'}</td>
-                          <td style="text-align: right; padding: 4px; font-weight: bold;">${item.price ? (item.price * item.quantity).toLocaleString() : '0'}</td>
+                          <td style="text-align: right; padding: 4px;">${item.price.toLocaleString()}</td>
+                          <td style="text-align: right; padding: 4px; font-weight: bold;">${item.totalPrice.toLocaleString()}</td>
                         </tr>
                       `).join('') : 
-                      `<tr><td colspan="4" style="text-align: center; padding: 8px; color: #666;">${order.items_summary || 'Информация о товарах недоступна'}</td></tr>`
+                      `<tr><td colspan="4" style="text-align: center; padding: 8px; color: #666;">${order.items?.map((item: any) => `${item.productName} x${item.quantity}`).join(', ') || 'Информация о товарах недоступна'}</td></tr>`
                     }
                   </tbody>
                 </table>
@@ -240,7 +240,7 @@ export const AdminOrdersPage: React.FC = () => {
                   </div>
                   <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                     <span><strong>Способ оплаты:</strong></span>
-                    <span>${order.payment_method === 'cash' ? 'Наличные' : order.payment_method === 'card' ? 'Карта' : order.payment_method}</span>
+                    <span>${order.paymentMethod === 'cash' ? 'Наличные' : order.paymentMethod === 'card' ? 'Карта' : order.paymentMethod}</span>
                   </div>
                   <div style="display: flex; justify-content: space-between;">
                     <span><strong>Статус:</strong></span>
@@ -251,7 +251,7 @@ export const AdminOrdersPage: React.FC = () => {
             </div>
 
             <div class="total">
-              💰 ИТОГО: ${order.total_amount.toLocaleString()} сом
+              💰 ИТОГО: ${order.totalAmount.toLocaleString()} сом
             </div>
 
             <div class="thanks-text">
@@ -290,7 +290,7 @@ export const AdminOrdersPage: React.FC = () => {
     setFilters({ status: '', dateFrom: '', dateTo: '', search: '' });
   };
 
-  const openOrderDetail = (order: Order) => {
+  const openOrderDetail = (order: AdminOrder) => {
     setSelectedOrder(order);
     setIsDetailModalOpen(true);
   };
@@ -308,7 +308,7 @@ export const AdminOrdersPage: React.FC = () => {
     );
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | OrderStatus) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'preparing': return 'bg-blue-100 text-blue-800';
@@ -320,7 +320,7 @@ export const AdminOrdersPage: React.FC = () => {
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: string | OrderStatus) => {
     switch (status) {
       case 'pending': return 'Ожидает';
       case 'preparing': return 'Готовится';
@@ -348,13 +348,13 @@ export const AdminOrdersPage: React.FC = () => {
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       return (
-        order.order_number.toLowerCase().includes(searchLower) ||
-        order.customer_name.toLowerCase().includes(searchLower) ||
-        order.customer_phone.includes(searchLower)
+        order.orderNumber.toLowerCase().includes(searchLower) ||
+        order.customerName.toLowerCase().includes(searchLower) ||
+        order.customerPhone.includes(searchLower)
       );
     }
-    if (filters.dateFrom && new Date(order.created_at) < new Date(filters.dateFrom)) return false;
-    if (filters.dateTo && new Date(order.created_at) > new Date(filters.dateTo)) return false;
+    if (filters.dateFrom && new Date(order.createdAt) < new Date(filters.dateFrom)) return false;
+    if (filters.dateTo && new Date(order.createdAt) > new Date(filters.dateTo)) return false;
     return true;
   });
 
@@ -406,10 +406,10 @@ export const AdminOrdersPage: React.FC = () => {
                           <div className="flex items-center space-x-4">
                             <div>
                               <h3 className="font-medium text-gray-900">
-                                #{order.order_number}
+                                #{order.orderNumber}
                               </h3>
                               <p className="text-sm text-gray-600">
-                                {order.customer_name} • {order.customer_phone}
+                                {order.customerName} • {order.customerPhone}
                               </p>
                             </div>
                             <div>
@@ -420,13 +420,13 @@ export const AdminOrdersPage: React.FC = () => {
                           </div>
                           <div className="mt-2">
                             <p className="text-sm text-gray-600">
-                              <strong>Товары:</strong> {order.items_summary || 'Информация о товарах недоступна'}
+                              <strong>Товары:</strong> {order.items?.map((item: any) => `${item.productName} x${item.quantity}`).join(', ') || 'Информация о товарах недоступна'}
                             </p>
                             <p className="text-sm text-gray-600">
-                              <strong>Сумма:</strong> {order.total_amount?.toLocaleString() || 'Не указана'} сом
+                              <strong>Сумма:</strong> {order.totalAmount?.toLocaleString() || 'Не указана'} сом
                             </p>
                             <p className="text-sm text-gray-600">
-                              <strong>Дата:</strong> {new Date(order.created_at).toLocaleDateString('ru-RU')} {new Date(order.created_at).toLocaleTimeString('ru-RU')}
+                              <strong>Дата:</strong> {new Date(order.createdAt).toLocaleDateString('ru-RU')} {new Date(order.createdAt).toLocaleTimeString('ru-RU')}
                             </p>
                           </div>
                         </div>
@@ -459,7 +459,29 @@ export const AdminOrdersPage: React.FC = () => {
       </div>
       
       <OrderDetailModal
-        order={selectedOrder}
+        order={selectedOrder ? {
+          id: selectedOrder.id,
+          order_number: selectedOrder.orderNumber,
+          customer_name: selectedOrder.customerName,
+          customer_phone: selectedOrder.customerPhone,
+          delivery_address: selectedOrder.deliveryAddress,
+          total_amount: selectedOrder.totalAmount,
+          status: selectedOrder.status,
+          payment_method: selectedOrder.paymentMethod,
+          payment_status: selectedOrder.paymentStatus,
+          created_at: selectedOrder.createdAt,
+          items: selectedOrder.items?.map(item => ({
+            id: item.id,
+            product_name: item.productName,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.totalPrice,
+            product_id: item.id
+          })),
+          payment_proof: undefined,
+          payment_proof_date: undefined,
+          notes: undefined
+        } : null}
         isOpen={isDetailModalOpen}
         onClose={closeOrderDetail}
         onOrderUpdate={handleOrderUpdate}

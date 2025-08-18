@@ -105,7 +105,7 @@ export const CheckoutPage: React.FC = () => {
         result = await ordersApi.create({
           customer: customerData,
           items: items.map(item => ({
-            productId: item.product.id,
+            productId: item.product.id.toString(),
             quantity: item.quantity
           })),
           paymentMethod: paymentMethod,

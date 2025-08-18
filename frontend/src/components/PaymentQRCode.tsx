@@ -5,6 +5,7 @@ import { Badge } from './ui/Badge';
 import { QrCode, Check } from 'lucide-react';
 import { formatPrice } from '../utils/format';
 import { ordersApi } from '../api/orders';
+import { OrderStatus } from '../types';
 
 interface PaymentQRCodeProps {
   orderId: string;
@@ -95,7 +96,7 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
   const handlePaymentComplete = async () => {
     try {
       // Отправляем статус оплаты на сервер
-      await ordersApi.updateStatus(orderId, 'paid');
+      await ordersApi.updateStatus(orderId, OrderStatus.DELIVERED);
 
       if (onPaymentComplete) {
         onPaymentComplete();

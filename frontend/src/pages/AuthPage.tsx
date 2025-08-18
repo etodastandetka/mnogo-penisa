@@ -21,7 +21,12 @@ export const AuthPage: React.FC = () => {
       const result = await authApi.login(credentials);
       
       // Сохраняем данные в store
-      setUser(result.user);
+      setUser({
+        id: result.user.id.toString(),
+        name: result.user.name,
+        phone: '', // Будет заполнено позже
+        email: result.user.email
+      });
       
       // Сохраняем токен в localStorage
       localStorage.setItem('token', result.access_token);
@@ -56,7 +61,12 @@ export const AuthPage: React.FC = () => {
       const result = await authApi.register(userData);
       
       // Сохраняем данные в store
-      setUser(result.user);
+      setUser({
+        id: result.user.id.toString(),
+        name: result.user.name,
+        phone: userData.phone,
+        email: result.user.email
+      });
       
       // Сохраняем токен в localStorage
       localStorage.setItem('token', result.access_token);
@@ -81,9 +91,9 @@ export const AuthPage: React.FC = () => {
 
       <div className="relative z-10 w-full max-w-md">
         {isLogin ? (
-          <LoginForm onSubmit={handleLogin} loading={loading} error={error} />
+          <LoginForm onLogin={handleLogin} onSwitchToRegister={() => setIsLogin(false)} loading={loading} error={error} />
         ) : (
-          <RegisterForm onSubmit={handleRegister} loading={loading} error={error} />
+          <RegisterForm onRegister={handleRegister} onSwitchToLogin={() => setIsLogin(true)} loading={loading} error={error} />
         )}
         <div className="mt-6 text-center">
           <button
