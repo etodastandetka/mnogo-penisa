@@ -151,6 +151,22 @@ const initDatabase = () => {
       }
     });
 
+    // Миграция: переименование delivery_address в customer_address
+    db.run(`ALTER TABLE orders ADD COLUMN customer_address TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column name')) {
+        console.log('Column customer_address already exists or error:', err.message);
+      } else {
+        // Если колонка была добавлена, копируем данные из delivery_address
+        db.run(`UPDATE orders SET customer_address = delivery_address WHERE delivery_address IS NOT NULL`, (updateErr) => {
+          if (updateErr) {
+            console.log('Error copying data from delivery_address:', updateErr.message);
+          } else {
+            console.log('Data copied from delivery_address to customer_address');
+          }
+        });
+      }
+    });
+
     // Таблица банковских настроек
     db.run(`CREATE TABLE IF NOT EXISTS bank_settings (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -933,9 +949,24 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
                   });
         
             resolve({
-              ...order,
-              items: items || [],
-          items_summary: items_summary
+              id: order.id,
+              orderNumber: order.order_number,
+              customerName: order.customer_name,
+              customerPhone: order.customer_phone,
+              deliveryAddress: order.customer_address,
+              totalAmount: order.total_amount,
+              status: order.status,
+              paymentMethod: order.payment_method,
+              paymentStatus: order.payment_proof ? 'paid' : 'pending',
+              createdAt: order.created_at,
+              items: items ? items.map((item: any) => ({
+                id: item.id,
+                productName: item.product_name || 'Неизвестный товар',
+                quantity: item.quantity,
+                price: item.price,
+                totalPrice: item.price * item.quantity
+              })) : [],
+              items_summary: items_summary
             });
         });
       });
