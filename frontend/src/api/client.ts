@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Создаем экземпляр axios с базовой конфигурацией
 const client = axios.create({
-  baseURL: 'https://45.144.221.227:3443/api',
+  baseURL: 'http://45.144.221.227:3001/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
