@@ -87,6 +87,7 @@ export const CheckoutPage: React.FC = () => {
     }
   };
 
+  // Force HTTPS for all API calls
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
