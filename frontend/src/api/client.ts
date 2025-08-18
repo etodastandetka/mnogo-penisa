@@ -2,12 +2,8 @@ import axios from 'axios';
 
 // Определяем базовый URL в зависимости от среды
 const getBaseURL = () => {
-  // Принудительно используем HTTPS для продакшена
-  if (import.meta.env.PROD || window.location.hostname !== 'localhost') {
-    return 'https://45.144.221.227:3443/api';
-  }
-  // В разработке используем HTTP
-  return 'https://45.144.221.227:3443/api';
+  // Временно используем HTTP для всех сред
+  return 'http://45.144.221.227:3001/api';
 };
 
 // Создаем экземпляр axios с базовой конфигурацией

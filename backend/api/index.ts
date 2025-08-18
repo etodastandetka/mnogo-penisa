@@ -506,6 +506,146 @@ app.get('/api/orders', authenticateToken, (req: any, res) => {
   });
 });
 
+// Гостевые заказы (без авторизации)
+app.post('/api/orders/guest', (req: any, res) => {
+  try {
+    const { customer, items, total, paymentMethod, notes } = req.body;
+
+    if (!customer || !items || !total || !paymentMethod) {
+      return res.status(400).json({
+        success: false,
+        message: 'Не все обязательные поля заполнены'
+      });
+    }
+
+    const orderNumber = 'MR-GUEST-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    // Объединяем комментарии: customer.notes + общие notes
+    const combinedNotes = [customer.notes, notes].filter(note => note && note.trim()).join(' | ');
+
+    const sql = `
+      INSERT INTO orders (
+        order_number, user_id, customer_name, customer_phone,
+        delivery_address, total_amount, status, payment_method, notes
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    const params = [
+      orderNumber, null, customer.name, customer.phone,
+      customer.address || '', total, 'pending', paymentMethod, combinedNotes || ''
+    ];
+
+    db.run(sql, params, function(err) {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: 'Ошибка создания заказа',
+          error: err.message
+        });
+      }
+
+      const orderId = this.lastID;
+      let itemsAdded = 0;
+      let totalItems = items.length;
+
+      items.forEach((item: any, index: number) => {
+        db.run(`
+          INSERT INTO order_items (order_id, product_id, quantity, price)
+          VALUES (?, ?, ?, ?)
+        `, [orderId, item.product.id, item.quantity, item.product.price], (err) => {
+          if (err) {
+            console.error('Ошибка добавления товара в заказ:', err);
+          } else {
+            itemsAdded++;
+          }
+
+          if (itemsAdded === totalItems) {
+            // Отправляем уведомление в Telegram
+            sendNewOrderNotification({
+              id: orderId,
+              orderNumber,
+              customerName: customer.name,
+              customerPhone: customer.phone,
+              deliveryAddress: customer.address,
+              totalAmount: total,
+              status: 'pending',
+              createdAt: new Date().toISOString(),
+              items: items
+            } as any).catch(console.error);
+
+            res.json({
+              success: true,
+              message: 'Заказ успешно создан',
+              data: {
+                orderId,
+                orderNumber
+              }
+            });
+          }
+        });
+      });
+
+      if (totalItems === 0) {
+        res.json({
+          success: true,
+          message: 'Заказ успешно создан',
+          data: {
+            orderId,
+            orderNumber
+          }
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Ошибка создания гостевого заказа:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Внутренняя ошибка сервера'
+    });
+  }
+});
+
+// Получение гостевого заказа по номеру
+app.get('/api/orders/guest/:orderNumber', (req, res) => {
+  const { orderNumber } = req.params;
+
+  db.get(`
+    SELECT o.*
+    FROM orders o
+    WHERE o.order_number = ? AND o.user_id IS NULL
+  `, [orderNumber], (err, order) => {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка поиска заказа', error: err.message });
+    }
+    if (!order) {
+      return res.status(404).json({ message: 'Заказ не найден' });
+    }
+    
+    // Загружаем детали товаров для заказа
+    console.log('Loading items for guest order:', (order as any).id);
+    
+    db.all('SELECT * FROM order_items WHERE order_id = ?', [(order as any).id], (err, items) => {
+      if (err) {
+        console.error('Error loading items for guest order:', (order as any).id, err);
+        return res.json({
+          ...(order as any),
+          items: [],
+          items_summary: 'Товары не найдены'
+        });
+      }
+      
+      console.log('Items for guest order:', (order as any).id, items);
+      const orderWithItems = {
+        ...(order as any),
+        items: items || [],
+        items_summary: items && items.length > 0 ? 
+          items.map((item: any) => item.product_name + ' x' + item.quantity).join(', ') : 
+          'Товары не найдены'
+      };
+      
+      res.json(orderWithItems);
+    });
+  });
+});
+
 // Статус заказа по номеру
 app.get('/api/orders/status/:orderNumber', (req, res) => {
   const { orderNumber } = req.params;
