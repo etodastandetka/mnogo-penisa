@@ -97,11 +97,11 @@ export const AdminProductsPage: React.FC = () => {
   };
 
   const handleFileSelect = (file: File) => {
-    // Проверяем размер файла (максимум 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Размер файла не должен превышать 5MB');
-      return;
-    }
+      // Проверяем размер файла (максимум 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Размер файла не должен превышать 5MB');
+        return;
+      }
 
     // Проверяем тип файла
     if (!file.type.startsWith('image/')) {
@@ -109,12 +109,12 @@ export const AdminProductsPage: React.FC = () => {
       return;
     }
 
-    setSelectedImage(file);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setImagePreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -698,7 +698,7 @@ export const AdminProductsPage: React.FC = () => {
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
                     >
-                      <input
+                  <input
                         type="file"
                         accept="image/*"
                         onChange={handleImageSelect}

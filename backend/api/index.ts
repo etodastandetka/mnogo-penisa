@@ -80,14 +80,14 @@ let db: sqlite3.Database;
 // Инициализация базы данных
 const initDatabase = () => {
   try {
-    // Создаем папку data если её нет
-    if (!fs.existsSync('./data')) {
-      fs.mkdirSync('./data', { recursive: true });
-    }
-    
-    // Используем файловую базу данных
+  // Создаем папку data если её нет
+  if (!fs.existsSync('./data')) {
+    fs.mkdirSync('./data', { recursive: true });
+  }
+  
+  // Используем файловую базу данных
     console.log('Создание файловой базы данных');
-    db = new sqlite3.Database('./data/mnogo_rolly.db');
+  db = new sqlite3.Database('./data/mnogo_rolly.db');
     console.log('Файловая база данных создана успешно');
   } catch (error) {
     console.error('Критическая ошибка при инициализации базы данных:', error);
@@ -232,7 +232,7 @@ const initDatabase = () => {
 
 // Инициализируем базу данных при запуске
 try {
-  initDatabase();
+initDatabase();
   console.log('База данных инициализирована успешно');
 } catch (error) {
   console.error('Ошибка инициализации базы данных:', error);
@@ -803,24 +803,24 @@ app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
       console.log('Найден заказ для обновления:', order);
       
       // Теперь обновляем заказ
-      db.run(
+    db.run(
         'UPDATE orders SET payment_proof = ?, payment_proof_date = CURRENT_TIMESTAMP WHERE id = ?',
         [fileUrl, (order as any).id],
-        function(err) {
-          if (err) {
+      function(err) {
+        if (err) {
             console.error('Ошибка обновления базы:', err);
-            return res.status(500).json({ success: false, error: 'Ошибка сохранения чека в базе данных' });
-          }
+          return res.status(500).json({ success: false, error: 'Ошибка сохранения чека в базе данных' });
+        }
           
           console.log('Заказ обновлен успешно:', { changes: this.changes, fileUrl, orderId: (order as any).id });
-          
-          res.json({ 
-            success: true, 
-            message: 'Чек успешно загружен',
-            fileUrl: fileUrl
-          });
-        }
-      );
+        
+        res.json({ 
+          success: true, 
+          message: 'Чек успешно загружен',
+          fileUrl: fileUrl
+        });
+      }
+    );
     });
   } catch (error) {
     console.error('Ошибка сохранения файла:', error);
@@ -973,11 +973,11 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
                     items_count: items ? items.length : 0 
                   });
         
-        resolve({
-          ...order,
-          items: items || [],
+            resolve({
+              ...order,
+              items: items || [],
           items_summary: items_summary
-        });
+            });
         });
       });
     });
@@ -985,7 +985,7 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
     Promise.all(ordersWithItemsPromises)
       .then((ordersWithItems) => {
         console.log('Sending response with', ordersWithItems.length, 'orders');
-        res.json(ordersWithItems);
+    res.json(ordersWithItems);
       })
       .catch((error) => {
         console.error('Error processing orders:', error);
@@ -1171,23 +1171,23 @@ app.put('/api/admin/products/:id', authenticateToken, requireAdmin, (req, res) =
   });
 
   // Обновляем товар
-  db.run(`
-    UPDATE products 
-    SET name = ?, description = ?, price = ?, image_url = ?, category = ?, is_popular = ?, is_available = ?
-    WHERE id = ?
+    db.run(`
+      UPDATE products 
+      SET name = ?, description = ?, price = ?, image_url = ?, category = ?, is_popular = ?, is_available = ?
+      WHERE id = ?
   `, [name, description, price, imageUrl, category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0, id], function(err) {
-    if (err) {
+      if (err) {
       console.error('Ошибка обновления товара:', err);
-      return res.status(500).json({ message: 'Ошибка обновления товара' });
-    }
+        return res.status(500).json({ message: 'Ошибка обновления товара' });
+      }
     
     console.log('Товар обновлен успешно:', { id, imageUrl, isAvailable: isAvailableValue, isPopular: isPopularValue });
-    
-    res.json({
-      message: 'Товар обновлен успешно',
-      imageUrl
+      
+      res.json({
+        message: 'Товар обновлен успешно',
+        imageUrl
+      });
     });
-  });
 });
 
 // Удаление товара
@@ -1730,5 +1730,5 @@ if (require.main === module) {
   app.listen(Number(PORT), '0.0.0.0', () => {
     console.log('🌐 HTTP Server started on port:', PORT);
     console.log('🔗 URL: http://45.144.221.227:' + PORT);
-  });
+    });
 }
