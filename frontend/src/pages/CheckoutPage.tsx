@@ -177,10 +177,8 @@ export const CheckoutPage: React.FC = () => {
   };
 
   const handlePaymentComplete = () => {
-    clearCart();
     setShowPayment(false);
-    setOrderId(''); // Очищаем orderId после завершения
-    alert('Заказ успешно оплачен и оформлен!');
+    alert('Чек об оплате успешно загружен! Теперь можете оформить заказ.');
   };
 
   // Функции для управления корзиной
@@ -526,10 +524,7 @@ export const CheckoutPage: React.FC = () => {
             setShowProofUpload(false);
             // Обновляем URL изображения в форме
             setCustomerData(prev => ({ ...prev, paymentProof: proofUrl }));
-            // Очищаем корзину и orderId после успешной загрузки чека
-            clearCart();
-            setOrderId('');
-            alert('Чек об оплате успешно загружен! Заказ завершен.');
+            alert('Чек об оплате успешно загружен! Теперь можете оформить заказ.');
           }}
         />
       )}
