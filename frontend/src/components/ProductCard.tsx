@@ -47,74 +47,74 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+    <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 h-full flex flex-col">
       <div className="relative overflow-hidden rounded-t-xl">
         <img
           src={getImageUrl(product.image_url || product.image)}
           alt={product.name}
-          className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+          className="w-full h-40 sm:h-48 object-cover group-hover:scale-110 transition-transform duration-300"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.src = 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
           }}
         />
         {product.isPopular && (
-          <div className="absolute top-3 left-3">
-            <Badge variant="primary" className="bg-red-500 text-white">
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+            <Badge variant="primary" className="bg-red-500 text-white text-xs sm:text-sm">
               Популярное
             </Badge>
           </div>
         )}
         {product.is_available === false && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <Badge variant="secondary" className="bg-gray-600 text-white">
+            <Badge variant="secondary" className="bg-gray-600 text-white text-xs sm:text-sm">
               Недоступно
             </Badge>
           </div>
         )}
       </div>
       
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
+      <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
+        <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-red-600 transition-colors text-sm sm:text-base line-clamp-2">
           {product.name}
         </h3>
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+        <p className="text-gray-600 text-xs sm:text-sm mb-3 line-clamp-2 flex-1">
           {product.description}
         </p>
         
-        <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-red-600">
+        <div className="flex items-center justify-between mt-auto">
+          <span className="text-lg sm:text-xl font-bold text-red-600">
             {formatPrice(product.price)}
           </span>
           
           {quantity > 0 ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => handleUpdateQuantity(quantity - 1)}
-                className="w-8 h-8 p-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 p-0"
               >
-                <Minus className="w-4 h-4" />
+                <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
-              <span className="font-semibold min-w-[2rem] text-center">{quantity}</span>
+              <span className="font-semibold min-w-[1.5rem] sm:min-w-[2rem] text-center text-sm sm:text-base">{quantity}</span>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => handleUpdateQuantity(quantity + 1)}
-                className="w-8 h-8 p-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 p-0"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
             </div>
           ) : (
             <Button 
               size="sm"
               onClick={handleAddToCart}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white w-7 h-7 sm:w-8 sm:h-8 p-0"
               disabled={product.is_available === false}
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
             </Button>
           )}
         </div>

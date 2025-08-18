@@ -25,17 +25,26 @@ export const MenuPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setError(null);
         console.log('Загружаем товары для меню...');
         const productsData = await productsApi.getAll();
         console.log('Загружено товаров:', productsData.length);
-        setProducts(productsData);
-        setFilteredProducts(productsData);
+        
+        if (productsData && Array.isArray(productsData)) {
+          setProducts(productsData);
+          setFilteredProducts(productsData);
+        } else {
+          console.error('Неверный формат данных:', productsData);
+          setError('Ошибка загрузки данных');
+        }
       } catch (error) {
         console.error('Ошибка загрузки продуктов:', error);
+        setError('Не удалось загрузить меню');
       } finally {
         setLoading(false);
       }
@@ -89,25 +98,39 @@ export const MenuPage: React.FC = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Попробовать снова
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Наше меню</h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Наше меню</h1>
           <Input
             type="text"
             placeholder="Поиск блюд..."
             value={searchQuery}
             onChange={handleSearchChange}
-            className="max-w-md"
+            className="max-w-md w-full"
           />
         </div>
 
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 sm:pb-0">
             <Button
               variant={selectedCategory === 'all' ? 'primary' : 'outline'}
               onClick={() => handleCategoryChange('all')}
+              className="whitespace-nowrap"
             >
               Все
             </Button>
@@ -116,6 +139,7 @@ export const MenuPage: React.FC = () => {
                 key={category}
                 variant={selectedCategory === category ? 'primary' : 'outline'}
                 onClick={() => handleCategoryChange(category)}
+                className="whitespace-nowrap"
               >
                 {getCategoryName(category)}
               </Button>
@@ -123,13 +147,13 @@ export const MenuPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-
-        {filteredProducts.length === 0 && (
+        {filteredProducts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
           <div className="text-center py-12">
             <p className="text-gray-500 text-base sm:text-lg">
               {searchQuery ? 'Ничего не найдено по вашему запросу' : 'В данной категории пока нет блюд'}

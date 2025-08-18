@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUserStore } from '../store/userStore';
 import { ordersApi } from '../api/orders';
-import { useState, useEffect } from 'react';
 
 interface PageWrapperProps {
   children: React.ReactNode;
@@ -31,7 +30,7 @@ export const PageWrapper: React.FC<PageWrapperProps> = ({ children }) => {
   }, [user]);
 
   return (
-    <div className={`min-h-screen ${hasActiveOrder ? 'pt-20 sm:pt-16' : ''}`}>
+    <div className={`min-h-screen ${hasActiveOrder ? 'pt-16 sm:pt-20' : ''}`}>
       {children}
     </div>
   );

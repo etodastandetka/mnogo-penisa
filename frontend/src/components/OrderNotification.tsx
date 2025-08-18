@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, X, QrCode } from 'lucide-react';
-import { Button } from './ui/Button';
-import { Badge } from './ui/Badge';
+import { X, Package, Clock } from 'lucide-react';
 import { useUserStore } from '../store/userStore';
-
 import { ordersApi } from '../api/orders';
 
-interface Order {
+interface OrderNotificationProps {
+  onClose: () => void;
+}
+
+interface OrderNotificationOrder {
   id: string;
   orderNumber: string;
   status: string;
@@ -19,16 +20,11 @@ interface Order {
   createdAt: string;
 }
 
-interface OrderNotificationProps {
-  onClose: () => void;
-}
-
 export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose }) => {
   const navigate = useNavigate();
   const { user } = useUserStore();
-  const [latestOrder, setLatestOrder] = useState<Order | null>(null);
+  const [latestOrder, setLatestOrder] = useState<OrderNotificationOrder | null>(null);
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     const fetchLatestOrder = async () => {
@@ -100,7 +96,7 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
       case 'preparing':
         return 'Готовится';
       case 'delivering':
-        return 'Доставляется';
+        return 'В доставке';
       case 'completed':
         return 'Завершен';
       case 'cancelled':
@@ -110,72 +106,76 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
     }
   };
 
-  const handleViewDetails = () => {
-    if (user) {
-      navigate('/profile');
-    } else {
-      onClose();
-    }
-  };
-
-  if (loading || !latestOrder) {
-    return null;
+  if (loading) {
+    return (
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div className="flex items-center justify-between p-3 sm:p-4">
+          <div className="flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+            <span className="text-sm sm:text-base text-gray-600">Загрузка заказа...</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+        </div>
+      </div>
+    );
   }
 
-  if (latestOrder.status === 'delivered' || latestOrder.status === 'cancelled') {
+  if (!latestOrder) {
     return null;
   }
 
   return (
-    <>
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <div className="flex items-center space-x-2">
-                <Package className="w-5 h-5 text-red-600" />
-                <span className="font-medium text-gray-900">Статус заказа</span>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3">
-                <span className="text-sm text-gray-600">
-                  Заказ {latestOrder.orderNumber}
-                </span>
-                <Badge className={`${getStatusColor(latestOrder.status)} flex items-center space-x-1 w-fit`}>
-                  {getStatusIcon(latestOrder.status)}
-                  <span className="hidden sm:inline">{getStatusText(latestOrder.status)}</span>
-                  <span className="sm:hidden">{getStatusText(latestOrder.status).split(' ')[0]}</span>
-                </Badge>
-                <span className="text-sm font-medium text-gray-900">
-                  {latestOrder.totalAmount} сом
-                </span>
-              </div>
+    <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+      <div className="flex items-center justify-between p-3 sm:p-4">
+        <div className="flex items-center space-x-3 flex-1 min-w-0">
+          <div className="flex-shrink-0">
+            <Package className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center space-x-2 mb-1">
+              <span className="text-xs sm:text-sm font-medium text-gray-900 truncate">
+                Заказ #{latestOrder.orderNumber}
+              </span>
+              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(latestOrder.status)}`}>
+                <span className="mr-1">{getStatusIcon(latestOrder.status)}</span>
+                <span className="hidden sm:inline">{getStatusText(latestOrder.status)}</span>
+                <span className="sm:hidden">{getStatusText(latestOrder.status).split(' ')[0]}</span>
+              </span>
             </div>
-            
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <Button
-                onClick={handleViewDetails}
-                size="sm"
-                className="bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm"
-              >
-                <span className="hidden sm:inline">Подробнее</span>
-                <span className="sm:hidden">Детали</span>
-              </Button>
-              <Button
-                onClick={onClose}
-                variant="outline"
-                size="sm"
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-4 h-4" />
-                <span className="hidden sm:inline ml-1">Закрыть</span>
-              </Button>
+            <div className="flex items-center space-x-1 text-xs sm:text-sm text-gray-600">
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="truncate">
+                {new Date(latestOrder.createdAt).toLocaleDateString('ru-RU', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
             </div>
           </div>
         </div>
+        <div className="flex items-center space-x-2 flex-shrink-0">
+          <button
+            onClick={() => navigate('/profile')}
+            className="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium transition-colors"
+          >
+            <span className="hidden sm:inline">Подробнее</span>
+            <span className="sm:hidden">→</span>
+          </button>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+        </div>
       </div>
-
-
-    </>
+    </div>
   );
 };
