@@ -79,7 +79,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
   };
 
-  const imageUrl = getImageUrl(product.image_url || product.image);
+  const imageUrl = getImageUrl(product.image_url || product.image || '');
 
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 h-full flex flex-col border border-gray-200 bg-white">

@@ -222,7 +222,7 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
                        Файл выбран: {selectedFile?.name}
                      </p>
                      <p className="text-xs text-gray-500">
-                       Размер: {Math.round(selectedFile?.size / 1024)} KB → Сжато для мобильных
+                       Размер: {Math.round((selectedFile?.size || 0) / 1024)} KB → Сжато для мобильных
                      </p>
                   </div>
                 ) : (
