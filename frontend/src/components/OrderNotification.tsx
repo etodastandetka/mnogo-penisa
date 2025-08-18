@@ -4,7 +4,7 @@ import { Package, X, QrCode } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 import { useUserStore } from '../store/userStore';
-import { PaymentQR } from './PaymentQR';
+
 import { ordersApi } from '../api/orders';
 
 interface Order {
@@ -28,7 +28,7 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
   const { user } = useUserStore();
   const [latestOrder, setLatestOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showPayment, setShowPayment] = useState(false);
+
 
   useEffect(() => {
     const fetchLatestOrder = async () => {
@@ -122,7 +122,7 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
     return null;
   }
 
-  if (latestOrder.status === 'completed' || latestOrder.status === 'cancelled') {
+  if (latestOrder.status === 'delivered' || latestOrder.status === 'cancelled') {
     return null;
   }
 
@@ -130,20 +130,21 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
     <>
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
               <div className="flex items-center space-x-2">
                 <Package className="w-5 h-5 text-red-600" />
                 <span className="font-medium text-gray-900">Статус заказа</span>
               </div>
               
-              <div className="flex items-center space-x-3">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3">
                 <span className="text-sm text-gray-600">
                   Заказ {latestOrder.orderNumber}
                 </span>
-                <Badge className={`${getStatusColor(latestOrder.status)} flex items-center space-x-1`}>
+                <Badge className={`${getStatusColor(latestOrder.status)} flex items-center space-x-1 w-fit`}>
                   {getStatusIcon(latestOrder.status)}
-                  <span>{getStatusText(latestOrder.status)}</span>
+                  <span className="hidden sm:inline">{getStatusText(latestOrder.status)}</span>
+                  <span className="sm:hidden">{getStatusText(latestOrder.status).split(' ')[0]}</span>
                 </Badge>
                 <span className="text-sm font-medium text-gray-900">
                   {latestOrder.totalAmount} сом
@@ -151,23 +152,14 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
               </div>
             </div>
             
-            <div className="flex items-center space-x-3">
-              {latestOrder.status === 'pending' && (
-                <Button
-                  onClick={() => setShowPayment(true)}
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <QrCode className="w-4 h-4 mr-1" />
-                  Оплатить
-                </Button>
-              )}
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <Button
                 onClick={handleViewDetails}
                 size="sm"
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm"
               >
-                Подробнее
+                <span className="hidden sm:inline">Подробнее</span>
+                <span className="sm:hidden">Детали</span>
               </Button>
               <Button
                 onClick={onClose}
@@ -176,26 +168,14 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X className="w-4 h-4" />
-                Закрыть
+                <span className="hidden sm:inline ml-1">Закрыть</span>
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Модальное окно оплаты */}
-      {showPayment && latestOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <PaymentQR
-            order={latestOrder}
-            onPaymentComplete={() => {
-              setShowPayment(false);
-              onClose();
-            }}
-            onClose={() => setShowPayment(false)}
-          />
-        </div>
-      )}
+
     </>
   );
 };

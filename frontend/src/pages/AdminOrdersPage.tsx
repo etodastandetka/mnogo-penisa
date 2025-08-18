@@ -444,6 +444,67 @@ export const AdminOrdersPage: React.FC = () => {
                         </div>
                         
                         <div className="flex items-center space-x-2">
+                          {/* Быстрые кнопки изменения статуса */}
+                          {order.status === 'pending' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleUpdateOrderStatus(order.id, 'preparing')}
+                              disabled={updatingOrderId === order.id}
+                              className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                            >
+                              {updatingOrderId === order.id ? '...' : 'Готовится'}
+                            </Button>
+                          )}
+                          
+                          {order.status === 'preparing' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleUpdateOrderStatus(order.id, 'ready')}
+                              disabled={updatingOrderId === order.id}
+                              className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                            >
+                              {updatingOrderId === order.id ? '...' : 'Готов'}
+                            </Button>
+                          )}
+                          
+                          {order.status === 'ready' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleUpdateOrderStatus(order.id, 'delivering')}
+                              disabled={updatingOrderId === order.id}
+                              className="bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
+                            >
+                              {updatingOrderId === order.id ? '...' : 'В доставке'}
+                            </Button>
+                          )}
+                          
+                          {order.status === 'delivering' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleUpdateOrderStatus(order.id, 'delivered')}
+                              disabled={updatingOrderId === order.id}
+                              className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                            >
+                              {updatingOrderId === order.id ? '...' : 'Доставлен'}
+                            </Button>
+                          )}
+                          
+                          {(order.status === 'pending' || order.status === 'preparing' || order.status === 'ready') && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleUpdateOrderStatus(order.id, 'cancelled')}
+                              disabled={updatingOrderId === order.id}
+                              className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+                            >
+                              {updatingOrderId === order.id ? '...' : 'Отменить'}
+                            </Button>
+                          )}
+                          
                           <Button
                             variant="outline"
                             size="sm"

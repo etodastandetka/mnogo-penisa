@@ -32,7 +32,7 @@ export const Navigation: React.FC = () => {
           
           if (orders.length > 0) {
             const latestOrder = orders[0];
-            const hasActiveOrder = latestOrder.status !== 'completed' && latestOrder.status !== 'cancelled';
+            const hasActiveOrder = latestOrder.status !== 'delivered' && latestOrder.status !== 'cancelled';
             setShowOrderNotification(hasActiveOrder);
           }
         } catch (error) {
@@ -40,7 +40,7 @@ export const Navigation: React.FC = () => {
         }
       } else if (guestOrders.length > 0) {
         const latestOrder = guestOrders[0];
-        const hasActiveOrder = latestOrder.status !== 'completed' && latestOrder.status !== 'cancelled';
+        const hasActiveOrder = latestOrder.status !== 'delivered' && latestOrder.status !== 'cancelled';
         setShowOrderNotification(hasActiveOrder);
       }
     };
