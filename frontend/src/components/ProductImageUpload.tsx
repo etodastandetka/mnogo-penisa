@@ -64,39 +64,28 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
     setUploading(true);
     
     try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('type', 'product');
-
-      console.log('Отправляем фото товара:', {
-        fileName: selectedFile.name,
-        fileSize: selectedFile.size,
-        fileType: selectedFile.type
+      // Конвертируем изображение в base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
       });
-
-      const response = await fetch(`http://localhost:3001/api/upload/product-image`, {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Фото товара успешно загружено:', result);
-        setUploaded(true);
-        onImageUpload(result.fileUrl);
-        
-        // Автоматически закрываем через 2 секунды
-        setTimeout(() => {
-          onClose();
-        }, 2000);
-      } else {
-        const errorText = await response.text();
-        console.error('Ошибка загрузки фото:', response.status, errorText);
-        throw new Error(`Ошибка загрузки: ${response.status} - ${errorText}`);
-      }
+      
+      reader.readAsDataURL(selectedFile);
+      const imageUrl = await base64Promise;
+      
+      console.log('Фото конвертировано в base64, размер:', imageUrl.length);
+      
+      setUploaded(true);
+      onImageUpload(imageUrl);
+      
+      // Автоматически закрываем через 2 секунды
+      setTimeout(() => {
+        onClose();
+      }, 2000);
     } catch (error) {
-      console.error('Ошибка загрузки фото:', error);
-      alert('Ошибка загрузки фото. Попробуйте еще раз.');
+      console.error('Ошибка конвертации фото:', error);
+      alert('Ошибка при обработке фото. Попробуйте еще раз.');
     } finally {
       setUploading(false);
     }

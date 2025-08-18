@@ -42,7 +42,6 @@ export const AdminProductsPage: React.FC = () => {
     description: '',
     price: 0,
     category: '',
-    image_url: '',
     is_available: true
   });
   const [addForm, setAddForm] = useState({
@@ -50,7 +49,6 @@ export const AdminProductsPage: React.FC = () => {
     description: '',
     price: 0,
     category: '',
-    image_url: '',
     is_available: true
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -185,21 +183,38 @@ export const AdminProductsPage: React.FC = () => {
     }
 
     try {
-      // Если выбрано изображение, сжимаем его
-      let imageUrl = addForm.image_url;
+      // Если выбрано изображение, конвертируем в base64
+      let imageUrl = '';
       if (selectedImage) {
         try {
-          imageUrl = await compressImage(selectedImage);
+          // Конвертируем изображение в base64
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+          });
+          
+          reader.readAsDataURL(selectedImage);
+          imageUrl = await base64Promise;
+          
+          console.log('Фото конвертировано в base64, размер:', imageUrl.length);
         } catch (err) {
-          alert('Ошибка при обработке изображения');
+          console.error('Ошибка конвертации фото:', err);
+          alert('Ошибка при обработке фото. Попробуйте еще раз.');
           return;
         }
       }
 
       const productData = {
-        ...addForm,
-        image_url: imageUrl
+        name: addForm.name,
+        description: addForm.description,
+        price: addForm.price,
+        category: addForm.category,
+        image_url: imageUrl,
+        is_available: addForm.is_available
       };
+
+      console.log('Создаем товар с данными:', productData);
 
       const result = await createProduct(productData);
       
@@ -217,13 +232,13 @@ export const AdminProductsPage: React.FC = () => {
         description: '',
         price: 0,
         category: '',
-        image_url: '',
         is_available: true
       });
       setSelectedImage(null);
       setImagePreview('');
       alert('Товар успешно добавлен!');
     } catch (err) {
+      console.error('Ошибка создания товара:', err);
       alert('Ошибка при добавлении товара');
     }
   };
@@ -235,7 +250,6 @@ export const AdminProductsPage: React.FC = () => {
       description: '',
       price: 0,
       category: '',
-      image_url: '',
       is_available: true
     });
     setSelectedImage(null);
@@ -249,7 +263,6 @@ export const AdminProductsPage: React.FC = () => {
       description: product.description,
       price: product.price,
       category: product.category,
-      image_url: product.image_url || '',
       is_available: product.is_available
     });
     setShowEditModal(true);
@@ -259,20 +272,55 @@ export const AdminProductsPage: React.FC = () => {
     if (!editingProduct) return;
 
     try {
-              await updateProduct(String(editingProduct.id), editForm);
+      console.log('Отправляем данные для обновления:', editForm);
+      
+      // Если выбрано новое изображение, конвертируем в base64
+      let imageUrl = editingProduct.image_url; // Сохраняем текущее изображение по умолчанию
+      if (selectedImage) {
+        try {
+          // Конвертируем изображение в base64
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+          });
+          
+          reader.readAsDataURL(selectedImage);
+          imageUrl = await base64Promise;
+          
+          console.log('Новое фото конвертировано в base64, размер:', imageUrl.length);
+        } catch (err) {
+          console.error('Ошибка конвертации фото:', err);
+          alert('Ошибка при обработке фото. Попробуйте еще раз.');
+          return;
+        }
+      }
+      
+      // Создаем объект с данными для обновления
+      const updateData = {
+        ...editForm,
+        image_url: imageUrl
+      };
+      
+      console.log('Отправляем данные для обновления:', updateData);
+      
+      await updateProduct(String(editingProduct.id), updateData);
       
       // Обновляем список товаров
       const updatedProducts = products.map(p => 
         p.id === editingProduct.id 
-          ? { ...p, ...editForm }
+          ? { ...p, ...editForm, image_url: imageUrl }
           : p
       );
       setProducts(updatedProducts);
       
       setShowEditModal(false);
       setEditingProduct(null);
+      setSelectedImage(null);
+      setImagePreview('');
       alert('Товар успешно обновлен!');
     } catch (err) {
+      console.error('Ошибка обновления товара:', err);
       alert('Ошибка при обновлении товара');
     }
   };
@@ -285,9 +333,10 @@ export const AdminProductsPage: React.FC = () => {
       description: '',
       price: 0,
       category: '',
-      image_url: '',
       is_available: true
     });
+    setSelectedImage(null);
+    setImagePreview('');
   };
 
   const handleImageUpload = (product: Product) => {
@@ -295,21 +344,42 @@ export const AdminProductsPage: React.FC = () => {
     setShowImageUploadModal(true);
   };
 
-  const handleImageUploadComplete = (imageUrl: string) => {
+  const handleImageUploadComplete = async (imageUrl: string) => {
     if (currentProductForImage) {
-      // Обновляем товар с новым фото
-      const updatedProducts = products.map(p => 
-        p.id === currentProductForImage.id 
-          ? { ...p, image_url: imageUrl }
-          : p
-      );
-      setProducts(updatedProducts);
-      
-      // Обновляем в базе данных
-      updateProduct(String(currentProductForImage.id), {
-        ...currentProductForImage,
-        image_url: imageUrl
-      });
+      try {
+        console.log('Обновляем товар с новым фото:', { 
+          productId: currentProductForImage.id, 
+          imageUrl 
+        });
+        
+        // Создаем объект с обновленными данными
+        const updatedProductData = {
+          name: currentProductForImage.name,
+          description: currentProductForImage.description,
+          price: currentProductForImage.price,
+          category: currentProductForImage.category,
+          image_url: imageUrl,
+          is_available: currentProductForImage.is_available
+        };
+        
+        console.log('Отправляем данные для обновления:', updatedProductData);
+        
+        // Обновляем в базе данных
+        await updateProduct(String(currentProductForImage.id), updatedProductData);
+        
+        // Обновляем товар в списке
+        const updatedProducts = products.map(p => 
+          p.id === currentProductForImage.id 
+            ? { ...p, image_url: imageUrl }
+            : p
+        );
+        setProducts(updatedProducts);
+        
+        console.log('Товар успешно обновлен с новым фото');
+      } catch (error) {
+        console.error('Ошибка обновления товара:', error);
+        alert('Ошибка обновления товара. Попробуйте еще раз.');
+      }
     }
     setShowImageUploadModal(false);
     setCurrentProductForImage(null);
@@ -593,18 +663,80 @@ export const AdminProductsPage: React.FC = () => {
                   </select>
                 </div>
 
-                {/* URL изображения */}
+                {/* Загрузка изображения */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    URL изображения
+                    Изображение товара
                   </label>
-                  <input
-                    type="url"
-                    value={editForm.image_url}
-                    onChange={(e) => setEditForm({...editForm, image_url: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                    placeholder="https://example.com/image.jpg"
-                  />
+                  <p className="text-xs text-gray-500 mb-3">
+                    Максимальный размер файла: 5MB. Поддерживаемые форматы: JPG, PNG, GIF
+                  </p>
+                  
+                  {/* Текущее изображение */}
+                  {editingProduct?.image_url && (
+                    <div className="mb-3">
+                      <p className="text-sm text-gray-600 mb-2">Текущее изображение:</p>
+                      <img
+                        src={editingProduct.image_url}
+                        alt="Текущее изображение"
+                        className="w-24 h-24 object-cover rounded-lg border border-gray-300"
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="space-y-3">
+                    {/* Drag & Drop зона */}
+                    <div 
+                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-red-400 transition-colors"
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        className="hidden"
+                        id="edit-image-upload"
+                      />
+                      <label
+                        htmlFor="edit-image-upload"
+                        className="cursor-pointer flex flex-col items-center"
+                      >
+                        <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <span className="text-sm text-gray-600">
+                          {selectedImage ? 'Файл выбран' : 'Нажмите для выбора файла'}
+                        </span>
+                        <span className="text-xs text-gray-500 mt-1">
+                          или перетащите файл сюда
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Предварительный просмотр */}
+                    {imagePreview && (
+                      <div className="relative">
+                        <img
+                          src={imagePreview}
+                          alt="Предварительный просмотр"
+                          className="w-full max-w-md h-auto rounded-lg border border-gray-300"
+                        />
+                        <button
+                          onClick={() => {
+                            setSelectedImage(null);
+                            setImagePreview('');
+                          }}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Статус */}
@@ -786,19 +918,7 @@ export const AdminProductsPage: React.FC = () => {
                       </div>
                     )}
 
-                    {/* URL изображения (альтернатива) */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">
-                        Или введите URL изображения
-                      </label>
-                      <input
-                        type="url"
-                        value={addForm.image_url}
-                        onChange={(e) => setAddForm({...addForm, image_url: e.target.value})}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                        placeholder="https://example.com/image.jpg"
-                      />
-                    </div>
+
                   </div>
                 </div>
 

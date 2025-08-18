@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { ArrowLeft, QrCode, Banknote } from 'lucide-react';
+import { ArrowLeft, QrCode, Banknote, Plus, Minus, Trash2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useUserStore } from '../store/userStore';
 import { useGuestOrderStore } from '../store/guestOrderStore';
@@ -15,7 +15,7 @@ import { formatPrice } from '../utils/format';
 
 export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
-  const { items, getTotal, clearCart } = useCartStore();
+  const { items, getTotal, clearCart, addItem, removeItem, updateQuantity } = useCartStore();
   const { user } = useUserStore();
   const { addOrder } = useGuestOrderStore();
   
@@ -172,9 +172,8 @@ export const CheckoutPage: React.FC = () => {
         if (paymentMethod === PaymentMethod.QR) {
           setShowPayment(true);
         } else {
-          // Для других способов оплаты - стандартная логика
-          clearCart();
-          alert(`Заказ успешно оформлен! Номер заказа: ${result.order?.orderNumber || result.data?.orderNumber}`);
+          // Для других способов оплаты - показываем уведомление, но не очищаем корзину сразу
+          alert(`Заказ успешно оформлен! Номер заказа: ${result.order?.orderNumber || result.data?.orderNumber}. Теперь можете загрузить чек об оплате.`);
         }
       } else {
         alert('Ошибка при создании заказа: ' + result.message);
@@ -187,7 +186,25 @@ export const CheckoutPage: React.FC = () => {
   const handlePaymentComplete = () => {
     clearCart();
     setShowPayment(false);
+    setOrderId(''); // Очищаем orderId после завершения
     alert('Заказ успешно оплачен и оформлен!');
+  };
+
+  // Функции для управления корзиной
+  const handleAddItem = (product: any) => {
+    addItem(product);
+  };
+
+  const handleRemoveItem = (productId: string) => {
+    removeItem(productId);
+  };
+
+  const handleUpdateQuantity = (productId: string, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      removeItem(productId);
+    } else {
+      updateQuantity(productId, newQuantity);
+    }
   };
 
   if (items.length === 0) {
@@ -354,6 +371,11 @@ export const CheckoutPage: React.FC = () => {
                     <p className="text-sm text-green-700 mb-3">
                       Выбран способ: <strong>{getBankName(selectedBank)}</strong>
                     </p>
+                    {orderId && (
+                      <p className="text-sm text-blue-700 mb-3">
+                        ID заказа: <strong>{orderId}</strong>
+                      </p>
+                    )}
                     <div className="space-y-3">
                       {/* Кнопка перехода к платежной системе */}
                       <Button
@@ -363,9 +385,12 @@ export const CheckoutPage: React.FC = () => {
                         🔗 Перейти к оплате
                       </Button>
                       
-                      {/* Кнопка загрузки чека */}
+                      {/* Кнопка загрузки чека (теперь доступна всегда) */}
                       <Button
-                        onClick={() => setShowProofUpload(true)}
+                        onClick={() => {
+                          console.log('Открываем окно загрузки чека. Текущий orderId:', orderId || 'нет');
+                          setShowProofUpload(true);
+                        }}
                         className="w-full bg-green-600 hover:bg-green-700 text-white"
                       >
                         📸 Загрузить чек об оплате
@@ -398,7 +423,7 @@ export const CheckoutPage: React.FC = () => {
                 <div className="space-y-4 mb-6">
                   {items.map((item) => (
                     <div key={item.product.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-3 flex-1">
                         <img
                           src={item.product.image_url || 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=100&h=100&fit=crop'}
                           alt={item.product.name}
@@ -408,23 +433,71 @@ export const CheckoutPage: React.FC = () => {
                             target.src = 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=100&h=100&fit=crop';
                           }}
                         />
-                        <div>
+                        <div className="flex-1">
                           <h4 className="font-semibold text-gray-900">{item.product.name}</h4>
-                          <p className="text-sm text-gray-600">Количество: {item.quantity}</p>
+                          <p className="text-sm text-gray-600">{formatPrice(item.product.price)} за шт.</p>
                         </div>
                       </div>
-                      <span className="font-semibold text-red-600">
-                        {formatPrice(item.product.price * item.quantity)}
-                      </span>
+                      
+                      {/* Управление количеством */}
+                      <div className="flex items-center space-x-2 mr-4">
+                        <button
+                          onClick={() => handleUpdateQuantity(item.product.id.toString(), item.quantity - 1)}
+                          className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                        >
+                          <Minus className="w-4 h-4 text-gray-600" />
+                        </button>
+                        
+                        <span className="font-semibold text-gray-900 min-w-[2rem] text-center">
+                          {item.quantity}
+                        </span>
+                        
+                        <button
+                          onClick={() => handleUpdateQuantity(item.product.id.toString(), item.quantity + 1)}
+                          className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                        >
+                          <Plus className="w-4 h-4 text-gray-600" />
+                        </button>
+                      </div>
+                      
+                      {/* Цена и кнопка удаления */}
+                      <div className="flex items-center space-x-2">
+                        <span className="font-semibold text-red-600">
+                          {formatPrice(item.product.price * item.quantity)}
+                        </span>
+                        
+                        <button
+                          onClick={() => handleRemoveItem(item.product.id.toString())}
+                          className="w-8 h-8 flex items-center justify-center bg-red-100 hover:bg-red-200 rounded-full transition-colors"
+                          title="Удалить товар"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
                 
                 <div className="border-t border-gray-200 pt-4">
-                  <div className="flex items-center justify-between text-lg font-bold text-gray-900">
+                  <div className="flex items-center justify-between text-lg font-bold text-gray-900 mb-4">
                     <span>Итого:</span>
                     <span className="text-2xl text-red-600">{formatPrice(getTotal())}</span>
                   </div>
+                  
+                  {/* Кнопка очистки корзины */}
+                  {items.length > 0 && (
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Вы уверены, что хотите очистить корзину?')) {
+                          clearCart();
+                        }
+                      }}
+                      className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Очистить корзину</span>
+                    </button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -452,13 +525,18 @@ export const CheckoutPage: React.FC = () => {
       {/* Модальное окно загрузки фото чека */}
       {showProofUpload && (
         <PaymentProofUpload
+          orderId={orderId}
           onClose={() => setShowProofUpload(false)}
           onUploadComplete={(proofUrl) => {
             console.log('Фото чека загружено:', proofUrl);
-            console.log('Детали загрузки:', { proofUrl });
+            console.log('Детали загрузки:', { proofUrl, orderId });
             setShowProofUpload(false);
             // Обновляем URL изображения в форме
             setCustomerData(prev => ({ ...prev, paymentProof: proofUrl }));
+            // Очищаем корзину и orderId после успешной загрузки чека
+            clearCart();
+            setOrderId('');
+            alert('Чек об оплате успешно загружен! Заказ завершен.');
           }}
         />
       )}

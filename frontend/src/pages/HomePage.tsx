@@ -28,7 +28,9 @@ export const MenuPage: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        console.log('Загружаем товары для меню...');
         const productsData = await productsApi.getAll();
+        console.log('Загружено товаров:', productsData.length);
         setProducts(productsData);
         setFilteredProducts(productsData);
       } catch (error) {
@@ -39,6 +41,11 @@ export const MenuPage: React.FC = () => {
     };
 
     fetchProducts();
+    
+    // Обновляем данные каждые 30 секунд
+    const interval = setInterval(fetchProducts, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {

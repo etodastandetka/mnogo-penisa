@@ -293,10 +293,10 @@ app.get('/api/products', (req, res) => {
       return res.status(500).json({ message: 'Ошибка загрузки продуктов' });
     }
     
-    // Добавляем placeholder изображения только для товаров без фото
+    // Добавляем placeholder изображения для товаров без фото
     const productsWithPlaceholders = products.map((product: any) => {
-      if (!product.image_url || product.image_url === '') {
-        // Используем placeholder изображение только если нет фото
+      if (!product.image_url || product.image_url === '' || product.image_url.includes('/images/products/')) {
+        // Используем placeholder изображение
         return {
           ...product,
           image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
@@ -304,8 +304,6 @@ app.get('/api/products', (req, res) => {
       }
       return product;
     });
-    
-    console.log('Отправляем товары в меню:', productsWithPlaceholders.length, 'шт.');
     
     res.json(productsWithPlaceholders);
   });
@@ -625,7 +623,6 @@ app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
           });
         }
       );
-    });
   } catch (error) {
     console.error('Ошибка сохранения файла:', error);
     res.status(500).json({ success: false, error: 'Ошибка сохранения файла' });
@@ -691,7 +688,6 @@ app.post('/api/admin/orders/:orderNumber/payment-proof', upload.single('file'), 
           });
         }
       );
-    });
   } catch (error) {
     console.error('Ошибка сохранения файла:', error);
     res.status(500).json({ success: false, error: 'Ошибка сохранения файла' });
@@ -899,43 +895,51 @@ app.delete('/api/admin/clear-all-products', authenticateToken, requireAdmin, (re
   });
 });
 
-// Создание нового товара
-app.post('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
-  const { name, description, price, category, isPopular, isAvailable, is_available, image_url } = req.body;
-  
-  console.log('Получены данные для создания товара:', { name, description, price, category, isPopular, isAvailable, is_available, image_url });
+// Создание нового товара с загрузкой изображения
+app.post('/api/admin/products', authenticateToken, requireAdmin, upload.single('image'), (req, res) => {
+  const { name, description, price, category, isPopular, isAvailable } = req.body;
   
   if (!name || !price) {
     return res.status(400).json({ message: 'Название и цена обязательны' });
   }
 
-  // Используем переданное изображение (base64 или URL)
-  const imageUrl = image_url || '';
+  let imageUrl = '';
   
-  // Определяем статус доступности
-  const isAvailableValue = isAvailable !== undefined ? isAvailable : is_available !== undefined ? is_available : true;
-  const isPopularValue = isPopular !== undefined ? isPopular : false;
-
-  console.log('Создаем товар с параметрами:', { 
-    name, 
-    description, 
-    price, 
-    category, 
-    imageUrl, 
-    isAvailable: isAvailableValue, 
-    isPopular: isPopularValue 
-  });
+  // Если загружено изображение, сохраняем его
+  if (req.file) {
+    const fileName = 'product-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.jpg';
+    
+    try {
+      // Создаем папку uploads если её нет
+      const uploadsDir = path.join(__dirname, '../uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      
+      // Сохраняем файл в папку uploads
+      const filePath = path.join(uploadsDir, fileName);
+      fs.writeFileSync(filePath, req.file.buffer);
+      
+      // Создаем правильный URL для файла
+      imageUrl = 'http://localhost:3001/uploads/' + fileName;
+      
+      console.log('Фото товара сохранено:', { fileName, imageUrl });
+    } catch (error) {
+      console.error('Ошибка сохранения изображения:', error);
+      return res.status(500).json({ message: 'Ошибка сохранения изображения' });
+    }
+  }
 
   db.run(`
     INSERT INTO products (name, description, price, image_url, category, is_popular, is_available)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `, [name, description, price, imageUrl, category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0], function(err) {
+  `, [name, description, price, imageUrl, category, isPopular ? 1 : 0, isAvailable ? 1 : 0], function(err) {
     if (err) {
       console.error('Ошибка создания товара:', err);
       return res.status(500).json({ message: 'Ошибка создания товара' });
     }
     
-    console.log('Товар создан успешно:', { productId: this.lastID, imageUrl, isAvailable: isAvailableValue, isPopular: isPopularValue });
+    console.log('Товар создан успешно:', { productId: this.lastID, imageUrl });
     
     res.json({
       message: 'Товар создан успешно',
@@ -945,47 +949,57 @@ app.post('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
   });
 });
 
-// Обновление товара
-app.put('/api/admin/products/:id', authenticateToken, requireAdmin, (req, res) => {
+// Обновление товара с возможностью загрузки нового изображения
+app.put('/api/admin/products/:id', authenticateToken, requireAdmin, upload.single('image'), (req, res) => {
   const { id } = req.params;
-  const { name, description, price, category, isPopular, isAvailable, is_available, image_url } = req.body;
-  
-  console.log('Получены данные для обновления товара:', { id, name, description, price, category, isPopular, isAvailable, is_available, image_url });
+  const { name, description, price, category, isPopular, isAvailable, image_url } = req.body;
   
   if (!name || !price) {
     return res.status(400).json({ message: 'Название и цена обязательны' });
   }
 
-  // Используем переданное изображение (base64 или URL)
-  const imageUrl = image_url || '';
+  let imageUrl = '';
   
-  // Определяем статус доступности
-  const isAvailableValue = isAvailable !== undefined ? isAvailable : is_available !== undefined ? is_available : true;
-  const isPopularValue = isPopular !== undefined ? isPopular : false;
-
-  console.log('Обновляем товар с параметрами:', { 
-    id, 
-    name, 
-    description, 
-    price, 
-    category, 
-    imageUrl, 
-    isAvailable: isAvailableValue, 
-    isPopular: isPopularValue 
-  });
+  // Если загружено новое изображение, сохраняем его
+  if (req.file) {
+    const fileName = 'product-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.jpg';
+    
+    try {
+      // Создаем папку uploads если её нет
+      const uploadsDir = path.join(__dirname, '../uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      
+      // Сохраняем файл в папку uploads
+      const filePath = path.join(uploadsDir, fileName);
+      fs.writeFileSync(filePath, req.file.buffer);
+      
+      // Создаем правильный URL для файла
+      imageUrl = 'http://localhost:3001/uploads/' + fileName;
+      
+      console.log('Новое фото товара сохранено:', { fileName, imageUrl });
+    } catch (error) {
+      console.error('Ошибка сохранения изображения:', error);
+      return res.status(500).json({ message: 'Ошибка сохранения изображения' });
+    }
+  } else {
+    // Если новое изображение не загружено, используем переданное в body или оставляем старое
+    imageUrl = image_url || '';
+  }
 
   // Обновляем товар
   db.run(`
     UPDATE products 
     SET name = ?, description = ?, price = ?, image_url = ?, category = ?, is_popular = ?, is_available = ?
     WHERE id = ?
-  `, [name, description, price, imageUrl, category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0, id], function(err) {
+  `, [name, description, price, imageUrl, category, isPopular ? 1 : 0, isAvailable ? 1 : 0, id], function(err) {
     if (err) {
       console.error('Ошибка обновления товара:', err);
       return res.status(500).json({ message: 'Ошибка обновления товара' });
     }
     
-    console.log('Товар обновлен успешно:', { id, imageUrl, isAvailable: isAvailableValue, isPopular: isPopularValue });
+    console.log('Товар обновлен успешно:', { id, imageUrl });
     
     res.json({
       message: 'Товар обновлен успешно',
