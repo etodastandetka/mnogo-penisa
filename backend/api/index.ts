@@ -9,6 +9,8 @@ import compression from 'compression';
 import path from 'path';
 import multer from 'multer';
 import fs from 'fs';
+import https from 'https';
+import http from 'http';
 import { sendNewOrderNotification, sendStatusUpdateNotification, testTelegramBot, getBotInfo } from '../src/telegramBot';
 
 // Типы для базы данных
@@ -1544,11 +1546,49 @@ app.post('/api/bank-settings', (req, res) => {
 
 // Экспортируем для Vercel
 export default app;
+
+// Функция для создания HTTPS сервера
+const createHttpsServer = () => {
+  try {
+    const certPath = path.join(__dirname, '../certs/certificate.pem');
+    const keyPath = path.join(__dirname, '../certs/private-key.pem');
+    
+    if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+      const options = {
+        cert: fs.readFileSync(certPath),
+        key: fs.readFileSync(keyPath)
+      };
+      
+      return https.createServer(options, app);
+    } else {
+      console.log('⚠️  SSL сертификаты не найдены. Запускаем HTTP сервер.');
+      return null;
+    }
+  } catch (error) {
+    console.log('⚠️  Ошибка загрузки SSL сертификатов:', (error as Error).message);
+    console.log('🔄 Запускаем HTTP сервер.');
+    return null;
+  }
+};
+
 // Запускаем сервер если файл запущен напрямую
 if (require.main === module) {
   const PORT = process.env.PORT || 3001;
+  const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
   
+  // Пробуем запустить HTTPS сервер
+  const httpsServer = createHttpsServer();
+  
+  if (httpsServer) {
+    httpsServer.listen(Number(HTTPS_PORT), '0.0.0.0', () => {
+      console.log('🔒 HTTPS Server started on port:', HTTPS_PORT);
+      console.log('🌐 URL: https://45.144.221.227:' + HTTPS_PORT);
+    });
+  }
+  
+  // Всегда запускаем HTTP сервер для совместимости
   app.listen(Number(PORT), '0.0.0.0', () => {
-    console.log('Server started on port:', PORT);
+    console.log('🌐 HTTP Server started on port:', PORT);
+    console.log('🔗 URL: http://45.144.221.227:' + PORT);
   });
 }
