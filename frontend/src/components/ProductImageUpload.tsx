@@ -64,28 +64,39 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
     setUploading(true);
     
     try {
-      // Конвертируем изображение в base64
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
+      // Создаем FormData для загрузки файла на сервер (как в russkii-portal)
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+      
+      console.log('Загружаем файл на сервер:', selectedFile.name, 'размер:', selectedFile.size);
+      
+      // Загружаем файл на сервер (как в russkii-portal)
+      const response = await fetch('https://45.144.221.227:3443/api/upload', {
+        method: 'POST',
+        body: formData,
       });
       
-      reader.readAsDataURL(selectedFile);
-      const imageUrl = await base64Promise;
+      if (!response.ok) {
+        throw new Error(`Ошибка загрузки: ${response.status}`);
+      }
       
-      console.log('Фото конвертировано в base64, размер:', imageUrl.length);
+      const result = await response.json();
       
-      setUploaded(true);
-      onImageUpload(imageUrl);
-      
-      // Автоматически закрываем через 2 секунды
-      setTimeout(() => {
-        onClose();
-      }, 2000);
+      if (response.ok) {
+        console.log('Файл успешно загружен на сервер:', result.imageUrl);
+        setUploaded(true);
+        onImageUpload(result.imageUrl);
+        
+        // Автоматически закрываем через 2 секунды
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      } else {
+        throw new Error(result.message || 'Ошибка загрузки файла');
+      }
     } catch (error) {
-      console.error('Ошибка конвертации фото:', error);
-      alert('Ошибка при обработке фото. Попробуйте еще раз.');
+      console.error('Ошибка загрузки фото:', error);
+      alert('Ошибка при загрузке фото. Попробуйте еще раз.');
     } finally {
       setUploading(false);
     }
