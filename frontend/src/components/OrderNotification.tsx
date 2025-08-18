@@ -5,7 +5,6 @@ import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 import { useUserStore } from '../store/userStore';
 import { PaymentQR } from './PaymentQR';
-import { PrintReceipt } from './PrintReceipt';
 import { ordersApi } from '../api/orders';
 
 interface Order {
@@ -153,7 +152,6 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
             </div>
             
             <div className="flex items-center space-x-3">
-              <PrintReceipt order={latestOrder} onClose={() => {}} />
               {latestOrder.status === 'pending' && (
                 <Button
                   onClick={() => setShowPayment(true)}

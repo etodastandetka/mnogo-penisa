@@ -82,199 +82,190 @@ export const AdminOrdersPage: React.FC = () => {
   };
 
   const printReceipt = (order: AdminOrder) => {
-    // Подсчитываем количество товаров
-    const itemsCount = order.items?.reduce((sum: number, item: any) => sum + item.quantity, 0) || 0;
-    const itemsText = order.items?.map((item: any) => `${item.productName} x${item.quantity}`).join(', ') || 'Детали заказа';
-
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
-        <html>
-          <head>
-            <title>Чек заказа #${order.orderNumber}</title>
-            <style>
-              body { 
-                font-family: 'Arial', sans-serif; 
-                font-size: 13px; 
-                line-height: 1.4;
+        <!DOCTYPE html>
+        <html lang="ru">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Чек заказа ${order.orderNumber || order.id || 'N/A'}</title>
+          <style>
+            body {
+              font-family: 'Arial', 'Helvetica', 'Courier New', monospace;
+              font-size: 12px;
+              line-height: 1.2;
+              margin: 0;
+              padding: 10px;
+              width: 80mm;
+              -webkit-font-smoothing: antialiased;
+              -moz-osx-font-smoothing: grayscale;
+            }
+            .header {
+              text-align: center;
+              border-bottom: 1px dashed #000;
+              padding-bottom: 10px;
+              margin-bottom: 10px;
+            }
+            .company-name {
+              font-size: 14px;
+              font-weight: bold;
+              margin-bottom: 5px;
+            }
+            .company-info {
+              font-size: 10px;
+              margin-bottom: 5px;
+            }
+            .order-info {
+              margin-bottom: 10px;
+            }
+            .order-number {
+              font-weight: bold;
+              margin-bottom: 5px;
+            }
+            .order-date {
+              margin-bottom: 5px;
+            }
+            .customer-info {
+              margin-bottom: 10px;
+              border-bottom: 1px dashed #000;
+              padding-bottom: 10px;
+            }
+            .items-table {
+              width: 100%;
+              margin-bottom: 10px;
+            }
+            .items-table th {
+              text-align: left;
+              border-bottom: 1px solid #000;
+              padding: 2px 0;
+            }
+            .items-table td {
+              padding: 2px 0;
+              vertical-align: top;
+            }
+            .item-name {
+              width: 60%;
+            }
+            .item-quantity {
+              width: 15%;
+              text-align: center;
+            }
+            .item-price {
+              width: 25%;
+              text-align: right;
+            }
+            .total-section {
+              border-top: 1px dashed #000;
+              padding-top: 10px;
+              margin-bottom: 10px;
+            }
+            .total-row {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 2px;
+            }
+            .total-final {
+              font-weight: bold;
+              font-size: 14px;
+              border-top: 1px solid #000;
+              padding-top: 5px;
+            }
+            .footer {
+              text-align: center;
+              font-size: 10px;
+              margin-top: 15px;
+              border-top: 1px dashed #000;
+              padding-top: 10px;
+            }
+            .tax-info {
+              margin-bottom: 5px;
+            }
+            .qr-code {
+              text-align: center;
+              margin: 10px 0;
+            }
+            @media print {
+              body {
+                width: 80mm;
                 margin: 0;
-                padding: 15px;
-                max-width: 380px;
-                margin: 0 auto;
+                padding: 5px;
               }
-              .header {
-                text-align: center;
-                border-bottom: 2px solid #333;
-                padding-bottom: 15px;
-                margin-bottom: 20px;
-              }
-              .logo {
-                font-size: 24px;
-                font-weight: bold;
-                color: #e53e3e;
-                margin-bottom: 5px;
-              }
-              .company-info {
-                font-size: 12px;
-                color: #666;
-                margin-bottom: 10px;
-              }
-              .order-info {
-                margin-bottom: 20px;
-                padding: 10px;
-                background: #f8f8f8;
-                border-radius: 5px;
-              }
-              .section {
-                margin-bottom: 12px;
-                padding-bottom: 8px;
-                border-bottom: 1px dashed #ccc;
-              }
-              .section-title {
-                font-weight: bold;
-                color: #333;
-                margin-bottom: 5px;
-              }
-              .total {
-                font-size: 18px;
-                font-weight: bold;
-                text-align: center;
-                padding: 10px;
-                background: #e53e3e;
-                color: white;
-                border-radius: 5px;
-                margin: 20px 0;
-              }
-              .footer {
-                text-align: center;
-                margin-top: 30px;
-                padding-top: 20px;
-                border-top: 2px solid #333;
-              }
-              .tips-section {
-                text-align: center;
-                margin-top: 15px;
-                padding: 12px;
-                background: #f0f8ff;
-                border-radius: 8px;
-                border: 2px dashed #4a90e2;
-              }
-              .qr-image {
-                width: 100px;
-                height: 100px;
-                margin: 8px auto;
-                display: block;
-                border-radius: 8px;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-              }
-              .thanks-text {
-                background: #fff8e1;
-                padding: 12px;
-                border-radius: 6px;
-                margin: 15px 0;
-                border-left: 4px solid #ff9800;
-              }
-              @media print {
-                body { margin: 0; padding: 10px; }
-                .tips-section { break-inside: avoid; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <div class="logo">🍕 Mnogo Rolly</div>
-              <div class="company-info">
-                ИП Султанкулов Адилет Б<br>
-                📍 г. Бишкек, ул. Ахунбаева 182<br>
-                📞 +996 709 611 043
-              </div>
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="company-name">MNOGO ROLLY</div>
+            <div class="company-info">Доставка суши и роллов</div>
+            <div class="company-info">ИП: Султанкулов А.Б.</div>
+            <div class="company-info">ИНН: 20504198701431</div>
+            <div class="company-info">Адрес: г. Бишкек, ул. Ахунбаева, 182 Б</div>
+            <div class="company-info">Тел: +996 (709) 611-043</div>
+            <div class="company-info">Касса: ККТ-001</div>
+          </div>
+
+          <div class="order-info">
+            <div class="order-number">Заказ №${order.orderNumber || order.id || 'N/A'}</div>
+            <div class="order-date">Дата: ${new Date(order.createdAt || new Date()).toLocaleDateString('ru-RU')}</div>
+            <div class="order-date">Время: ${new Date(order.createdAt || new Date()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
+          </div>
+
+          <div class="customer-info">
+            <div>Клиент: ${order.customerName || 'Гость'}</div>
+            <div>Телефон: ${order.customerPhone || 'Не указан'}</div>
+            <div>Адрес: ${order.deliveryAddress || 'Не указан'}</div>
+          </div>
+
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th class="item-name">Товар</th>
+                <th class="item-quantity">Кол-во</th>
+                <th class="item-price">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${(order.items || []).map((item: any) => `
+                <tr>
+                  <td class="item-name">${item.productName || 'Товар'}</td>
+                  <td class="item-quantity">${item.quantity || 1}</td>
+                  <td class="item-price">${item.price || 0} сом</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="total-section">
+            <div class="total-row">
+              <span>Подытог:</span>
+              <span>${Math.round((order.totalAmount || 0) / 1.12)} сом</span>
             </div>
-
-            <div class="order-info">
-              <div style="display: flex; justify-content: space-between;">
-                <div><strong>Заказ:</strong> #${order.orderNumber}</div>
-                <div><strong>Дата:</strong> ${new Date(order.createdAt).toLocaleDateString('ru-RU')}</div>
-              </div>
-              <div style="text-align: center; margin-top: 5px;">
-                <strong>Время:</strong> ${new Date(order.createdAt).toLocaleTimeString('ru-RU')}
-              </div>
+            <div class="total-row">
+              <span>Доставка:</span>
+              <span>0 сом</span>
             </div>
-
-            <div class="section">
-              <div class="section-title">👤 КЛИЕНТ:</div>
-              <div><strong>Имя:</strong> ${order.customerName}</div>
-              <div><strong>Телефон:</strong> ${order.customerPhone}</div>
-              <div><strong>Адрес доставки:</strong> ${order.deliveryAddress || 'Не указан'}</div>
+            <div class="total-row">
+              <span>НДС (12%):</span>
+              <span>${Math.round((order.totalAmount || 0) - ((order.totalAmount || 0) / 1.12))} сом</span>
             </div>
-
-            <div class="section">
-              <div class="section-title">🛒 ДЕТАЛИ ЗАКАЗА:</div>
-              <div style="background: white; padding: 8px; border-radius: 5px; margin-top: 8px;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                  <thead>
-                    <tr style="border-bottom: 1px solid #ddd;">
-                      <th style="text-align: left; padding: 4px; font-weight: bold;">Наименование</th>
-                      <th style="text-align: center; padding: 4px; font-weight: bold; width: 40px;">К-во</th>
-                      <th style="text-align: right; padding: 4px; font-weight: bold; width: 60px;">Цена</th>
-                      <th style="text-align: right; padding: 4px; font-weight: bold; width: 70px;">Сумма</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${order.items && order.items.length > 0 ? 
-                      order.items.map((item: any) => `
-                        <tr style="border-bottom: 1px dashed #eee;">
-                          <td style="padding: 4px 4px 4px 0; line-height: 1.3;">${item.productName}</td>
-                          <td style="text-align: center; padding: 4px;">${item.quantity}</td>
-                          <td style="text-align: right; padding: 4px;">${item.price.toLocaleString()}</td>
-                          <td style="text-align: right; padding: 4px; font-weight: bold;">${item.totalPrice.toLocaleString()}</td>
-                        </tr>
-                      `).join('') : 
-                      `<tr><td colspan="4" style="text-align: center; padding: 8px; color: #666;">${order.items?.map((item: any) => `${item.productName} x${item.quantity}`).join(', ') || 'Информация о товарах недоступна'}</td></tr>`
-                    }
-                  </tbody>
-                </table>
-                <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #ddd;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span><strong>Количество позиций:</strong></span>
-                    <span>${itemsCount} шт.</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span><strong>Способ оплаты:</strong></span>
-                    <span>${order.paymentMethod === 'cash' ? 'Наличные' : order.paymentMethod === 'card' ? 'Карта' : order.paymentMethod}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span><strong>Статус:</strong></span>
-                    <span>${getStatusText(order.status)}</span>
-                  </div>
-                </div>
-              </div>
+            <div class="total-row total-final">
+              <span>ИТОГО:</span>
+              <span>${order.totalAmount || 0} сом</span>
             </div>
+          </div>
 
-            <div class="total">
-              💰 ИТОГО: ${order.totalAmount.toLocaleString()} сом
-            </div>
-
-            <div class="thanks-text">
-              <div style="font-weight: bold; color: #ff9800; margin-bottom: 8px;">🎉 Спасибо за ваш заказ!</div>
-              <div style="font-size: 12px; color: #666;">
-                📞 По всем вопросам: +996 709 611 043
-              </div>
-            </div>
-
-
-
-            <div class="footer">
-              <div style="font-size: 13px; color: #666; margin-bottom: 10px;">
-                ⭐ Оцените нас в социальных сетях!<br>
-                📱 Instagram: @mnogo_rolly
-              </div>
-              <div style="font-size: 12px; color: #999;">
-                Приходите к нам снова! До встречи в Mnogo Rolly! 👋
-              </div>
-            </div>
-          </body>
+          <div class="footer">
+            <div class="tax-info">Спасибо за заказ!</div>
+            <div class="tax-info">Приятного аппетита!</div>
+            <div class="tax-info">С уважением, команда Mnogo Rolly</div>
+          </div>
+        </body>
         </html>
       `);
+
+
       printWindow.document.close();
       printWindow.focus();
       printWindow.print();
