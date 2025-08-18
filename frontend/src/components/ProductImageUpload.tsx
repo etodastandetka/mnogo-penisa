@@ -72,7 +72,7 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
         console.log('Конвертируем в base64:', selectedFile.name);
         
         // Отправляем base64 на сервер
-        const response = await fetch('https://45.144.221.227:3443/api/upload-base64', {
+        const response = await fetch('https://45.144.221.227:3444/api/upload-base64', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
