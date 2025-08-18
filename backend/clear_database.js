@@ -1,71 +1,121 @@
-const sqlite3 = require('sqlite3');
+const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
+console.log('🗑️  Очистка базы данных...');
+
+// Путь к базе данных
 const dbPath = path.join(__dirname, 'data', 'mnogo_rolly.db');
+
+// Проверяем существование базы данных
+if (!fs.existsSync(dbPath)) {
+  console.log('❌ База данных не найдена:', dbPath);
+  process.exit(1);
+}
+
+// Создаем подключение к базе данных
 const db = new sqlite3.Database(dbPath);
 
-console.log('🧹 Начинаем полную очистку базы данных...');
-console.log('⚠️  ВНИМАНИЕ: Это удалит ВСЕ данные!');
-
-// Функция для очистки таблиц
-const clearTable = (tableName) => {
+// Функция для выполнения SQL запросов
+const runQuery = (query) => {
   return new Promise((resolve, reject) => {
-    db.run(`DELETE FROM ${tableName}`, function(err) {
+    db.run(query, function(err) {
       if (err) {
-        console.error(`❌ Ошибка очистки таблицы ${tableName}:`, err.message);
         reject(err);
       } else {
-        console.log(`✅ Таблица ${tableName} очищена. Удалено ${this.changes} записей`);
-        resolve(this.changes);
+        resolve(this);
       }
     });
   });
 };
 
-// Функция для сброса автоинкремента
-const resetAutoIncrement = (tableName) => {
+// Функция для получения данных
+const getQuery = (query) => {
   return new Promise((resolve, reject) => {
-    db.run(`DELETE FROM sqlite_sequence WHERE name = ?`, [tableName], function(err) {
+    db.all(query, (err, rows) => {
       if (err) {
-        console.error(`❌ Ошибка сброса автоинкремента для ${tableName}:`, err.message);
         reject(err);
       } else {
-        console.log(`✅ Автоинкремент для ${tableName} сброшен`);
-        resolve();
+        resolve(rows);
       }
     });
   });
 };
 
-// Основная функция очистки
-const clearDatabase = async () => {
+async function clearDatabase() {
   try {
-    console.log('\n📊 Начинаем очистку таблиц...\n');
+    console.log('📊 Получаем статистику перед очисткой...');
     
-    // Очищаем таблицы в правильном порядке (сначала зависимые)
-    await clearTable('order_items');
-    await clearTable('orders');
-    await clearTable('products');
-    await clearTable('users');
+    // Получаем количество записей в каждой таблице
+    const tables = ['products', 'orders', 'order_items', 'users', 'bank_settings'];
     
-    console.log('\n🔄 Сбрасываем автоинкременты...\n');
+    for (const table of tables) {
+      try {
+        const count = await getQuery(`SELECT COUNT(*) as count FROM ${table}`);
+        console.log(`📋 ${table}: ${count[0]?.count || 0} записей`);
+      } catch (error) {
+        console.log(`📋 ${table}: таблица не существует или пуста`);
+      }
+    }
     
-    // Сбрасываем автоинкременты
-    await resetAutoIncrement('order_items');
-    await resetAutoIncrement('orders');
-    await resetAutoIncrement('products');
-    await resetAutoIncrement('users');
+    console.log('\n🧹 Начинаем очистку...');
     
-    console.log('\n✅ База данных полностью очищена!');
-    console.log('📝 Все таблицы пусты и готовы к новым данным');
+    // Очищаем таблицы в правильном порядке (из-за внешних ключей)
+    const clearQueries = [
+      'DELETE FROM order_items',
+      'DELETE FROM orders', 
+      'DELETE FROM products',
+      'DELETE FROM users WHERE role != "admin"', // Оставляем админов
+      'DELETE FROM bank_settings'
+    ];
+    
+    for (const query of clearQueries) {
+      try {
+        await runQuery(query);
+        console.log(`✅ Выполнено: ${query}`);
+      } catch (error) {
+        console.log(`⚠️  Ошибка при выполнении "${query}":`, error.message);
+      }
+    }
+    
+    // Сбрасываем автоинкремент
+    const resetQueries = [
+      'DELETE FROM sqlite_sequence WHERE name="products"',
+      'DELETE FROM sqlite_sequence WHERE name="orders"',
+      'DELETE FROM sqlite_sequence WHERE name="order_items"',
+      'DELETE FROM sqlite_sequence WHERE name="users"',
+      'DELETE FROM sqlite_sequence WHERE name="bank_settings"'
+    ];
+    
+    for (const query of resetQueries) {
+      try {
+        await runQuery(query);
+        console.log(`✅ Сброшен автоинкремент: ${query}`);
+      } catch (error) {
+        // Игнорируем ошибки, если таблица не существует
+      }
+    }
+    
+    console.log('\n📊 Статистика после очистки...');
+    
+    for (const table of tables) {
+      try {
+        const count = await getQuery(`SELECT COUNT(*) as count FROM ${table}`);
+        console.log(`📋 ${table}: ${count[0]?.count || 0} записей`);
+      } catch (error) {
+        console.log(`📋 ${table}: таблица не существует или пуста`);
+      }
+    }
+    
+    console.log('\n🎉 База данных успешно очищена!');
+    console.log('💡 Теперь можете добавить новые товары через админ-панель.');
     
   } catch (error) {
-    console.error('\n❌ Произошла ошибка при очистке:', error.message);
+    console.error('❌ Ошибка при очистке базы данных:', error);
   } finally {
     db.close();
-    console.log('\n🔒 Соединение с базой данных закрыто');
   }
-};
+}
 
 // Запускаем очистку
 clearDatabase();

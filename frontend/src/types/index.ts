@@ -8,12 +8,13 @@ export enum OrderStatus {
 
 // Категории товаров
 export enum ProductCategory {
-  SUSHI_ROLLS = 'sushi_rolls', // Объединенная категория суши и роллов
+  ROLLS = 'rolls', // Роллы
   SETS = 'sets',
   WINGS = 'wings', // Крылья
   PIZZA = 'pizza', // Пицца
   DRINKS = 'drinks',
   SAUCES = 'sauces',
+  SNACKS = 'snacks', // Снэки
 }
 
 // Способы оплаты
