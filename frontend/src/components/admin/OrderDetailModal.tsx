@@ -333,116 +333,14 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                       </div>
                     </div>
 
-                    <div className="text-center space-y-3">
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        onClick={() => window.open(order.payment_proof, '_blank')}
-                        className="flex items-center space-x-3 px-6 py-3"
-                      >
-                        <Eye className="h-5 w-5" />
-                        <span>Открыть в новой вкладке</span>
-                      </Button>
-                      
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        onClick={() => {
-                          if (order.payment_proof) {
-                            const link = document.createElement('a');
-                            link.href = order.payment_proof;
-                            link.download = `чек-заказа-${order.order_number}.jpg`;
-                            link.click();
-                          }
-                        }}
-                        className="flex items-center space-x-3 px-6 py-3"
-                      >
-                        <Download className="h-5 w-5" />
-                        <span>Скачать чек</span>
-                      </Button>
-                      
-                      {/* Дополнительная кнопка для проверки */}
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        onClick={() => {
-                          console.log('Проверяем чек:', order.payment_proof);
-                          if (order.payment_proof) {
-                            // Пробуем открыть в новой вкладке
-                            window.open(order.payment_proof, '_blank');
-                          }
-                        }}
-                        className="flex items-center space-x-3 px-6 py-3 bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
-                      >
-                        <Receipt className="h-5 w-5" />
-                        <span>Проверить чек (новая вкладка)</span>
-                      </Button>
-                    </div>
+
                   </div>
                 </>
               ) : (
                 <div className="text-center py-6 text-gray-500">
                   <Receipt className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                   <p className="font-medium">Чек об оплате не предоставлен</p>
-                  <p className="text-sm text-gray-600 mb-3">Клиент еще не загрузил подтверждение оплаты</p>
-                  
-                  {/* Информация о том, как загружается чек */}
-                  <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600 mb-4">
-                    <p><strong>Как это работает:</strong></p>
-                    <p>1. Клиент выбирает онлайн оплату</p>
-                    <p>2. Переходит к платежной системе</p>
-                    <p>3. После оплаты загружает фото чека</p>
-                    <p>4. Фото сохраняется и отображается здесь</p>
-                  </div>
-                  
-                  {/* Кнопки для проверки чека */}
-                  <div className="space-y-3">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={() => {
-                        // Проверяем, есть ли чек в базе данных
-                        if (order.payment_proof && order.payment_proof.trim() !== '') {
-                          window.open(order.payment_proof, '_blank');
-                        } else {
-                          alert('Чек об оплате не найден в базе данных');
-                        }
-                      }}
-                      className="flex items-center space-x-3 px-6 py-3 mx-auto"
-                    >
-                      <Eye className="h-5 w-5" />
-                      <span>Проверить чек в базе данных</span>
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={() => {
-                        // Показываем информацию о заказе
-                        alert(`Информация о заказе:\n\nНомер заказа: ${order.order_number}\nСтатус: ${order.status}\nСпособ оплаты: ${order.payment_method}\nЧек в базе: ${order.payment_proof || 'Не найден'}`);
-                      }}
-                      className="flex items-center space-x-3 px-6 py-3 mx-auto"
-                    >
-                      <Receipt className="h-5 w-5" />
-                      <span>Информация о заказе</span>
-                    </Button>
-                    
-                    {/* Кнопка для принудительной проверки по номеру заказа */}
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={() => {
-                        // Пытаемся найти чек по номеру заказа
-                        const searchUrl = `https://45.144.221.227:3443/uploads/receipt-*${order.order_number}*.jpg`;
-                        console.log('Ищем чек по URL:', searchUrl);
-                        alert(`Поиск чека:\n\nНомер заказа: ${order.order_number}\n\nПопробуйте проверить в папке uploads файлы:\nreceipt-*${order.order_number}*.jpg`);
-                      }}
-                      className="flex items-center space-x-3 px-6 py-3 mx-auto bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100"
-                    >
-                      <Search className="h-5 w-5" />
-                      <span>Поиск чека по номеру заказа</span>
-                    </Button>
-                  </div>
+                  <p className="text-sm text-gray-600">Клиент еще не загрузил подтверждение оплаты</p>
                 </div>
               )}
             </CardContent>
@@ -463,51 +361,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           )}
 
           {/* Действия */}
-          <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-            {/* Левая сторона - кнопки для чека */}
-            <div className="flex space-x-2">
-              {order.payment_proof && order.payment_proof.trim() !== '' ? (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => window.open(order.payment_proof, '_blank')}
-                    className="flex items-center space-x-2"
-                  >
-                    <Eye className="h-4 w-4" />
-                    <span>Просмотреть чек</span>
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      if (order.payment_proof) {
-                        const link = document.createElement('a');
-                        link.href = order.payment_proof;
-                        link.download = `чек-заказа-${order.order_number}.jpg`;
-                        link.click();
-                      }
-                    }}
-                    className="flex items-center space-x-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span>Скачать чек</span>
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    alert('Чек об оплате не найден в базе данных');
-                  }}
-                  className="flex items-center space-x-2"
-                >
-                  <Receipt className="h-4 w-4" />
-                  <span>Чек не найден</span>
-                </Button>
-              )}
-            </div>
-            
-            {/* Правая сторона - кнопки закрытия и печати */}
+          <div className="flex justify-end items-center pt-4 border-t border-gray-200">
             <div className="flex space-x-3">
               <Button variant="outline" onClick={onClose}>
                 Закрыть

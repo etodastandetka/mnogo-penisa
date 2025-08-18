@@ -50,6 +50,14 @@ export const AdminOrdersPage: React.FC = () => {
 
     // Загружаем заказы
     fetchOrders();
+
+    // Автоматическое обновление заказов каждые 30 секунд
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 30000);
+
+    // Очистка интервала при размонтировании
+    return () => clearInterval(interval);
   }, [user, isAdmin, navigate]);
 
   const fetchOrders = async () => {
@@ -353,8 +361,21 @@ export const AdminOrdersPage: React.FC = () => {
     <AdminLayout>
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Заказы</h1>
-          <p className="text-gray-600 mt-2">Управление заказами клиентов</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Заказы</h1>
+              <p className="text-gray-600 mt-2">Управление заказами клиентов</p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={fetchOrders}
+              disabled={loading}
+              className="flex items-center space-x-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>{loading ? 'Обновление...' : 'Обновить'}</span>
+            </Button>
+          </div>
         </div>
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
