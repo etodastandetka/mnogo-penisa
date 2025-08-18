@@ -226,19 +226,8 @@ const initDatabase = () => {
     db.run(`INSERT OR IGNORE INTO users (email, password, name, phone, role, is_admin) VALUES (?, ?, ?, ?, ?, ?)`, 
       ['test@example.com', testUserPassword, 'Тестовый пользователь', '+996 555 123 456', 'user', 0]);
 
-    // Добавление тестовых продуктов
-    const products = [
-      ['Филадельфия ролл', 'Классический ролл с лососем и сливочным сыром', 450, 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop', 'Роллы', 1, 1],
-      ['Калифорния ролл', 'Ролл с крабом и авокадо', 380, 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop', 'Роллы', 1, 1],
-      ['Унаги ролл', 'Ролл с угрем и огурцом', 520, 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop', 'Роллы', 0, 1],
-      ['Мини сет', 'Набор из 4 роллов', 1200, 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop', 'Сеты', 1, 1],
-      ['Суп мисо', 'Традиционный японский суп', 180, 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop', 'Супы', 0, 1],
-      ['Сашими лосось', 'Свежий лосось', 320, 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop', 'Сашими', 0, 1]
-    ];
-
-    products.forEach(product => {
-      db.run(`INSERT OR IGNORE INTO products (name, description, price, image_url, category, is_popular, is_available) VALUES (?, ?, ?, ?, ?, ?, ?)`, product);
-    });
+    // Тестовые продукты больше не создаются автоматически
+    // Используйте админ-панель для добавления товаров
     } catch (error) {
       console.error('Ошибка при создании таблиц:', error);
       throw error;
