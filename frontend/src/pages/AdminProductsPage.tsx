@@ -42,6 +42,7 @@ export const AdminProductsPage: React.FC = () => {
     description: '',
     price: 0,
     category: '',
+    image_url: '',
     is_available: true
   });
   const [addForm, setAddForm] = useState({
@@ -49,6 +50,7 @@ export const AdminProductsPage: React.FC = () => {
     description: '',
     price: 0,
     category: '',
+    image_url: '',
     is_available: true
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -232,6 +234,7 @@ export const AdminProductsPage: React.FC = () => {
         description: '',
         price: 0,
         category: '',
+        image_url: '',
         is_available: true
       });
       setSelectedImage(null);
@@ -250,6 +253,7 @@ export const AdminProductsPage: React.FC = () => {
       description: '',
       price: 0,
       category: '',
+      image_url: '',
       is_available: true
     });
     setSelectedImage(null);
@@ -263,6 +267,7 @@ export const AdminProductsPage: React.FC = () => {
       description: product.description,
       price: product.price,
       category: product.category,
+      image_url: product.image_url || '',
       is_available: product.is_available
     });
     setShowEditModal(true);
@@ -333,6 +338,7 @@ export const AdminProductsPage: React.FC = () => {
       description: '',
       price: 0,
       category: '',
+      image_url: '',
       is_available: true
     });
     setSelectedImage(null);
