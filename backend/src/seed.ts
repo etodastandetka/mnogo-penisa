@@ -54,7 +54,7 @@ async function seed() {
       user_id INTEGER,
       total_amount REAL NOT NULL,
       status TEXT DEFAULT 'pending',
-      delivery_address TEXT,
+      customer_address TEXT,
       phone TEXT,
       notes TEXT,
       payment_method TEXT DEFAULT 'cash',
@@ -280,44 +280,44 @@ function createTestOrders() {
       user_id: 1,
       total_amount: 850,
       status: 'pending',
-      delivery_address: 'ул. Пушкина, д. 10, кв. 5',
+      customer_address: 'ул. Пушкина, д. 10, кв. 5',
       phone: '+7 (999) 123-45-67'
     },
     {
       user_id: 1,
       total_amount: 1200,
       status: 'preparing',
-      delivery_address: 'ул. Ленина, д. 25, кв. 12',
+      customer_address: 'ул. Ленина, д. 25, кв. 12',
       phone: '+7 (999) 234-56-78'
     },
     {
       user_id: 1,
       total_amount: 680,
       status: 'ready',
-      delivery_address: 'пр. Мира, д. 15, кв. 8',
+      customer_address: 'пр. Мира, д. 15, кв. 8',
       phone: '+7 (999) 345-67-89'
     },
     {
       user_id: 1,
       total_amount: 950,
       status: 'delivering',
-      delivery_address: 'ул. Гагарина, д. 7, кв. 3',
+      customer_address: 'ул. Гагарина, д. 7, кв. 3',
       phone: '+7 (999) 456-78-90'
     },
     {
       user_id: 1,
       total_amount: 1500,
       status: 'completed',
-      delivery_address: 'ул. Королева, д. 33, кв. 15',
+      customer_address: 'ул. Королева, д. 33, кв. 15',
       phone: '+7 (999) 567-89-01'
     }
   ];
 
   orders.forEach((order, index) => {
     db.run(`
-      INSERT OR IGNORE INTO orders (user_id, total_amount, status, delivery_address, phone) 
+      INSERT OR IGNORE INTO orders (user_id, total_amount, status, customer_address, phone) 
       VALUES (?, ?, ?, ?, ?)
-    `, [order.user_id, order.total_amount, order.status, order.delivery_address, order.phone], function(err) {
+    `, [order.user_id, order.total_amount, order.status, order.customer_address, order.phone], function(err) {
       if (err) {
         } else {
         const orderId = this.lastID;

@@ -271,19 +271,12 @@ const initDatabase = () => {
       }
     });
 
-    // Миграция: переименование delivery_address в customer_address
+    // Добавляем колонку customer_address если её нет
     db.run(`ALTER TABLE orders ADD COLUMN customer_address TEXT`, (err) => {
       if (err && !err.message.includes('duplicate column name')) {
         console.log('Column customer_address already exists or error:', err.message);
       } else {
-        // Если колонка была добавлена, копируем данные из delivery_address
-        db.run(`UPDATE orders SET customer_address = delivery_address WHERE delivery_address IS NOT NULL`, (updateErr) => {
-          if (updateErr) {
-            console.log('Error copying data from delivery_address:', updateErr.message);
-          } else {
-            console.log('Data copied from delivery_address to customer_address');
-          }
-        });
+        console.log('Column customer_address added successfully');
       }
     });
 
@@ -489,7 +482,7 @@ app.get('/api/products', (req, res) => {
       
       // Если есть относительный путь к изображению, делаем его полным
       if (product.image_url && product.image_url.startsWith('/uploads/')) {
-        processedImageUrl = `http://45.144.221.227:3001${product.image_url}`;
+        processedImageUrl = `https://45.144.221.227:3444${product.image_url}`;
         console.log('🔗 Локальный файл, полный URL:', processedImageUrl);
       }
       
@@ -499,15 +492,14 @@ app.get('/api/products', (req, res) => {
         console.log('🌐 Внешний URL изображения:', processedImageUrl);
       }
       
-      // Если это base64 изображение, оставляем как есть
-      if (product.image_url && product.image_url.startsWith('data:image/')) {
-        processedImageUrl = product.image_url;
-        console.log('📄 Base64 изображение для товара:', product.name);
-      }
+              // Если это base64 изображение, оставляем как есть
+        if (product.image_url && product.image_url.startsWith('data:image/')) {
+          processedImageUrl = product.image_url;
+        }
       
       // Если нет изображения, добавляем placeholder
       if (!product.image_url || product.image_url === '') {
-        processedImageUrl = 'http://45.144.221.227:3001/images/placeholder.svg';
+        processedImageUrl = 'https://45.144.221.227:3444/images/placeholder.svg';
         console.log('🖼️ Добавлен placeholder для товара:', product.name);
       }
       
@@ -904,7 +896,7 @@ app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
     fs.writeFileSync(filePath, req.file.buffer);
     
     // Создаем URL для файла
-    const fileUrl = 'http://45.144.221.227:3001/uploads/' + fileName;
+    const fileUrl = 'https://45.144.221.227:3444/uploads/' + fileName;
     
     console.log('Обновляем заказ в базе:', { orderId, orderNumber, fileUrl });
     
@@ -989,7 +981,7 @@ app.post('/api/admin/orders/:orderNumber/payment-proof', upload.single('file'), 
     fs.writeFileSync(filePath, req.file.buffer);
     
     // Создаем URL для файла
-    const fileUrl = 'http://45.144.221.227:3001/uploads/' + fileName;
+    const fileUrl = 'https://45.144.221.227:3444/uploads/' + fileName;
     
     // Ищем заказ по номеру
     db.get('SELECT id, order_number FROM orders WHERE order_number = ?', [orderNumber], (err, order) => {
@@ -1891,7 +1883,7 @@ app.get('/api/mobile-test', (req, res) => {
     success: true,
     message: 'Мобильный тест работает!',
     timestamp: new Date().toISOString(),
-    server: 'http://45.144.221.227:3001',
+    server: 'https://45.144.221.227:3444',
     endpoints: {
       products: '/api/products',
       upload: '/api/upload',
@@ -1957,7 +1949,7 @@ app.get('/api/check-image/:filename(*)', (req, res) => {
     extension: ext,
     created: stats.birthtime,
     modified: stats.mtime,
-    url: `http://45.144.221.227:3001/uploads/${filename}`
+    url: `https://45.144.221.227:3444/uploads/${filename}`
   });
 });
 
@@ -1973,7 +1965,7 @@ app.post('/api/upload-base64', (req, res) => {
     // Сохраняем base64 в базу данных как есть
     const imageUrl = image; // base64 строка
     
-    console.log('✅ Base64 изображение сохранено:', filename);
+                 console.log('✅ Изображение сохранено:', filename);
     
     res.json({
       success: true,

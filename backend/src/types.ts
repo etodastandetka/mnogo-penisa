@@ -24,7 +24,7 @@ export interface Order {
   user_id: number | null;
   total_amount: number;
   status: string;
-  delivery_address: string;
+  customer_address: string;
   phone: string;
   notes: string | null;
   payment_method: string;
@@ -55,7 +55,7 @@ export interface DatabaseOrder {
   user_id: number | null;
   total_amount: number;
   status: string;
-  delivery_address: string;
+  customer_address: string;
   phone: string;
   notes: string | null;
   payment_method: string;
