@@ -18,15 +18,57 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState(false);
 
+  // Функция для сжатия изображения
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+      const img = new Image();
+      
+      img.onload = () => {
+        // Максимальные размеры для мобильных устройств
+        const maxWidth = 800;
+        const maxHeight = 600;
+        
+        let { width, height } = img;
+        
+        // Вычисляем новые размеры с сохранением пропорций
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Рисуем сжатое изображение
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Конвертируем в base64 с качеством 0.7 (70%)
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        resolve(compressedBase64);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreviewUrl(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      
+      // Сжимаем изображение для предварительного просмотра
+      compressImage(file).then((compressedUrl) => {
+        setPreviewUrl(compressedUrl);
+      });
     }
   };
 
@@ -49,11 +91,11 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
       const file = files[0];
       if (file.type.startsWith('image/')) {
         setSelectedFile(file);
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setPreviewUrl(e.target?.result as string);
-        };
-        reader.readAsDataURL(file);
+        
+        // Сжимаем изображение для предварительного просмотра
+        compressImage(file).then((compressedUrl) => {
+          setPreviewUrl(compressedUrl);
+        });
       }
     }
   }, []);
@@ -64,40 +106,37 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
     setUploading(true);
     
     try {
-      // Конвертируем файл в base64 (работает везде)
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const base64Image = e.target?.result as string;
-        
-        console.log('Конвертируем в base64:', selectedFile.name);
-        
-        // Отправляем base64 на сервер
-        const response = await fetch('https://45.144.221.227:3444/api/upload-base64', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            image: base64Image,
-            filename: selectedFile.name
-          }),
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          console.log('Файл успешно загружен:', result.imageUrl);
-          setUploaded(true);
-          onImageUpload(result.imageUrl);
-          
-          setTimeout(() => {
-            onClose();
-          }, 2000);
-        } else {
-          throw new Error('Ошибка загрузки');
-        }
-      };
+      console.log('Сжимаем изображение перед загрузкой:', selectedFile.name);
       
-      reader.readAsDataURL(selectedFile);
+      // Сжимаем изображение перед отправкой
+      const compressedBase64 = await compressImage(selectedFile);
+      
+      console.log('Размер сжатого изображения:', Math.round(compressedBase64.length / 1024), 'KB');
+      
+      // Отправляем сжатое base64 на сервер
+      const response = await fetch('https://45.144.221.227:3444/api/upload-base64', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: compressedBase64,
+          filename: selectedFile.name
+        }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Файл успешно загружен:', result.imageUrl);
+        setUploaded(true);
+        onImageUpload(result.imageUrl);
+        
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      } else {
+        throw new Error('Ошибка загрузки');
+      }
       
     } catch (error) {
       console.error('Ошибка загрузки фото:', error);
@@ -179,9 +218,12 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
                       alt="Предварительный просмотр"
                       className="w-32 h-32 object-cover rounded-lg mx-auto"
                     />
-                    <p className="text-sm text-green-600 font-medium">
-                      Файл выбран: {selectedFile?.name}
-                    </p>
+                                         <p className="text-sm text-green-600 font-medium">
+                       Файл выбран: {selectedFile?.name}
+                     </p>
+                     <p className="text-xs text-gray-500">
+                       Размер: {Math.round(selectedFile?.size / 1024)} KB → Сжато для мобильных
+                     </p>
                   </div>
                 ) : (
                   <>
@@ -192,9 +234,9 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
                     <p className="text-sm text-gray-500 mb-3">
                       Перетащите файл сюда или нажмите для выбора
                     </p>
-                    <p className="text-xs text-gray-400">
-                      Поддерживаемые форматы: JPG, PNG, GIF (макс. 5MB)
-                    </p>
+                                         <p className="text-xs text-gray-400">
+                       Поддерживаемые форматы: JPG, PNG, GIF (автоматически сжимается)
+                     </p>
                   </>
                 )}
               </label>
