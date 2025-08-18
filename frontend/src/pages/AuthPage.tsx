@@ -18,31 +18,38 @@ export const AuthPage: React.FC = () => {
     setError('');
 
     try {
+      console.log('🔐 Начинаем процесс входа...');
       const result = await authApi.login(credentials);
       
       // Сохраняем данные в store
       setUser({
         id: result.user.id.toString(),
         name: result.user.name,
-        phone: '', // Будет заполнено позже
+        phone: result.user.phone || '', // Будет заполнено позже
         email: result.user.email
       });
       
       // Сохраняем токен в localStorage
       localStorage.setItem('token', result.access_token);
+      console.log('✅ Токен сохранен в localStorage');
       
       // Принудительно обновляем информацию о пользователе с сервера
       try {
+        console.log('🔄 Получаем дополнительную информацию о пользователе...');
         const userInfo = await getUserInfo();
         setUser(userInfo);
+        console.log('✅ Информация о пользователе обновлена');
       } catch (error) {
+        console.warn('⚠️ Не удалось получить дополнительную информацию о пользователе:', error);
         // Игнорируем ошибку, если не удалось получить дополнительную информацию
       }
       
       // Перенаправляем на главную страницу
+      console.log('🚀 Перенаправляем на главную страницу...');
       navigate('/');
-    } catch (error) {
-      setError('Ошибка входа');
+    } catch (error: any) {
+      console.error('❌ Ошибка входа:', error);
+      setError(error.message || 'Ошибка входа. Проверьте email и пароль.');
     } finally {
       setLoading(false);
     }
@@ -58,6 +65,7 @@ export const AuthPage: React.FC = () => {
     setError('');
 
     try {
+      console.log('📝 Начинаем процесс регистрации...');
       const result = await authApi.register(userData);
       
       // Сохраняем данные в store
@@ -70,11 +78,14 @@ export const AuthPage: React.FC = () => {
       
       // Сохраняем токен в localStorage
       localStorage.setItem('token', result.access_token);
+      console.log('✅ Токен сохранен в localStorage');
       
       // Перенаправляем на главную страницу
+      console.log('🚀 Перенаправляем на главную страницу...');
       navigate('/');
-    } catch (error) {
-      setError('Ошибка регистрации');
+    } catch (error: any) {
+      console.error('❌ Ошибка регистрации:', error);
+      setError(error.message || 'Ошибка регистрации. Попробуйте еще раз.');
     } finally {
       setLoading(false);
     }
@@ -97,7 +108,10 @@ export const AuthPage: React.FC = () => {
         )}
         <div className="mt-6 text-center">
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError(''); // Очищаем ошибки при переключении
+            }}
             className="text-red-600 hover:text-red-700 font-medium"
           >
             {isLogin ? 'Не зарегистрированы?' : 'Уже есть аккаунт?'}

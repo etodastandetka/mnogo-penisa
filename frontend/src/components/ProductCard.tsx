@@ -47,12 +47,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 h-full flex flex-col border border-gray-200">
+    <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 h-full flex flex-col border border-gray-200 bg-white">
       <div className="relative overflow-hidden rounded-t-xl bg-gray-100">
         <img
           src={getImageUrl(product.image_url || product.image)}
           alt={product.name}
-          className="w-full h-40 sm:h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+          className="w-full h-32 sm:h-40 md:h-48 object-cover group-hover:scale-110 transition-transform duration-300"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.src = 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
@@ -60,8 +60,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           loading="lazy"
         />
         {product.isPopular && (
-          <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
-            <Badge variant="primary" className="bg-red-500 text-white text-xs sm:text-sm">
+          <div className="absolute top-1 left-1 sm:top-2 sm:left-2 md:top-3 md:left-3">
+            <Badge variant="primary" className="bg-red-500 text-white text-xs px-1 sm:px-2 py-0.5 sm:py-1">
               Популярное
             </Badge>
           </div>
@@ -75,16 +75,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         )}
       </div>
       
-      <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
-        <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-red-600 transition-colors text-sm sm:text-base line-clamp-2 min-h-[2rem]">
+      <CardContent className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col">
+        <h3 className="font-semibold text-gray-900 mb-1 sm:mb-2 group-hover:text-red-600 transition-colors text-sm sm:text-base line-clamp-2 min-h-[2rem] leading-tight">
           {product.name}
         </h3>
-        <p className="text-gray-600 text-xs sm:text-sm mb-3 line-clamp-2 flex-1 min-h-[2rem]">
+        <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2 flex-1 min-h-[2rem] leading-tight">
           {product.description || 'Описание отсутствует'}
         </p>
         
-        <div className="flex items-center justify-between mt-auto">
-          <span className="text-lg sm:text-xl font-bold text-red-600">
+        <div className="flex items-center justify-between mt-auto pt-1 sm:pt-2">
+          <span className="text-base sm:text-lg md:text-xl font-bold text-red-600">
             {formatPrice(product.price)}
           </span>
           
@@ -94,16 +94,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 size="sm"
                 variant="outline"
                 onClick={() => handleUpdateQuantity(quantity - 1)}
-                className="w-7 h-7 sm:w-8 sm:h-8 p-0 border border-gray-300"
+                className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 p-0 border border-gray-300 flex items-center justify-center"
               >
                 <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
-              <span className="font-semibold min-w-[1.5rem] sm:min-w-[2rem] text-center text-sm sm:text-base">{quantity}</span>
+              <span className="font-semibold min-w-[1.2rem] sm:min-w-[1.5rem] md:min-w-[2rem] text-center text-xs sm:text-sm md:text-base">{quantity}</span>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => handleUpdateQuantity(quantity + 1)}
-                className="w-7 h-7 sm:w-8 sm:h-8 p-0 border border-gray-300"
+                className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 p-0 border border-gray-300 flex items-center justify-center"
               >
                 <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
@@ -112,7 +112,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <Button 
               size="sm"
               onClick={handleAddToCart}
-              className="bg-red-600 hover:bg-red-700 text-white w-7 h-7 sm:w-8 sm:h-8 p-0 border border-red-600"
+              className="bg-red-600 hover:bg-red-700 text-white w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 p-0 border border-red-600 flex items-center justify-center"
               disabled={product.is_available === false}
             >
               <Plus className="w-3 h-3 sm:w-4 sm:h-4" />

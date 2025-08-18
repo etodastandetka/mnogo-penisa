@@ -52,6 +52,36 @@
   z-index: 9997 !important;
 }
 
+/* Скрытие скроллбара для мобильных устройств */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+/* Улучшения для мобильных устройств */
+@media (max-width: 768px) {
+  /* Уменьшаем размеры шрифтов на мобильных */
+  .mobile-text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  /* Улучшаем отступы на мобильных */
+  .mobile-p-2 {
+    padding: 0.5rem;
+  }
+  
+  /* Улучшаем размеры кнопок на мобильных */
+  .mobile-btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;

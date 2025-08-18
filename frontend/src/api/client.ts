@@ -9,7 +9,7 @@ const getBaseURL = () => {
 // Создаем экземпляр axios с базовой конфигурацией
 const client = axios.create({
   baseURL: getBaseURL(),
-  timeout: 10000,
+  timeout: 15000, // Увеличиваем таймаут для мобильных устройств
   headers: {
     'Content-Type': 'application/json',
   },
@@ -29,6 +29,7 @@ client.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.error('❌ Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
@@ -36,15 +37,31 @@ client.interceptors.request.use(
 // Интерцептор для обработки ошибок
 client.interceptors.response.use(
   (response) => {
+    console.log('✅ API Response:', response.config.url, response.status);
     return response;
   },
   (error) => {
-    console.log('🚨 API Error:', error.response?.status, error.response?.data);
+    console.log('🚨 API Error:', error.config?.url, error.response?.status, error.response?.data);
+    
     // Если получаем 401, перенаправляем на главную страницу
     if (error.response?.status === 401) {
+      console.log('🔒 Unauthorized, clearing token and redirecting...');
       localStorage.removeItem('token');
-      window.location.href = '/';
+      // Не перенаправляем автоматически, пусть компоненты сами решают
     }
+    
+    // Если таймаут, возвращаем понятную ошибку
+    if (error.code === 'ECONNABORTED') {
+      console.log('⏰ Request timeout');
+      return Promise.reject(new Error('Превышено время ожидания ответа от сервера'));
+    }
+    
+    // Если нет интернета
+    if (!error.response && error.request) {
+      console.log('🌐 Network error');
+      return Promise.reject(new Error('Ошибка соединения с сервером. Проверьте интернет-соединение'));
+    }
+    
     return Promise.reject(error);
   }
 );

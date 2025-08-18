@@ -13,55 +13,110 @@ export const productsApi = {
         return response.data;
       } else {
         console.error('❌ Неверный формат ответа:', response.data);
-        return [];
+        throw new Error('Неверный формат данных от сервера');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Ошибка загрузки товаров:', error);
-      return [];
+      
+      // Если это ошибка сети, возвращаем пустой массив
+      if (!error.response && error.request) {
+        throw new Error('Ошибка соединения с сервером. Проверьте интернет-соединение');
+      }
+      
+      // Если это ошибка сервера
+      if (error.response?.status >= 500) {
+        throw new Error('Ошибка сервера. Попробуйте позже');
+      }
+      
+      // Если это ошибка клиента
+      if (error.response?.status >= 400) {
+        throw new Error('Ошибка запроса данных');
+      }
+      
+      // Если это таймаут
+      if (error.code === 'ECONNABORTED') {
+        throw new Error('Превышено время ожидания ответа от сервера');
+      }
+      
+      throw new Error(error.message || 'Неизвестная ошибка при загрузке товаров');
     }
   },
 
   // Получить продукты по категории
   getByCategory: async (category: ProductCategory): Promise<Product[]> => {
     try {
+      console.log('🔍 Запрос товаров категории:', category);
       const response = await client.get(`/products?category=${category}`);
+      console.log('✅ Получено товаров категории', category, ':', response.data?.length || 0);
       return response.data || [];
-    } catch (error) {
-      console.error('Ошибка загрузки товаров по категории:', error);
-      return [];
+    } catch (error: any) {
+      console.error('❌ Ошибка загрузки товаров по категории:', error);
+      
+      if (!error.response && error.request) {
+        throw new Error('Ошибка соединения с сервером');
+      }
+      
+      throw new Error(error.message || 'Ошибка загрузки товаров по категории');
     }
   },
 
   // Получить популярные продукты
   getPopular: async (): Promise<Product[]> => {
     try {
+      console.log('🔍 Запрос популярных товаров...');
       const response = await client.get('/products');
       // Возвращаем первые 6 товаров как популярные
-      return (response.data || []).slice(0, 6);
-    } catch (error) {
-      console.error('Ошибка загрузки популярных товаров:', error);
-      return [];
+      const popularProducts = (response.data || []).slice(0, 6);
+      console.log('✅ Получено популярных товаров:', popularProducts.length);
+      return popularProducts;
+    } catch (error: any) {
+      console.error('❌ Ошибка загрузки популярных товаров:', error);
+      
+      if (!error.response && error.request) {
+        throw new Error('Ошибка соединения с сервером');
+      }
+      
+      throw new Error(error.message || 'Ошибка загрузки популярных товаров');
     }
   },
 
   // Получить продукт по ID
   getById: async (id: string): Promise<Product> => {
     try {
+      console.log('🔍 Запрос товара по ID:', id);
       const response = await client.get(`/products/${id}`);
+      console.log('✅ Товар найден:', response.data?.name);
       return response.data;
-    } catch (error) {
-      throw new Error('Продукт не найден');
+    } catch (error: any) {
+      console.error('❌ Ошибка загрузки товара по ID:', error);
+      
+      if (error.response?.status === 404) {
+        throw new Error('Товар не найден');
+      }
+      
+      if (!error.response && error.request) {
+        throw new Error('Ошибка соединения с сервером');
+      }
+      
+      throw new Error(error.message || 'Ошибка загрузки товара');
     }
   },
 
   // Поиск продуктов
   search: async (query: string): Promise<Product[]> => {
     try {
+      console.log('🔍 Поиск товаров:', query);
       const response = await client.get(`/products?search=${encodeURIComponent(query)}`);
+      console.log('✅ Найдено товаров:', response.data?.length || 0);
       return response.data || [];
-    } catch (error) {
-      console.error('Ошибка поиска товаров:', error);
-      return [];
+    } catch (error: any) {
+      console.error('❌ Ошибка поиска товаров:', error);
+      
+      if (!error.response && error.request) {
+        throw new Error('Ошибка соединения с сервером');
+      }
+      
+      throw new Error(error.message || 'Ошибка поиска товаров');
     }
   },
 };
