@@ -13,6 +13,7 @@ export enum ProductCategory {
   DRINKS = 'drinks', // Напитки
   SAUCES = 'sauces', // Соусы
   SNACKS = 'snacks', // Снэки
+  PIZZA = 'pizza', // Пицца
 }
 
 // Способы оплаты
