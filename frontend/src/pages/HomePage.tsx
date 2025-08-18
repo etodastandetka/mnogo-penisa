@@ -11,6 +11,7 @@ const categoryLabels = {
   [ProductCategory.DRINKS]: 'Напитки',
   [ProductCategory.SAUCES]: 'Соусы',
   [ProductCategory.SNACKS]: 'Снэки',
+  [ProductCategory.WINGS]: 'Крылья',
   [ProductCategory.PIZZA]: 'Пицца',
 };
 
