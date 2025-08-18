@@ -7,6 +7,7 @@
     "build": "tsc",
     "start": "node api/index.js",
     "dev": "ts-node api/index.ts",
+    "server": "node start-server.js",
     "seed": "ts-node src/seed.ts",
     "vercel-build": "tsc --skipLibCheck"
   },
