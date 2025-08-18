@@ -7,10 +7,11 @@ import { ArrowLeft, QrCode, Banknote, Plus, Minus, Trash2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useUserStore } from '../store/userStore';
 import { useGuestOrderStore } from '../store/guestOrderStore';
-import { PaymentMethod } from '../types';
+import { PaymentMethod, OrderStatus } from '../types';
 import { PaymentQR } from '../components/PaymentQR';
 import { PaymentProofUpload } from '../components/PaymentProofUpload';
 import { formatPrice } from '../utils/format';
+import { ordersApi } from '../api/orders';
 
 
 export const CheckoutPage: React.FC = () => {
@@ -97,32 +98,22 @@ export const CheckoutPage: React.FC = () => {
     }
 
     try {
-      let response;
+      let result;
       
       if (user) {
         // Заказ для авторизованного пользователя
-        const token = localStorage.getItem('token');
-        if (token) {
-          response = await fetch(`https://45.144.221.227:3443/api/orders`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              customer: customerData,
-              items: items,
-              total: getTotal(),
-              paymentMethod: paymentMethod,
-              notes: customerData.notes,
-              paymentProof: customerData.paymentProof,
-              userId: user.id
-            })
-          });
-        }
+        result = await ordersApi.create({
+          customer: customerData,
+          items: items.map(item => ({
+            productId: item.product.id,
+            quantity: item.quantity
+          })),
+          paymentMethod: paymentMethod,
+          notes: customerData.notes
+        });
       } else {
         // Заказ для гостя
-        response = await fetch(`https://45.144.221.227:3443/api/orders/guest`, {
+        const response = await fetch(`https://45.144.221.227:3443/api/orders/guest`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -140,19 +131,19 @@ export const CheckoutPage: React.FC = () => {
             paymentProof: customerData.paymentProof
           })
         });
+        
+        const responseData = await response.json();
+        if (!responseData.success) {
+          throw new Error(responseData.message || 'Ошибка создания заказа');
+        }
+        result = responseData.data;
       }
 
-      if (!response) {
-        throw new Error('Не удалось создать заказ');
-      }
-      
-      const result = await response.json();
-
-      if (result.success) {
-        const orderId = result.order?.id || result.data?.orderId;
+      if (result) {
+        const orderId = result.id || result.orderId;
         console.log('Заказ создан успешно:', {
           orderId,
-          orderNumber: result.order?.orderNumber || result.data?.orderNumber,
+          orderNumber: result.orderNumber,
           result
         });
         
@@ -165,8 +156,8 @@ export const CheckoutPage: React.FC = () => {
         }, 100);
         
         // Сохраняем заказ гостя локально
-        if (!user && result.order) {
-          addOrder(result.order);
+        if (!user && result) {
+          addOrder(result);
         }
         
         // Если выбран QR-код, показываем экран оплаты
@@ -174,10 +165,10 @@ export const CheckoutPage: React.FC = () => {
           setShowPayment(true);
         } else {
           // Для других способов оплаты - показываем уведомление, но не очищаем корзину сразу
-          alert(`Заказ успешно оформлен! Номер заказа: ${result.order?.orderNumber || result.data?.orderNumber}. Теперь можете загрузить чек об оплате.`);
+          alert(`Заказ успешно оформлен! Номер заказа: ${result.orderNumber}. Теперь можете загрузить чек об оплате.`);
         }
       } else {
-        alert('Ошибка при создании заказа: ' + result.message);
+        alert('Ошибка при создании заказа');
       }
     } catch (error) {
       alert('Ошибка при создании заказа. Попробуйте еще раз.');

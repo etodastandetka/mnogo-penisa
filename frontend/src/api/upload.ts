@@ -1,28 +1,21 @@
+import { client } from './client';
 import { UploadResponse } from '../utils/fileUpload';
-
-const API_BASE_URL = 'https://45.144.221.227:3443';
 
 export const uploadFileToServer = async (
   file: File, 
-  endpoint: string = '/api/upload'
+  endpoint: string = '/upload'
 ): Promise<UploadResponse> => {
   try {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'POST',
-      body: formData,
+    const response = await client.post(endpoint, formData, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
+    const result = response.data;
     
     if (result.success) {
       return {
@@ -50,16 +43,13 @@ export const uploadPaymentProof = async (file: File, orderId: string | number, o
   formData.append('orderNumber', orderNumber);
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/orders/payment-proof`, {
-      method: 'POST',
-      body: formData,
+    const response = await client.post('/orders/payment-proof', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
+    const result = response.data;
     
     if (result.success) {
       return {
@@ -85,33 +75,15 @@ export const updateOrderPaymentProof = async (
   fileUrl: string
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/admin/orders/${orderId}/payment-proof`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({ payment_proof: fileUrl })
+    const response = await client.patch(`/admin/orders/${orderId}/payment-proof`, {
+      payment_proof: fileUrl
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    
-    if (result.success) {
-      return { success: true };
-    } else {
-      return {
-        success: false,
-        error: result.error || 'Неизвестная ошибка обновления'
-      };
-    }
+    return { success: true };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Ошибка обновления чека'
+      error: error instanceof Error ? error.message : 'Ошибка обновления'
     };
   }
 };

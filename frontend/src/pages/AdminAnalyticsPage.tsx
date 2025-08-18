@@ -21,6 +21,7 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
+import { getOrders } from '../api/admin';
 
 interface AnalyticsData {
   totalOrders: number;
@@ -53,33 +54,17 @@ export const AdminAnalyticsPage: React.FC = () => {
     setError('');
     
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Токен не найден');
+      const orders = await getOrders();
+      
+      if (!Array.isArray(orders)) {
+        setError('Неверный формат данных');
         return;
       }
-
-      const response = await fetch('https://45.144.221.227:3443/api/admin/orders', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const orders = await response.json();
-        
-        if (!Array.isArray(orders)) {
-          setError('Неверный формат данных');
-          return;
-        }
-        
-        const analyticsData = analyzeOrders(orders);
-        setAnalytics(analyticsData);
-      } else {
-        setError(`Ошибка загрузки данных: ${response.status}`);
-      }
+      
+      const analyticsData = analyzeOrders(orders);
+      setAnalytics(analyticsData);
     } catch (error) {
-      setError('Ошибка соединения с сервером');
+      setError('Ошибка загрузки данных');
     } finally {
       setLoading(false);
     }

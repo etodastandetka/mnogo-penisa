@@ -4,6 +4,7 @@ import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 import { QrCode, Check } from 'lucide-react';
 import { formatPrice } from '../utils/format';
+import { ordersApi } from '../api/orders';
 
 interface PaymentQRCodeProps {
   orderId: string;
@@ -68,21 +69,8 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
   React.useEffect(() => {
     const fetchQRCode = async () => {
       try {
-        const response = await fetch(`https://45.144.221.227:3443/api/orders/${orderId}/qr`);
-        const result = await response.json();
-        
-        if (result.success) {
-          setQrCodeUrl(result.data.qrCode);
-        } else {
-          // Fallback к простому QR-коду
-          const qrData = `order:${orderId}|amount:${amount}|bank:${selectedBank || 'any'}`;
-          setQrCodeUrl(`data:image/svg+xml;base64,${btoa(`
-            <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-              <rect width="200" height="200" fill="white"/>
-              <text x="100" y="100" text-anchor="middle" dy=".3em" font-family="monospace" font-size="12" fill="black">${qrData}</text>
-            </svg>
-          `)}`);
-        }
+        const result = await ordersApi.getQrCode(orderId);
+        setQrCodeUrl(result.qrCode);
       } catch (error) {
         // Fallback к простому QR-коду
         const qrData = `order:${orderId}|amount:${amount}|bank:${selectedBank || 'any'}`;
@@ -107,24 +95,10 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
   const handlePaymentComplete = async () => {
     try {
       // Отправляем статус оплаты на сервер
-      const response = await fetch(`https://45.144.221.227:3443/api/orders/${orderId}/payment`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: 'paid'
-        })
-      });
+      await ordersApi.updateStatus(orderId, 'paid');
 
-      const result = await response.json();
-
-      if (result.success) {
-        if (onPaymentComplete) {
-          onPaymentComplete();
-        }
-      } else {
-        alert('Ошибка при обновлении статуса оплаты: ' + result.message);
+      if (onPaymentComplete) {
+        onPaymentComplete();
       }
     } catch (error) {
       alert('Ошибка при обновлении статуса оплаты. Попробуйте еще раз.');

@@ -9,6 +9,7 @@ import { useGuestOrderStore } from '../store/guestOrderStore';
 
 import { OrderNotification } from './OrderNotification';
 import { AdminPanelButton } from './AdminPanelButton';
+import { getUserOrders } from '../api/user';
 
 export const Navigation: React.FC = () => {
   const navigate = useNavigate();
@@ -26,27 +27,17 @@ export const Navigation: React.FC = () => {
     const checkActiveOrders = async () => {
       if (user) {
         try {
-          const token = localStorage.getItem('token');
-          if (token) {
-            const response = await fetch('https://45.144.221.227:3443/api/orders/user', {
-              headers: {
-                'Authorization': `Bearer ${token}`
-              }
-            });
-            
-            if (response.ok) {
-              const orders = await response.json();
-              setUserOrders(orders);
-              
-              if (orders.length > 0) {
-                const latestOrder = orders[0];
-                const hasActiveOrder = latestOrder.status !== 'completed' && latestOrder.status !== 'cancelled';
-                setShowOrderNotification(hasActiveOrder);
-              }
-            }
+          const orders = await getUserOrders();
+          setUserOrders(orders);
+          
+          if (orders.length > 0) {
+            const latestOrder = orders[0];
+            const hasActiveOrder = latestOrder.status !== 'completed' && latestOrder.status !== 'cancelled';
+            setShowOrderNotification(hasActiveOrder);
           }
         } catch (error) {
-          }
+          console.error('Ошибка получения заказов:', error);
+        }
       } else if (guestOrders.length > 0) {
         const latestOrder = guestOrders[0];
         const hasActiveOrder = latestOrder.status !== 'completed' && latestOrder.status !== 'cancelled';

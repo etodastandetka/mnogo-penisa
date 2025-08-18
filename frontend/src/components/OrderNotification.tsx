@@ -6,6 +6,7 @@ import { Badge } from './ui/Badge';
 import { useUserStore } from '../store/userStore';
 import { PaymentQR } from './PaymentQR';
 import { PrintReceipt } from './PrintReceipt';
+import { getUserOrders } from '../api/user';
 
 interface Order {
   id: string;
@@ -38,28 +39,15 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
       }
 
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setLoading(false);
-          return;
-        }
-
-        const response = await fetch('https://45.144.221.227:3443/api/orders/user', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.data && data.data.length > 0) {
-            // Берем самый последний заказ
-            const latest = data.data[0];
-            setLatestOrder(latest);
-          }
+        const orders = await getUserOrders();
+        if (orders && orders.length > 0) {
+          // Берем самый последний заказ
+          const latest = orders[0];
+          setLatestOrder(latest);
         }
       } catch (error) {
-        } finally {
+        console.error('Ошибка получения заказов:', error);
+      } finally {
         setLoading(false);
       }
     };

@@ -12,6 +12,8 @@ import {
 import { useUserStore } from '../store/userStore';
 import { formatPrice } from '../utils/format';
 import { PaymentQR } from '../components/PaymentQR';
+import { ordersApi } from '../api/orders';
+import { client } from '../api/client';
 
 
 export const ProfilePage: React.FC = () => {
@@ -48,21 +50,11 @@ export const ProfilePage: React.FC = () => {
     const fetchOrders = async () => {
       if (user) {
         try {
-          const token = localStorage.getItem('token');
-          if (token) {
-            const response = await fetch('https://45.144.221.227:3443/api/orders/user', {
-              headers: {
-                'Authorization': `Bearer ${token}`
-              }
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              setOrders(data);
-            }
-          }
+          const data = await ordersApi.getUserOrders();
+          setOrders(data);
         } catch (error) {
-          } finally {
+          // Игнорируем ошибку
+        } finally {
           setLoading(false);
         }
       } else {
@@ -76,40 +68,30 @@ export const ProfilePage: React.FC = () => {
   const handleSaveProfile = async () => {
     if (user) {
       try {
-        const token = localStorage.getItem('token');
-        if (token) {
-                      const response = await fetch('https://45.144.221.227:3443/api/user/profile', {
-              method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(editData)
-          });
-
-          if (response.ok) {
-            setEditing(false);
-            // Обновляем данные в store
-            if (user) {
-              const updatedUser = {
-                ...user,
-                name: editData.name,
-                phone: editData.phone,
-                address: editData.address
-              };
-              setUser(updatedUser);
-              
-              // Обновляем локальное состояние editData
-              setEditData({
-                name: editData.name,
-                phone: editData.phone,
-                address: editData.address
-              });
-            }
-            alert('Профиль успешно обновлен!');
-          } else {
-            alert('Ошибка при обновлении профиля');
+        const response = await client.patch('/user/profile', editData);
+        
+        if (response.status === 200) {
+          setEditing(false);
+          // Обновляем данные в store
+          if (user) {
+            const updatedUser = {
+              ...user,
+              name: editData.name,
+              phone: editData.phone,
+              address: editData.address
+            };
+            setUser(updatedUser);
+            
+            // Обновляем локальное состояние editData
+            setEditData({
+              name: editData.name,
+              phone: editData.phone,
+              address: editData.address
+            });
           }
+          alert('Профиль успешно обновлен!');
+        } else {
+          alert('Ошибка при обновлении профиля');
         }
       } catch (error) {
         alert('Ошибка при обновлении профиля');

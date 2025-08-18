@@ -19,30 +19,10 @@ import {
   Eye,
   Receipt
 } from 'lucide-react';
+import { Order, OrderStatus } from '../types';
+import { formatPrice } from '../utils/format';
+import { getOrders, updateOrderStatus } from '../api/admin';
 
-interface Order {
-  id: number;
-  order_number: string;
-  customer_name: string;
-  customer_phone: string;
-  customer_address?: string;
-  delivery_address?: string;
-  total_amount: number;
-  status: string;
-  payment_method: string;
-  payment_status: string;
-  created_at: string;
-  items_summary?: string;
-  payment_proof?: string;
-  notes?: string;
-  items?: Array<{
-    id: number;
-    product_name: string;
-    quantity: number;
-    price: number;
-    total: number;
-  }>;
-}
 
 export const AdminOrdersPage: React.FC = () => {
   const navigate = useNavigate();
@@ -73,67 +53,29 @@ export const AdminOrdersPage: React.FC = () => {
   }, [user, isAdmin, navigate]);
 
   const fetchOrders = async () => {
-    setLoading(true);
-    setError('');
-    
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Токен не найден');
-        return;
-      }
-
-      const response = await fetch('https://45.144.221.227:3443/api/admin/orders', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const ordersData = await response.json();
-        ordersData.forEach((order: Order) => {
-          });
-        setOrders(ordersData);
-      } else {
-        setError('Ошибка загрузки заказов');
-      }
+      setLoading(true);
+      const ordersData = await getOrders();
+      setOrders(ordersData);
     } catch (error) {
-      setError('Ошибка соединения с сервером');
+      setError('Ошибка загрузки заказов');
     } finally {
       setLoading(false);
     }
   };
 
-  const updateOrderStatus = async (orderId: number, newStatus: string) => {
+  const handleUpdateOrderStatus = async (orderId: number, newStatus: string) => {
     try {
       setUpdatingOrderId(orderId);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Токен не найден');
-        return;
-      }
-
-      const response = await fetch(`https://45.144.221.227:3443/api/admin/orders/${orderId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status: newStatus })
-      });
-
-      if (response.ok) {
-        // Обновляем статус в локальном состоянии
-        setOrders(prev => prev.map(order => 
-          order.id === orderId ? { ...order, status: newStatus } : order
-        ));
-        setError(''); // Очищаем предыдущие ошибки
-      } else {
-        const errorData = await response.text();
-        setError(`Ошибка обновления статуса: ${response.status} - ${errorData}`);
-      }
+      await updateOrderStatus(orderId, newStatus);
+      
+      // Обновляем статус в локальном состоянии
+      setOrders(prev => prev.map(order => 
+        order.id === orderId ? { ...order, status: newStatus } : order
+      ));
+      setError(''); // Очищаем предыдущие ошибки
     } catch (error) {
-      setError('Ошибка соединения с сервером');
+      setError('Ошибка обновления статуса');
     } finally {
       setUpdatingOrderId(null);
     }

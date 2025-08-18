@@ -14,6 +14,8 @@ import {
   RefreshCw,
   ArrowRight
 } from 'lucide-react';
+import { formatPrice } from '../utils/format';
+import { getOrders, getProducts } from '../api/admin';
 
 export const AdminDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -44,38 +46,22 @@ export const AdminDashboardPage: React.FC = () => {
     setError('');
     
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Токен не найден');
-        return;
-      }
+      const orders = await getOrders();
+      const totalOrders = orders.length;
+      const totalRevenue = orders.reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0);
+      const activeOrders = orders.filter((order: any) => 
+        order.status !== 'delivered' && order.status !== 'cancelled'
+      ).length;
 
-      const response = await fetch('https://45.144.221.227:3443/api/admin/orders', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      // Берем последние 5 заказов
+      const recent = orders.slice(0, 5);
+      setStats({ totalOrders, totalRevenue, activeOrders });
+      setRecentOrders(recent);
 
-      if (response.ok) {
-        const orders = await response.json();
-        const totalOrders = orders.length;
-        const totalRevenue = orders.reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0);
-        const activeOrders = orders.filter((order: any) => 
-          order.status !== 'delivered' && order.status !== 'cancelled'
-        ).length;
-
-        // Берем последние 5 заказов
-        const recent = orders.slice(0, 5);
-        setStats({ totalOrders, totalRevenue, activeOrders });
-        setRecentOrders(recent);
-
-        // Загружаем популярные товары
-        fetchPopularProducts();
-      } else {
-        setError('Ошибка загрузки статистики');
-      }
+      // Загружаем популярные товары
+      fetchPopularProducts();
     } catch (error) {
-      setError('Ошибка соединения с сервером');
+      setError('Ошибка загрузки статистики');
     } finally {
       setLoading(false);
     }
@@ -92,27 +78,17 @@ export const AdminDashboardPage: React.FC = () => {
 
   const fetchPopularProducts = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const response = await fetch('https://45.144.221.227:3443/api/admin/products', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const products = await response.json();
-        // Берем товары с флагом is_popular или первые 5
-        const popular = products.filter((p: any) => p.is_popular).slice(0, 5);
-        if (popular.length === 0) {
-          setPopularProducts(products.slice(0, 5));
-        } else {
-          setPopularProducts(popular);
-        }
+      const products = await getProducts();
+      // Берем товары с флагом is_popular или первые 5
+      const popular = products.filter((p: any) => p.is_popular).slice(0, 5);
+      if (popular.length === 0) {
+        setPopularProducts(products.slice(0, 5));
+      } else {
+        setPopularProducts(popular);
       }
     } catch (error) {
-      }
+      // Игнорируем ошибку
+    }
   };
 
 

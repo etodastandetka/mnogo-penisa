@@ -12,6 +12,8 @@ import {
   RefreshCw,
   Save
 } from 'lucide-react';
+import { Input } from '../components/ui/Input';
+import { client } from '../api/client';
 
 export const AdminSettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -49,19 +51,18 @@ export const AdminSettingsPage: React.FC = () => {
 
   const loadBankSettings = async () => {
     try {
-      const response = await fetch('https://45.144.221.227:3443/api/bank-settings');
-      if (response.ok) {
-        const data = await response.json();
-        setSettings(prev => ({
-          ...prev,
-          bank: {
-            ...prev.bank,
-            bankLink: data.bank_link || 'https://app.mbank.kg/qr#'
-          }
-        }));
-      }
+      const response = await client.get('/bank-settings');
+      const data = response.data;
+      setSettings(prev => ({
+        ...prev,
+        bank: {
+          ...prev.bank,
+          bankLink: data.bank_link || 'https://app.mbank.kg/qr#'
+        }
+      }));
     } catch (error) {
-      }
+      // Игнорируем ошибку
+    }
   };
 
   const handleSettingChange = (category: string, key: string, value: any) => {
@@ -79,23 +80,15 @@ export const AdminSettingsPage: React.FC = () => {
     
     try {
       // Отправляем настройки на сервер
-      const response = await fetch('https://45.144.221.227:3443/api/bank-settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          bank_name: 'MBank',
-          bank_link: settings.bank.bankLink
-        })
+      const response = await client.post('/bank-settings', {
+        bank_name: 'MBank',
+        bank_link: settings.bank.bankLink
       });
 
-      const result = await response.json();
-      
-      if (result.success) {
+      if (response.status === 200) {
         alert('Настройки успешно сохранены!');
       } else {
-        alert('Ошибка сохранения: ' + result.message);
+        alert('Ошибка сохранения');
       }
     } catch (error) {
       alert('Ошибка соединения с сервером');
