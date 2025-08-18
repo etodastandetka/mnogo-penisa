@@ -7,36 +7,85 @@ const dbPath = path.join(__dirname, 'data/mnogo_rolly.db');
 // Создаем подключение к базе данных
 const db = new sqlite3.Database(dbPath);
 
-console.log('🌱 Скрипт добавления товаров запущен');
+console.log('🌱 Скрипт добавления новых товаров запущен');
 console.log('📁 База данных:', dbPath);
 
-// Функция для добавления товара
+// Функция для добавления товара (только если его нет)
 function addProduct(name, description, price, imageUrl, category, isPopular = 0, isAvailable = 1) {
   return new Promise((resolve, reject) => {
-    const sql = `
-      INSERT OR IGNORE INTO products (name, description, price, image_url, category, is_popular, is_available, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    `;
-    
-    db.run(sql, [name, description, price, imageUrl, category, isPopular, isAvailable], function(err) {
+    // Сначала проверяем, есть ли уже такой товар
+    db.get('SELECT id FROM products WHERE name = ?', [name], (err, existing) => {
       if (err) {
-        console.error(`❌ Ошибка добавления товара "${name}":`, err.message);
+        console.error(`❌ Ошибка проверки товара "${name}":`, err.message);
         reject(err);
-      } else {
-        console.log(`✅ Добавлен товар: ${name} (ID: ${this.lastID})`);
-        resolve(this.lastID);
+        return;
       }
+      
+      if (existing) {
+        console.log(`⏭️ Товар "${name}" уже существует, пропускаем`);
+        resolve(existing.id);
+        return;
+      }
+      
+      // Добавляем новый товар
+      const sql = `
+        INSERT INTO products (name, description, price, image_url, category, is_popular, is_available, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `;
+      
+      db.run(sql, [name, description, price, imageUrl, category, isPopular, isAvailable], function(err) {
+        if (err) {
+          console.error(`❌ Ошибка добавления товара "${name}":`, err.message);
+          reject(err);
+        } else {
+          console.log(`✅ Добавлен новый товар: ${name} (ID: ${this.lastID})`);
+          resolve(this.lastID);
+        }
+      });
     });
   });
 }
 
-// Функция для добавления всех товаров
-async function seedProducts() {
-  console.log('\n🔄 Начинаем добавление товаров...');
+// Функция для добавления новых товаров
+async function addNewProducts() {
+  console.log('\n🔄 Начинаем добавление новых товаров...');
   
   try {
-    // Роллы
-    console.log('\n🍣 Добавляем роллы...');
+    // Крылья (новая категория)
+    console.log('\n🍗 Добавляем крылья...');
+    
+    await addProduct(
+      'Крылья куриные 6 шт',
+      'Хрустящие куриные крылышки с соусом',
+      280,
+      'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+      'wings',
+      1,
+      1
+    );
+    
+    await addProduct(
+      'Крылья куриные 12 шт',
+      'Хрустящие куриные крылышки с соусом',
+      480,
+      'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+      'wings',
+      0,
+      1
+    );
+    
+    await addProduct(
+      'Крылья куриные 18 шт',
+      'Хрустящие куриные крылышки с соусом',
+      680,
+      'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+      'wings',
+      0,
+      1
+    );
+    
+    // Новые роллы
+    console.log('\n🍣 Добавляем новые роллы...');
     
     await addProduct(
       'Темпура с лососем',
@@ -178,77 +227,8 @@ async function seedProducts() {
       1
     );
     
-    // Сеты
-    console.log('\n🍱 Добавляем сеты...');
-    
-    await addProduct(
-      'Мини сет',
-      'Набор из 4 роллов на выбор',
-      1200,
-      'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop',
-      'sets',
-      1,
-      1
-    );
-    
-    await addProduct(
-      'Сет "Семейный"',
-      'Набор из 8 роллов для всей семьи',
-      2200,
-      'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop',
-      'sets',
-      1,
-      1
-    );
-    
-         // Снэки
-     console.log('\n🍟 Добавляем снэки...');
-     
-     await addProduct(
-       'Наггетсы куриные с картофелем фри',
-       'Картофель фри 200 гр, наггетсы 6 шт',
-       350,
-       'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
-       'snacks',
-       1,
-       1
-     );
-     
-     // Крылья
-     console.log('\n🍗 Добавляем крылья...');
-     
-     await addProduct(
-       'Крылья куриные 6 шт',
-       'Хрустящие куриные крылышки с соусом',
-       280,
-       'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
-       'wings',
-       1,
-       1
-     );
-     
-     await addProduct(
-       'Крылья куриные 12 шт',
-       'Хрустящие куриные крылышки с соусом',
-       480,
-       'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
-       'wings',
-       0,
-       1
-     );
-     
-     await addProduct(
-       'Крылья куриные 18 шт',
-       'Хрустящие куриные крылышки с соусом',
-       680,
-       'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
-       'wings',
-       0,
-       1
-     );
-    
-    // Напитки
-    console.log('\n🥤 Добавляем напитки...');
+    // Новые напитки
+    console.log('\n🥤 Добавляем новые напитки...');
     
     await addProduct(
       'Фанта 0.5л',
@@ -310,73 +290,7 @@ async function seedProducts() {
       1
     );
     
-    // Соусы
-    console.log('\n🥢 Добавляем соусы...');
-    
-    await addProduct(
-      'Соевый соус',
-      'Классический соевый соус',
-      50,
-      'https://images.unsplash.com/photo-1505253716333-d283d2b74e50?w=400&h=300&fit=crop',
-      'sauces',
-      0,
-      1
-    );
-    
-    await addProduct(
-      'Васаби',
-      'Острый японский хрен',
-      30,
-      'https://images.unsplash.com/photo-1505253716333-d283d2b74e50?w=400&h=300&fit=crop',
-      'sauces',
-      0,
-      1
-    );
-    
-    await addProduct(
-      'Имбирь',
-      'Маринованный имбирь',
-      40,
-      'https://images.unsplash.com/photo-1505253716333-d283d2b74e50?w=400&h=300&fit=crop',
-      'sauces',
-      0,
-      1
-    );
-    
-    // Пицца (базовые варианты, можно дополнить)
-    console.log('\n🍕 Добавляем пиццу...');
-    
-    await addProduct(
-      'Пицца Маргарита',
-      'Томатный соус, моцарелла, базилик',
-      450,
-      'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop',
-      'pizza',
-      1,
-      1
-    );
-    
-    await addProduct(
-      'Пицца Пепперони',
-      'Томатный соус, моцарелла, пепперони',
-      520,
-      'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop',
-      'pizza',
-      1,
-      1
-    );
-    
-    await addProduct(
-      'Пицца Четыре сыра',
-      'Томатный соус, моцарелла, пармезан, горгонзола, рикотта',
-      580,
-      'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop',
-      'pizza',
-      0,
-      1
-    );
-    
-    console.log('\n✅ Все товары добавлены успешно!');
+    console.log('\n✅ Все новые товары добавлены успешно!');
     
   } catch (error) {
     console.error('\n❌ Ошибка добавления товаров:', error.message);
@@ -389,8 +303,8 @@ function checkResult() {
   return new Promise((resolve, reject) => {
     console.log('\n🔍 Проверяем результат...');
     
-         // Проверяем количество товаров по категориям
-     const categories = ['rolls', 'sets', 'snacks', 'wings', 'drinks', 'sauces', 'pizza'];
+    // Проверяем количество товаров по категориям
+    const categories = ['rolls', 'sets', 'snacks', 'wings', 'drinks', 'sauces', 'pizza'];
     
     categories.forEach(category => {
       db.get('SELECT COUNT(*) as count FROM products WHERE category = ?', [category], (err, result) => {
@@ -418,8 +332,8 @@ function checkResult() {
 // Главная функция
 async function main() {
   try {
-    // Добавляем товары
-    await seedProducts();
+    // Добавляем новые товары
+    await addNewProducts();
     
     // Проверяем результат
     await checkResult();
