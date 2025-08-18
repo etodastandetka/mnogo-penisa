@@ -1,8 +1,18 @@
 import axios from 'axios';
 
+// Определяем базовый URL в зависимости от среды
+const getBaseURL = () => {
+  // В продакшене (Netlify) используем HTTPS
+  if (import.meta.env.PROD) {
+    return 'https://45.144.221.227:3443/api';
+  }
+  // В разработке используем HTTP
+  return 'http://45.144.221.227:3001/api';
+};
+
 // Создаем экземпляр axios с базовой конфигурацией
 const client = axios.create({
-  baseURL: 'http://45.144.221.227:3001/api',
+  baseURL: getBaseURL(),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
