@@ -15,7 +15,7 @@ export const AuthPage: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://45.144.221.227:3001/api'}/auth/login`, {
+      const response = await fetch(`https://45.144.221.227:3443/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ export const AuthPage: React.FC = () => {
         
         // Принудительно обновляем информацию о пользователе с сервера
         try {
-          const userResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://45.144.221.227:3001/api'}/user/me`, {
+          const userResponse = await fetch(`https://45.144.221.227:3443/api/user/me`, {
             headers: {
               'Authorization': `Bearer ${result.data.token}`
             }
@@ -69,7 +69,7 @@ export const AuthPage: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://45.144.221.227:3001/api'}/auth/register`, {
+      const response = await fetch(`https://45.144.221.227:3443/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
