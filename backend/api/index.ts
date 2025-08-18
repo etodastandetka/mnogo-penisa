@@ -387,7 +387,7 @@ app.post('/api/orders', authenticateToken, (req: any, res) => {
     const sql = `
       INSERT INTO orders (
         order_number, user_id, customer_name, customer_phone,
-        delivery_address, total_amount, status, payment_method, notes
+        customer_address, total_amount, status, payment_method, notes
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const params = [
@@ -463,48 +463,7 @@ app.post('/api/orders', authenticateToken, (req: any, res) => {
   }
 });
 
-// Получение заказов пользователя
-app.get('/api/orders', authenticateToken, (req: any, res) => {
-  const userId = req.user.id;
-
-  db.all(`
-    SELECT o.*
-    FROM orders o
-    WHERE o.user_id = ?
-    ORDER BY o.created_at DESC
-  `, [userId], async (err, orders) => {
-    if (err) {
-      return res.status(500).json({ message: 'Ошибка загрузки заказов', error: err.message });
-    }
-    
-    // Загружаем детали товаров для каждого заказа
-    const ordersWithItems = await Promise.all(orders.map(async (order: any) => {
-      return new Promise((resolve) => {
-        console.log('Loading items for order:', order.id);
-        
-        db.all('SELECT * FROM order_items WHERE order_id = ?', [order.id], (err, items) => {
-          if (err) {
-            resolve({
-              ...order,
-              items: [],
-              items_summary: 'Товары не найдены'
-            });
-          } else {
-            resolve({
-              ...order,
-              items: items || [],
-              items_summary: items && items.length > 0 ? 
-                items.map((item: any) => item.product_name + ' x' + item.quantity).join(', ') : 
-                'Товары не найдены'
-            });
-          }
-        });
-      });
-    }));
-    
-    res.json(ordersWithItems);
-  });
-});
+// Получение заказов пользователя (удален дублирующий эндпоинт)
 
 // Гостевые заказы (без авторизации)
 app.post('/api/orders/guest', (req: any, res) => {
@@ -525,7 +484,7 @@ app.post('/api/orders/guest', (req: any, res) => {
     const sql = `
       INSERT INTO orders (
         order_number, user_id, customer_name, customer_phone,
-        delivery_address, total_amount, status, payment_method, notes
+        customer_address, total_amount, status, payment_method, notes
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const params = [
@@ -1576,7 +1535,7 @@ app.get('/api/orders/user', authenticateToken, (req: any, res) => {
         o.order_number,
         o.customer_name,
         o.customer_phone,
-        o.delivery_address,
+        o.customer_address,
         o.total_amount,
         o.status,
         o.payment_method,
@@ -1604,7 +1563,7 @@ app.get('/api/orders/user', authenticateToken, (req: any, res) => {
         orderNumber: order.order_number,
         customerName: order.customer_name,
         customerPhone: order.customer_phone,
-        deliveryAddress: order.delivery_address,
+        deliveryAddress: order.customer_address,
         totalAmount: order.total_amount,
         status: order.status,
         paymentMethod: order.payment_method,
