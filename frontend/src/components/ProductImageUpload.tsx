@@ -64,45 +64,41 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
     setUploading(true);
     
     try {
-      // Создаем FormData для загрузки файла на сервер
-      const formData = new FormData();
-      formData.append('image', selectedFile);
-      
-      console.log('Загружаем файл на сервер:', selectedFile.name, 'размер:', selectedFile.size);
-      
-      // Попытка 1: Обычная загрузка
-      let response = await fetch('http://45.144.221.227:3001/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      // Если не получилось, пробуем альтернативный endpoint
-      if (!response.ok) {
-        console.log('Попытка 1 не удалась, пробуем альтернативный endpoint...');
-        response = await fetch('http://45.144.221.227:3001/api/upload-cdn', {
-          method: 'POST',
-          body: formData,
-        });
-      }
-      
-      if (!response.ok) {
-        throw new Error(`Ошибка загрузки: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      
-      if (response.ok) {
-        console.log('Файл успешно загружен на сервер:', result.imageUrl);
-        setUploaded(true);
-        onImageUpload(result.imageUrl);
+      // Конвертируем файл в base64 (работает везде)
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Image = e.target?.result as string;
         
-        // Автоматически закрываем через 2 секунды
-        setTimeout(() => {
-          onClose();
-        }, 2000);
-      } else {
-        throw new Error(result.message || 'Ошибка загрузки файла');
-      }
+        console.log('Конвертируем в base64:', selectedFile.name);
+        
+        // Отправляем base64 на сервер
+        const response = await fetch('https://45.144.221.227:3443/api/upload-base64', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image: base64Image,
+            filename: selectedFile.name
+          }),
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Файл успешно загружен:', result.imageUrl);
+          setUploaded(true);
+          onImageUpload(result.imageUrl);
+          
+          setTimeout(() => {
+            onClose();
+          }, 2000);
+        } else {
+          throw new Error('Ошибка загрузки');
+        }
+      };
+      
+      reader.readAsDataURL(selectedFile);
+      
     } catch (error) {
       console.error('Ошибка загрузки фото:', error);
       alert('Ошибка при загрузке фото. Попробуйте еще раз.');

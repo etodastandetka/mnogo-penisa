@@ -12,6 +12,11 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  // Защита от undefined/null
+  if (!product) {
+    console.log('❌ ProductCard: product is undefined/null');
+    return null;
+  }
   const { addItem, removeItem, updateQuantity, getItemQuantity } = useCartStore();
   const quantity = getItemQuantity(product.id.toString());
   const [imageError, setImageError] = useState(false);
@@ -20,37 +25,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   // Функция для получения URL изображения с кеш-бастером
   const getImageUrl = (imageUrl: string): string => {
-    console.log('🖼️ Обработка изображения для товара:', product.name, 'URL:', imageUrl);
-    
     // Если это base64 изображение, возвращаем как есть
-    if (imageUrl.startsWith('data:image/')) {
-      console.log('✅ Base64 изображение, возвращаем как есть');
+    if (imageUrl && imageUrl.startsWith('data:image/')) {
       return imageUrl;
     }
     
-    // Если это внешний URL (Unsplash), возвращаем как есть
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      console.log('✅ Внешний URL, возвращаем как есть');
+    // Если это внешний URL, возвращаем как есть
+    if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
       return imageUrl;
     }
     
-    // Если это относительный путь, добавляем базовый URL
-    if (imageUrl.startsWith('/uploads/')) {
-      const fullUrl = `http://45.144.221.227:3001${imageUrl}`;
-      console.log('🔗 Относительный путь, полный URL:', fullUrl);
-      return `${fullUrl}?t=${Date.now()}`;
-    }
-    
-    // Если пустая строка или null, возвращаем placeholder
+    // Если нет изображения, возвращаем placeholder
     if (!imageUrl || imageUrl === '') {
-      console.log('🔄 Нет изображения, используем placeholder');
-      return 'http://45.144.221.227:3001/images/placeholder.svg';
+      return 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
     }
     
-    // Для всех остальных случаев пробуем как относительный путь
-    const fullUrl = `http://45.144.221.227:3001/uploads/${imageUrl}`;
-    console.log('🔗 Пробуем как относительный путь:', fullUrl);
-    return `${fullUrl}?t=${Date.now()}`;
+    // Для всех остальных случаев возвращаем как есть
+    return imageUrl;
   };
 
   const handleImageLoad = () => {

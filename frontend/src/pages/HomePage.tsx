@@ -31,9 +31,11 @@ export const MenuPage: React.FC = () => {
   const fetchProducts = async () => {
     try {
       setError(null);
-      console.log('Загружаем товары для меню...');
+      console.log('📱 Загружаем товары для меню...');
       const productsData = await productsApi.getAll();
-      console.log('Загружено товаров:', productsData.length);
+      console.log('📱 Загружено товаров:', productsData.length);
+      console.log('📱 Первый товар:', productsData?.[0]);
+      console.log('📱 User Agent:', navigator.userAgent);
       
       if (productsData && Array.isArray(productsData)) {
         setProducts(productsData);

@@ -56,7 +56,11 @@ const upload = multer({
 });
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false
+}));
 app.use(compression());
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
@@ -64,6 +68,17 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Дополнительные заголовки для мобильных устройств
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
 
 // Обработка preflight запросов
 app.options('*', cors());
@@ -454,6 +469,10 @@ app.get('/api/user/me', authenticateToken, (req: any, res) => {
 
 // Продукты
 app.get('/api/products', (req, res) => {
+  console.log('📱 Запрос товаров с устройства:', req.headers['user-agent']);
+  console.log('📱 Origin:', req.headers.origin);
+  console.log('📱 Referer:', req.headers.referer);
+  
   db.all('SELECT * FROM products WHERE is_available = 1 ORDER BY created_at DESC', (err, products) => {
     if (err) {
       console.error('❌ Ошибка загрузки продуктов из БД:', err);
@@ -1940,6 +1959,31 @@ app.get('/api/check-image/:filename(*)', (req, res) => {
     modified: stats.mtime,
     url: `http://45.144.221.227:3001/uploads/${filename}`
   });
+});
+
+// Endpoint для загрузки base64 изображений (работает везде)
+app.post('/api/upload-base64', (req, res) => {
+  try {
+    const { image, filename } = req.body;
+    
+    if (!image || !filename) {
+      return res.status(400).json({ success: false, message: 'Отсутствует изображение или имя файла' });
+    }
+    
+    // Сохраняем base64 в базу данных как есть
+    const imageUrl = image; // base64 строка
+    
+    console.log('✅ Base64 изображение сохранено:', filename);
+    
+    res.json({
+      success: true,
+      imageUrl: imageUrl,
+      message: 'Изображение успешно загружено'
+    });
+  } catch (error) {
+    console.error('❌ Ошибка загрузки base64:', error);
+    res.status(500).json({ success: false, message: 'Ошибка загрузки файла' });
+  }
 });
 
 // Альтернативный endpoint для загрузки на CDN (если локальные файлы не работают)
