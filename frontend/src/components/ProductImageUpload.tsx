@@ -64,17 +64,26 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
     setUploading(true);
     
     try {
-      // Создаем FormData для загрузки файла на сервер (как в russkii-portal)
+      // Создаем FormData для загрузки файла на сервер
       const formData = new FormData();
       formData.append('image', selectedFile);
       
       console.log('Загружаем файл на сервер:', selectedFile.name, 'размер:', selectedFile.size);
       
-      // Загружаем файл на сервер (как в russkii-portal)
-      const response = await fetch('https://45.144.221.227:3443/api/upload', {
+      // Попытка 1: Обычная загрузка
+      let response = await fetch('http://45.144.221.227:3001/api/upload', {
         method: 'POST',
         body: formData,
       });
+      
+      // Если не получилось, пробуем альтернативный endpoint
+      if (!response.ok) {
+        console.log('Попытка 1 не удалась, пробуем альтернативный endpoint...');
+        response = await fetch('http://45.144.221.227:3001/api/upload-cdn', {
+          method: 'POST',
+          body: formData,
+        });
+      }
       
       if (!response.ok) {
         throw new Error(`Ошибка загрузки: ${response.status}`);

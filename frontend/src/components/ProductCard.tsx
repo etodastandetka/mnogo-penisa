@@ -19,30 +19,38 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
 
   // Функция для получения URL изображения с кеш-бастером
-  const getImageUrl = (imageUrl: string | undefined) => {
+  const getImageUrl = (imageUrl: string): string => {
     console.log('🖼️ Обработка изображения для товара:', product.name, 'URL:', imageUrl);
-    
-    if (!imageUrl || imageUrl === '') {
-      console.log('❌ Нет изображения, используем placeholder');
-      return 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
-    }
     
     // Если это base64 изображение, возвращаем как есть
     if (imageUrl.startsWith('data:image/')) {
-      console.log('✅ Base64 изображение');
+      console.log('✅ Base64 изображение, возвращаем как есть');
+      return imageUrl;
+    }
+    
+    // Если это внешний URL (Unsplash), возвращаем как есть
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      console.log('✅ Внешний URL, возвращаем как есть');
       return imageUrl;
     }
     
     // Если это относительный путь, добавляем базовый URL
     if (imageUrl.startsWith('/uploads/')) {
-      const fullUrl = `https://45.144.221.227:3443${imageUrl}`;
+      const fullUrl = `http://45.144.221.227:3001${imageUrl}`;
       console.log('🔗 Относительный путь, полный URL:', fullUrl);
       return `${fullUrl}?t=${Date.now()}`;
     }
     
-    // Если это полный URL, добавляем кеш-бастер
-    console.log('🔗 Полный URL с кеш-бастером');
-    return `${imageUrl}?t=${Date.now()}`;
+    // Если пустая строка или null, возвращаем placeholder
+    if (!imageUrl || imageUrl === '') {
+      console.log('🔄 Нет изображения, используем placeholder');
+      return 'http://45.144.221.227:3001/images/placeholder.svg';
+    }
+    
+    // Для всех остальных случаев пробуем как относительный путь
+    const fullUrl = `http://45.144.221.227:3001/uploads/${imageUrl}`;
+    console.log('🔗 Пробуем как относительный путь:', fullUrl);
+    return `${fullUrl}?t=${Date.now()}`;
   };
 
   const handleImageLoad = () => {

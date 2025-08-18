@@ -24,7 +24,22 @@ const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // Настройка multer для загрузки файлов
-const storage = multer.memoryStorage(); // Используем память для Vercel
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '../uploads');
+    
+    // Создаем папку если её нет
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
 
 const upload = multer({ 
   storage: storage,
@@ -57,20 +72,81 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Статическая папка для загруженных файлов
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
-  setHeaders: (res, path) => {
+  setHeaders: (res, filePath) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cache-Control', 'public, max-age=31536000');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Range');
     
     // Определяем тип контента по расширению файла
-    if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
-      res.setHeader('Content-Type', 'image/jpeg');
-    } else if (path.endsWith('.png')) {
-      res.setHeader('Content-Type', 'image/png');
-    } else if (path.endsWith('.gif')) {
-      res.setHeader('Content-Type', 'image/gif');
+    const ext = path.extname(filePath).toLowerCase();
+    
+    switch (ext) {
+      case '.jpg':
+      case '.jpeg':
+        res.setHeader('Content-Type', 'image/jpeg');
+        break;
+      case '.png':
+        res.setHeader('Content-Type', 'image/png');
+        break;
+      case '.gif':
+        res.setHeader('Content-Type', 'image/gif');
+        break;
+      case '.webp':
+        res.setHeader('Content-Type', 'image/webp');
+        break;
+      case '.svg':
+        res.setHeader('Content-Type', 'image/svg+xml');
+        break;
+      default:
+        // Для неизвестных типов файлов
+        res.setHeader('Content-Type', 'application/octet-stream');
     }
+    
+    // Добавляем заголовки для правильной обработки изображений
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    
+    console.log('📁 Обслуживаем файл:', filePath, 'Content-Type:', res.getHeader('Content-Type'));
+  }
+}));
+
+// Статическая папка для изображений
+app.use('/images', express.static(path.join(__dirname, '../public/images'), {
+  setHeaders: (res, filePath) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Range');
+    
+    // Определяем тип контента по расширению файла
+    const ext = path.extname(filePath).toLowerCase();
+    
+    switch (ext) {
+      case '.jpg':
+      case '.jpeg':
+        res.setHeader('Content-Type', 'image/jpeg');
+        break;
+      case '.png':
+        res.setHeader('Content-Type', 'image/png');
+        break;
+      case '.gif':
+        res.setHeader('Content-Type', 'image/gif');
+        break;
+      case '.webp':
+        res.setHeader('Content-Type', 'image/webp');
+        break;
+      case '.svg':
+        res.setHeader('Content-Type', 'image/svg+xml');
+        break;
+      default:
+        res.setHeader('Content-Type', 'application/octet-stream');
+    }
+    
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    
+    console.log('🖼️ Обслуживаем изображение:', filePath, 'Content-Type:', res.getHeader('Content-Type'));
   }
 }));
 
@@ -351,24 +427,56 @@ app.get('/api/user/me', authenticateToken, (req: any, res) => {
 app.get('/api/products', (req, res) => {
   db.all('SELECT * FROM products WHERE is_available = 1 ORDER BY created_at DESC', (err, products) => {
     if (err) {
+      console.error('❌ Ошибка загрузки продуктов из БД:', err);
       return res.status(500).json({ message: 'Ошибка загрузки продуктов' });
     }
     
-    // Добавляем placeholder изображения только для товаров без фото
-    const productsWithPlaceholders = products.map((product: any) => {
-      if (!product.image_url || product.image_url === '') {
-        // Используем placeholder изображение только если нет фото
-        return {
-          ...product,
-          image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
-        };
+    console.log('📦 Загружено товаров из БД:', products.length);
+    
+    // Обрабатываем изображения для каждого товара (упрощенная логика как в russkii-portal)
+    const productsWithImages = products.map((product: any) => {
+      console.log('🖼️ Обработка товара:', product.name, 'image_url:', product.image_url);
+      
+      let processedImageUrl = product.image_url;
+      
+      // Если есть относительный путь к изображению, делаем его полным
+      if (product.image_url && product.image_url.startsWith('/uploads/')) {
+        processedImageUrl = `http://45.144.221.227:3001${product.image_url}`;
+        console.log('🔗 Локальный файл, полный URL:', processedImageUrl);
       }
-      return product;
+      
+      // Если это внешний URL (Unsplash или другие), оставляем как есть
+      if (product.image_url && (product.image_url.startsWith('http://') || product.image_url.startsWith('https://'))) {
+        processedImageUrl = product.image_url;
+        console.log('🌐 Внешний URL изображения:', processedImageUrl);
+      }
+      
+      // Если это base64 изображение, оставляем как есть
+      if (product.image_url && product.image_url.startsWith('data:image/')) {
+        processedImageUrl = product.image_url;
+        console.log('📄 Base64 изображение для товара:', product.name);
+      }
+      
+      // Если нет изображения, добавляем placeholder
+      if (!product.image_url || product.image_url === '') {
+        processedImageUrl = 'http://45.144.221.227:3001/images/placeholder.svg';
+        console.log('🖼️ Добавлен placeholder для товара:', product.name);
+      }
+      
+      return {
+        ...product,
+        image_url: processedImageUrl,
+        original_image_url: product.image_url // сохраняем оригинальный URL для отладки
+      };
     });
     
-    console.log('Отправляем товары в меню:', productsWithPlaceholders.length, 'шт.');
+    console.log('✅ Отправляем товары в меню:', productsWithImages.length, 'шт.');
     
-    res.json(productsWithPlaceholders);
+    // Добавляем отладочную информацию в заголовки
+    res.setHeader('X-Products-Count', productsWithImages.length);
+    res.setHeader('X-Products-With-Images', productsWithImages.filter(p => p.original_image_url && p.original_image_url !== '').length);
+    
+    res.json(productsWithImages);
   });
 });
 
@@ -665,43 +773,60 @@ app.get('/api/orders/payment-proof/:filename', (req, res) => {
   }
 });
 
-// Загрузка фото товара
-app.post('/api/upload/product-image', upload.single('file'), (req, res) => {
-  console.log('Загрузка фото товара:', { 
-    file: req.file ? req.file.originalname : 'нет файла',
-    body: req.body 
-  });
+// Загрузка фото товара (как в russkii-portal)
+app.post('/api/upload', upload.single('image'), (req, res) => {
+  console.log('🔥 UPLOAD: Получен запрос на загрузку изображения');
+  console.log('🔥 UPLOAD: File:', req.file ? req.file.filename : 'не загружен');
   
   if (!req.file) {
-    return res.status(400).json({ success: false, error: 'Файл не загружен' });
+    console.log("❌ UPLOAD: Изображение не загружено");
+    return res.status(400).json({ message: "Изображение не загружено" });
   }
-
-  const fileName = 'product-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.jpg';
   
   try {
-    // Создаем папку uploads если её нет
-    const uploadsDir = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-    
-    // Сохраняем файл
-    const filePath = path.join(uploadsDir, fileName);
-    fs.writeFileSync(filePath, req.file.buffer);
-    
-    // Создаем URL для файла
-    const fileUrl = 'https://45.144.221.227:3443/uploads/' + fileName;
-    
-    console.log('Фото товара сохранено:', { fileName, fileUrl });
+    // Создаем URL к загруженному файлу (как в russkii-portal)
+    const imageUrl = `/uploads/${req.file.filename}`;
+    console.log(`✅ UPLOAD: Файл загружен: ${imageUrl}`);
     
     res.json({ 
-      success: true, 
-      message: 'Фото товара успешно загружено',
-      fileUrl: fileUrl
+      message: "Файл успешно загружен", 
+      imageUrl: imageUrl,
+      file: req.file
     });
   } catch (error) {
-    console.error('Ошибка сохранения фото товара:', error);
-    res.status(500).json({ success: false, error: 'Ошибка сохранения файла' });
+    console.error("❌ UPLOAD: Ошибка при загрузке файла:", error);
+    res.status(500).json({ message: "Ошибка при загрузке файла" });
+  }
+});
+
+// Загрузка нескольких изображений (как в russkii-portal)
+app.post('/api/upload-images', upload.array('images', 10), (req, res) => {
+  try {
+    console.log("🔥 UPLOAD-IMAGES: Получен запрос на загрузку изображений");
+    console.log("🔥 UPLOAD-IMAGES: Files count:", req.files ? req.files.length : 0);
+    
+    if (!req.files || req.files.length === 0) {
+      console.log("❌ UPLOAD-IMAGES: Изображения не загружены");
+      return res.status(400).json({ message: "Изображения не загружены" });
+    }
+    
+    // Создаем URL к загруженным файлам
+    const imageUrls: string[] = [];
+    const files = req.files as Express.Multer.File[];
+    
+    files.forEach(file => {
+      const imageUrl = `/uploads/${file.filename}`;
+      imageUrls.push(imageUrl);
+      console.log(`✅ UPLOAD-IMAGES: Файл загружен: ${imageUrl}`);
+    });
+    
+    res.json({ 
+      message: "Файлы успешно загружены", 
+      imageUrls: imageUrls
+    });
+  } catch (error) {
+    console.error("❌ UPLOAD-IMAGES: Ошибка при загрузке файлов:", error);
+    res.status(500).json({ message: "Ошибка при загрузке файлов" });
   }
 });
 
@@ -731,7 +856,7 @@ app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
     fs.writeFileSync(filePath, req.file.buffer);
     
     // Создаем URL для файла
-    const fileUrl = 'https://45.144.221.227:3443/uploads/' + fileName;
+    const fileUrl = 'http://45.144.221.227:3001/uploads/' + fileName;
     
     console.log('Обновляем заказ в базе:', { orderId, orderNumber, fileUrl });
     
@@ -816,7 +941,7 @@ app.post('/api/admin/orders/:orderNumber/payment-proof', upload.single('file'), 
     fs.writeFileSync(filePath, req.file.buffer);
     
     // Создаем URL для файла
-    const fileUrl = 'https://45.144.221.227:3443/uploads/' + fileName;
+    const fileUrl = 'http://45.144.221.227:3001/uploads/' + fileName;
     
     // Ищем заказ по номеру
     db.get('SELECT id, order_number FROM orders WHERE order_number = ?', [orderNumber], (err, order) => {
@@ -1711,3 +1836,100 @@ if (require.main === module) {
     console.log('🔗 URL: http://45.144.221.227:' + PORT);
     });
 }
+
+// Endpoint для проверки изображений
+app.get('/api/check-image/:filename(*)', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, '../uploads', filename);
+  
+  console.log('🔍 Проверка изображения:', filename);
+  console.log('📁 Полный путь:', filePath);
+  
+  if (!fs.existsSync(filePath)) {
+    console.log('❌ Файл не найден');
+    return res.status(404).json({ 
+      error: 'Файл не найден',
+      filename,
+      fullPath: filePath
+    });
+  }
+  
+  const stats = fs.statSync(filePath);
+  const ext = path.extname(filePath).toLowerCase();
+  
+  console.log('📊 Информация о файле:', {
+    size: stats.size,
+    extension: ext,
+    created: stats.birthtime,
+    modified: stats.mtime
+  });
+  
+  // Определяем MIME тип
+  let mimeType = 'application/octet-stream';
+  switch (ext) {
+    case '.jpg':
+    case '.jpeg':
+      mimeType = 'image/jpeg';
+      break;
+    case '.png':
+      mimeType = 'image/png';
+      break;
+    case '.gif':
+      mimeType = 'image/gif';
+      break;
+    case '.webp':
+      mimeType = 'image/webp';
+      break;
+    case '.svg':
+      mimeType = 'image/svg+xml';
+      break;
+  }
+  
+  res.json({
+    exists: true,
+    filename,
+    fullPath: filePath,
+    size: stats.size,
+    mimeType,
+    extension: ext,
+    created: stats.birthtime,
+    modified: stats.mtime,
+    url: `http://45.144.221.227:3001/uploads/${filename}`
+  });
+});
+
+// Альтернативный endpoint для загрузки на CDN (если локальные файлы не работают)
+app.post('/api/upload-cdn', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: 'Файл не загружен' });
+  }
+
+  try {
+    // Здесь можно интегрировать с внешним CDN (Cloudinary, AWS S3, etc.)
+    // Пока возвращаем локальный путь, но с улучшенной обработкой
+    const fileName = 'product-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(req.file.originalname);
+    
+    // Сохраняем файл локально
+    const uploadsDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    
+    const filePath = path.join(uploadsDir, fileName);
+    fs.writeFileSync(filePath, req.file.buffer);
+    
+    // Возвращаем URL с кэш-бастингом
+    const imageUrl = `/uploads/${fileName}?v=${Date.now()}`;
+    
+    console.log('✅ Файл загружен на CDN:', imageUrl);
+    
+    res.json({
+      success: true,
+      imageUrl: imageUrl,
+      message: 'Изображение успешно загружено'
+    });
+  } catch (error) {
+    console.error('❌ Ошибка загрузки на CDN:', error);
+    res.status(500).json({ success: false, message: 'Ошибка загрузки файла' });
+  }
+});
