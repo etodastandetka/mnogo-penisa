@@ -53,7 +53,7 @@ export const LandingPage: React.FC = () => {
     { name: 'Роллы', count: 15, image: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&h=200&fit=crop' },
     { name: 'Сеты', count: 8, image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=300&h=200&fit=crop' },
     { name: 'Пицца', count: 12, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&h=200&fit=crop' },
-    { name: 'Напитки', count: 6, image: 'https://images.unsplash.com/photo-1513639725746-c5d3e861f32a?w=300&h=200&fit=crop' }
+    { name: 'Напитки', count: 6, image: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.shutterstock.com%2Fru%2Fsearch%2Fcoca-cola-fanta-sprite&psig=AOvVaw20JWAr7vonm0Mj-wqIwpQK&ust=1755612486997000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCKi-0bXElI8DFQAAAAAdAAAAABAL' }
   ];
 
   const quickMenu = products.slice(0, 4);

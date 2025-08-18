@@ -165,8 +165,10 @@ export const CheckoutPage: React.FC = () => {
         if (paymentMethod === PaymentMethod.QR) {
           setShowPayment(true);
         } else {
-          // Для других способов оплаты - показываем уведомление, но не очищаем корзину сразу
-          alert(`Заказ успешно оформлен! Номер заказа: ${result.orderNumber}. Теперь можете загрузить чек об оплате.`);
+          // Для других способов оплаты - очищаем корзину и переходим на главную
+          clearCart();
+          alert(`Заказ успешно оформлен! Номер заказа: ${result.orderNumber}. Мы свяжемся с вами в ближайшее время.`);
+          navigate('/');
         }
       } else {
         alert('Ошибка при создании заказа');
@@ -178,7 +180,9 @@ export const CheckoutPage: React.FC = () => {
 
   const handlePaymentComplete = () => {
     setShowPayment(false);
-    alert('Чек об оплате успешно загружен! Теперь можете оформить заказ.');
+    clearCart();
+    alert('Чек об оплате успешно загружен! Заказ завершен. Мы свяжемся с вами в ближайшее время.');
+    navigate('/');
   };
 
   // Функции для управления корзиной

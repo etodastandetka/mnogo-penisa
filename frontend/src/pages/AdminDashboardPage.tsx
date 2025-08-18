@@ -48,7 +48,10 @@ export const AdminDashboardPage: React.FC = () => {
     try {
       const orders = await getOrders();
       const totalOrders = orders.length;
-      const totalRevenue = orders.reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0);
+      const totalRevenue = orders.reduce(
+        (sum: number, order: any) => sum + (order.total_amount ?? order.totalAmount ?? 0),
+        0
+      );
       const activeOrders = orders.filter((order: any) => 
         order.status !== 'delivered' && order.status !== 'cancelled'
       ).length;
@@ -239,25 +242,27 @@ export const AdminDashboardPage: React.FC = () => {
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
                           <Badge variant="primary" className="text-xs">
-                            #{order.order_number || order.id}
+                            #{order.order_number || order.orderNumber || order.id}
                           </Badge>
                           <Badge className={getStatusColor(order.status)}>
                             {getStatusText(order.status)}
                           </Badge>
                         </div>
                         <p className="text-sm font-medium text-gray-900">
-                          {order.customer_name || 'Клиент'}
+                          {order.customer_name || order.customerName || 'Клиент'}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {order.customer_phone || order.phone || 'Телефон не указан'}
+                          {order.customer_phone || order.customerPhone || order.phone || 'Телефон не указан'}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-bold text-gray-900">
-                          {order.total_amount?.toLocaleString() || 0} сом
+                          {(order.total_amount ?? order.totalAmount ?? 0).toLocaleString()} сом
                         </p>
                         <p className="text-xs text-gray-500">
-                          {order.created_at ? new Date(order.created_at).toLocaleDateString('ru-RU') : 'Дата не указана'}
+                          {order.created_at || order.createdAt
+                            ? new Date(order.created_at || order.createdAt).toLocaleDateString('ru-RU')
+                            : 'Дата не указана'}
                         </p>
                       </div>
                     </div>
