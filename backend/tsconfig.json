@@ -13,6 +13,6 @@
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node"
   },
-  "include": ["src/telegramBot.ts", "src/types.ts", "api/**/*"],
-  "exclude": ["node_modules", "dist", "src/seed.ts"]
+  "include": ["src/telegramBot.ts", "src/types.ts", "api/index.ts"],
+  "exclude": ["node_modules", "dist", "src/seed.ts", "api/index_backup.ts"]
 }
