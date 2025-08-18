@@ -77,13 +77,22 @@ let db: sqlite3.Database;
 
 // Инициализация базы данных
 const initDatabase = () => {
-  // Создаем папку data если её нет
-  if (!fs.existsSync('./data')) {
-    fs.mkdirSync('./data', { recursive: true });
-  }
+  // Для Vercel используем in-memory базу данных, для локальной разработки - файловую
+  const isVercel = process.env.VERCEL === '1';
   
-  // Используем файловую базу данных
-  db = new sqlite3.Database('./data/mnogo_rolly.db');
+  if (isVercel) {
+    // На Vercel используем in-memory базу данных
+    console.log('Инициализация in-memory базы данных для Vercel');
+    db = new sqlite3.Database(':memory:');
+  } else {
+    // Для локальной разработки создаем папку data если её нет
+    if (!fs.existsSync('./data')) {
+      fs.mkdirSync('./data', { recursive: true });
+    }
+    
+    // Используем файловую базу данных
+    db = new sqlite3.Database('./data/mnogo_rolly.db');
+  }
   
   // Создание таблиц
   db.serialize(() => {
@@ -519,18 +528,28 @@ app.post('/api/upload/product-image', upload.single('file'), (req, res) => {
   const fileName = 'product-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.jpg';
   
   try {
-    // Создаем папку uploads если её нет
-    const uploadsDir = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
+    // Для Vercel используем /tmp, для локальной разработки - папку uploads
+    const isVercel = process.env.VERCEL === '1';
+    
+    let uploadsDir: string;
+    if (isVercel) {
+      // На Vercel используем временную папку
+      uploadsDir = '/tmp';
+    } else {
+      // Для локальной разработки создаем папку uploads если её нет
+      uploadsDir = path.join(__dirname, '../uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
     }
     
-    // Сохраняем файл в папку uploads
+    // Сохраняем файл
     const filePath = path.join(uploadsDir, fileName);
     fs.writeFileSync(filePath, req.file.buffer);
     
-    // Создаем URL для файла
-    const fileUrl = 'http://localhost:3001/uploads/' + fileName;
+    // Создаем URL для файла (адаптировано для Vercel)
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3001';
+    const fileUrl = `${baseUrl}/api/uploads/${fileName}`;
     
     console.log('Фото товара сохранено:', { fileName, fileUrl });
     
@@ -560,18 +579,28 @@ app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
   const fileName = 'receipt-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.jpg';
   
   try {
-    // Создаем папку uploads если её нет
-    const uploadsDir = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
+    // Для Vercel используем /tmp, для локальной разработки - папку uploads
+    const isVercel = process.env.VERCEL === '1';
+    
+    let uploadsDir: string;
+    if (isVercel) {
+      // На Vercel используем временную папку
+      uploadsDir = '/tmp';
+    } else {
+      // Для локальной разработки создаем папку uploads если её нет
+      uploadsDir = path.join(__dirname, '../uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
     }
     
-    // Сохраняем файл в папку uploads
+    // Сохраняем файл
     const filePath = path.join(uploadsDir, fileName);
     fs.writeFileSync(filePath, req.file.buffer);
     
-    // Создаем URL для файла
-    const fileUrl = 'http://localhost:3001/uploads/' + fileName;
+    // Создаем URL для файла (адаптировано для Vercel)
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3001';
+    const fileUrl = `${baseUrl}/api/uploads/${fileName}`;
     
     console.log('Обновляем заказ в базе:', { orderId, orderNumber, fileUrl });
     
@@ -645,18 +674,28 @@ app.post('/api/admin/orders/:orderNumber/payment-proof', upload.single('file'), 
   const fileName = 'receipt-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.jpg';
   
   try {
-    // Создаем папку uploads если её нет
-    const uploadsDir = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
+    // Для Vercel используем /tmp, для локальной разработки - папку uploads
+    const isVercel = process.env.VERCEL === '1';
+    
+    let uploadsDir: string;
+    if (isVercel) {
+      // На Vercel используем временную папку
+      uploadsDir = '/tmp';
+    } else {
+      // Для локальной разработки создаем папку uploads если её нет
+      uploadsDir = path.join(__dirname, '../uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
     }
     
-    // Сохраняем файл в папку uploads
+    // Сохраняем файл
     const filePath = path.join(uploadsDir, fileName);
     fs.writeFileSync(filePath, req.file.buffer);
     
-    // Создаем URL для файла
-    const fileUrl = 'http://localhost:3001/uploads/' + fileName;
+    // Создаем URL для файла (адаптировано для Vercel)
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3001';
+    const fileUrl = `${baseUrl}/api/uploads/${fileName}`;
     
     // Ищем заказ по номеру
     db.get('SELECT id, order_number FROM orders WHERE order_number = ?', [orderNumber], (err, order) => {
@@ -1484,6 +1523,43 @@ app.post('/api/bank-settings', (req, res) => {
       id: this.lastID
     });
   });
+});
+
+// API endpoint для обработки статических файлов (для Vercel)
+app.get('/api/uploads/:filename', (req, res) => {
+  const { filename } = req.params;
+  
+  // Для Vercel используем /tmp, для локальной разработки - папку uploads
+  const isVercel = process.env.VERCEL === '1';
+  const filePath = isVercel 
+    ? path.join('/tmp', filename)
+    : path.join(__dirname, '../uploads', filename);
+  
+  // Проверяем существование файла
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ 
+      success: false, 
+      error: 'Файл не найден' 
+    });
+  }
+  
+  // Определяем тип контента по расширению
+  let contentType = 'application/octet-stream';
+  if (filename.endsWith('.jpg') || filename.endsWith('.jpeg')) {
+    contentType = 'image/jpeg';
+  } else if (filename.endsWith('.png')) {
+    contentType = 'image/png';
+  } else if (filename.endsWith('.gif')) {
+    contentType = 'image/gif';
+  }
+  
+  // Устанавливаем заголовки
+  res.setHeader('Content-Type', contentType);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'public, max-age=31536000');
+  
+  // Отправляем файл
+  res.sendFile(filePath);
 });
 
 // Экспортируем для Vercel
