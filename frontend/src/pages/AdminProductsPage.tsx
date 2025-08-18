@@ -16,6 +16,18 @@ import {
   Upload
 } from 'lucide-react';
 
+// Функция для отображения названий категорий
+const getCategoryDisplayName = (category: string): string => {
+  const categoryNames: { [key: string]: string } = {
+    'rolls': 'Роллы',
+    'sets': 'Сеты',
+    'drinks': 'Напитки',
+    'sauces': 'Соусы',
+    'snacks': 'Снэки'
+  };
+  return categoryNames[category] || category;
+};
+
 interface Product {
   id: number;
   name: string;
@@ -480,9 +492,10 @@ export const AdminProductsPage: React.FC = () => {
                 >
                   <option value="">Все категории</option>
                   <option value="rolls">Роллы</option>
-                  <option value="sushi">Суши</option>
                   <option value="sets">Сеты</option>
                   <option value="drinks">Напитки</option>
+                  <option value="sauces">Соусы</option>
+                  <option value="snacks">Снэки</option>
                 </select>
               </div>
 
@@ -534,7 +547,7 @@ export const AdminProductsPage: React.FC = () => {
                         <p className="text-sm text-gray-600">{product.description}</p>
                         <div className="flex items-center space-x-4 mt-1">
                           <Badge className="bg-blue-100 text-blue-800">
-                            {product.category}
+                            {getCategoryDisplayName(product.category)}
                           </Badge>
                           <Badge className={product.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
                             {product.is_available ? 'В наличии' : 'Нет в наличии'}
@@ -662,10 +675,10 @@ export const AdminProductsPage: React.FC = () => {
                   >
                     <option value="">Выберите категорию</option>
                     <option value="rolls">Роллы</option>
-                    <option value="sushi">Суши</option>
                     <option value="sets">Сеты</option>
                     <option value="drinks">Напитки</option>
                     <option value="sauces">Соусы</option>
+                    <option value="snacks">Снэки</option>
                   </select>
                 </div>
 
@@ -856,10 +869,10 @@ export const AdminProductsPage: React.FC = () => {
                   >
                     <option value="">Выберите категорию</option>
                     <option value="rolls">Роллы</option>
-                    <option value="sushi">Суши</option>
                     <option value="sets">Сеты</option>
                     <option value="drinks">Напитки</option>
                     <option value="sauces">Соусы</option>
+                    <option value="snacks">Снэки</option>
                   </select>
                 </div>
 

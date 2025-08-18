@@ -9,11 +9,9 @@ export enum OrderStatus {
 // Категории товаров
 export enum ProductCategory {
   ROLLS = 'rolls', // Роллы
-  SETS = 'sets',
-  WINGS = 'wings', // Крылья
-  PIZZA = 'pizza', // Пицца
-  DRINKS = 'drinks',
-  SAUCES = 'sauces',
+  SETS = 'sets', // Сеты
+  DRINKS = 'drinks', // Напитки
+  SAUCES = 'sauces', // Соусы
   SNACKS = 'snacks', // Снэки
 }
 

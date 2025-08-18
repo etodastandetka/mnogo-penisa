@@ -8,8 +8,6 @@ import { Input } from '../components/ui/Input';
 const categoryLabels = {
   [ProductCategory.ROLLS]: 'Роллы',
   [ProductCategory.SETS]: 'Сеты',
-  [ProductCategory.WINGS]: 'Крылья',
-  [ProductCategory.PIZZA]: 'Пицца',
   [ProductCategory.DRINKS]: 'Напитки',
   [ProductCategory.SAUCES]: 'Соусы',
   [ProductCategory.SNACKS]: 'Снэки',
