@@ -1,6 +1,6 @@
 import { UploadResponse } from '../utils/fileUpload';
 
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'http://45.144.221.227:3001';
 
 export const uploadFileToServer = async (
   file: File, 

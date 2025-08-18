@@ -50,7 +50,7 @@ export const AdminDashboardPage: React.FC = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/admin/orders', {
+      const response = await fetch('http://45.144.221.227:3001/api/admin/orders', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -95,7 +95,7 @@ export const AdminDashboardPage: React.FC = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('http://localhost:3001/api/admin/products', {
+      const response = await fetch('http://45.144.221.227:3001/api/admin/products', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

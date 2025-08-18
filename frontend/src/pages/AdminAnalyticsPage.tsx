@@ -59,7 +59,7 @@ export const AdminAnalyticsPage: React.FC = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/admin/orders', {
+      const response = await fetch('http://45.144.221.227:3001/api/admin/orders', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

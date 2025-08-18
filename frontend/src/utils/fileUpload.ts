@@ -49,7 +49,7 @@ export const uploadPaymentProof = async (file: File, orderId: string | number, o
   formData.append('orderNumber', orderNumber);
 
   try {
-    const response = await fetch('http://localhost:3001/api/orders/payment-proof', {
+    const response = await fetch('http://45.144.221.227:3001/api/orders/payment-proof', {
       method: 'POST',
       body: formData,
     });

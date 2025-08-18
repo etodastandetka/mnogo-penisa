@@ -49,7 +49,7 @@ export const AdminSettingsPage: React.FC = () => {
 
   const loadBankSettings = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/bank-settings');
+      const response = await fetch('http://45.144.221.227:3001/api/bank-settings');
       if (response.ok) {
         const data = await response.json();
         setSettings(prev => ({
@@ -79,7 +79,7 @@ export const AdminSettingsPage: React.FC = () => {
     
     try {
       // Отправляем настройки на сервер
-      const response = await fetch('http://localhost:3001/api/bank-settings', {
+      const response = await fetch('http://45.144.221.227:3001/api/bank-settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
