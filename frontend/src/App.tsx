@@ -8,6 +8,7 @@ import { CheckoutPage } from './pages/CheckoutPage';
 import { ContactPage } from './pages/ContactPage';
 import { AuthPage } from './pages/AuthPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { ImageDebugger } from './components/ImageDebugger';
 
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminOrdersPage } from './pages/AdminOrdersPage';
@@ -40,6 +41,11 @@ function App() {
             <Route path="/checkout" element={<PageWithNavigation><CheckoutPage /></PageWithNavigation>} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/profile" element={<PageWithNavigation><ProfilePage /></PageWithNavigation>} />
+            
+            {/* Отладчик изображений (только в development) */}
+            {process.env.NODE_ENV === 'development' && (
+              <Route path="/debug-images" element={<ImageDebugger />} />
+            )}
             
             {/* Админ-панель */}
             <Route path="/admin" element={
