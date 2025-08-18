@@ -116,6 +116,14 @@ export const MenuPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Наше меню</h1>
+          
+          {/* Отладочная информация */}
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              Всего товаров: {products.length} | Показано: {filteredProducts.length}
+            </p>
+          </div>
+          
           <Input
             type="text"
             placeholder="Поиск блюд..."

@@ -30,7 +30,7 @@ export const PageWrapper: React.FC<PageWrapperProps> = ({ children }) => {
   }, [user]);
 
   return (
-    <div className={`min-h-screen ${hasActiveOrder ? 'pt-16 sm:pt-20' : ''}`}>
+    <div className={`min-h-screen ${hasActiveOrder ? 'pt-20 sm:pt-16' : ''}`}>
       {children}
     </div>
   );

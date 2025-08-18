@@ -47,8 +47,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 h-full flex flex-col">
-      <div className="relative overflow-hidden rounded-t-xl">
+    <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 h-full flex flex-col border border-gray-200">
+      <div className="relative overflow-hidden rounded-t-xl bg-gray-100">
         <img
           src={getImageUrl(product.image_url || product.image)}
           alt={product.name}
@@ -57,6 +57,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             const target = e.target as HTMLImageElement;
             target.src = 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
           }}
+          loading="lazy"
         />
         {product.isPopular && (
           <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
@@ -75,11 +76,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
       
       <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
-        <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-red-600 transition-colors text-sm sm:text-base line-clamp-2">
+        <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-red-600 transition-colors text-sm sm:text-base line-clamp-2 min-h-[2rem]">
           {product.name}
         </h3>
-        <p className="text-gray-600 text-xs sm:text-sm mb-3 line-clamp-2 flex-1">
-          {product.description}
+        <p className="text-gray-600 text-xs sm:text-sm mb-3 line-clamp-2 flex-1 min-h-[2rem]">
+          {product.description || 'Описание отсутствует'}
         </p>
         
         <div className="flex items-center justify-between mt-auto">
@@ -93,7 +94,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 size="sm"
                 variant="outline"
                 onClick={() => handleUpdateQuantity(quantity - 1)}
-                className="w-7 h-7 sm:w-8 sm:h-8 p-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 p-0 border border-gray-300"
               >
                 <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
@@ -102,7 +103,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 size="sm"
                 variant="outline"
                 onClick={() => handleUpdateQuantity(quantity + 1)}
-                className="w-7 h-7 sm:w-8 sm:h-8 p-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 p-0 border border-gray-300"
               >
                 <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
@@ -111,7 +112,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <Button 
               size="sm"
               onClick={handleAddToCart}
-              className="bg-red-600 hover:bg-red-700 text-white w-7 h-7 sm:w-8 sm:h-8 p-0"
+              className="bg-red-600 hover:bg-red-700 text-white w-7 h-7 sm:w-8 sm:h-8 p-0 border border-red-600"
               disabled={product.is_available === false}
             >
               <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
