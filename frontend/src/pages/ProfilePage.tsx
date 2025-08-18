@@ -50,7 +50,7 @@ export const ProfilePage: React.FC = () => {
         try {
           const token = localStorage.getItem('token');
           if (token) {
-            const response = await fetch('http://45.144.221.227:3001/api/orders/user', {
+            const response = await fetch('https://45.144.221.227:3443/api/orders/user', {
               headers: {
                 'Authorization': `Bearer ${token}`
               }
@@ -78,7 +78,7 @@ export const ProfilePage: React.FC = () => {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-                      const response = await fetch('http://45.144.221.227:3001/api/user/profile', {
+                      const response = await fetch('https://45.144.221.227:3443/api/user/profile', {
               method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',

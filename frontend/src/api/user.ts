@@ -1,6 +1,6 @@
 import { User } from '../types';
 
-const API_BASE_URL = 'http://45.144.221.227:3001';
+const API_BASE_URL = 'https://45.144.221.227:3443';
 
 export const getUserInfo = async (): Promise<User> => {
   const token = localStorage.getItem('token');

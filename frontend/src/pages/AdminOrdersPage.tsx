@@ -83,7 +83,7 @@ export const AdminOrdersPage: React.FC = () => {
         return;
       }
 
-      const response = await fetch('http://45.144.221.227:3001/api/admin/orders', {
+      const response = await fetch('https://45.144.221.227:3443/api/admin/orders', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -113,7 +113,7 @@ export const AdminOrdersPage: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`http://45.144.221.227:3001/api/admin/orders/${orderId}/status`, {
+      const response = await fetch(`https://45.144.221.227:3443/api/admin/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
