@@ -102,7 +102,7 @@ export const CheckoutPage: React.FC = () => {
         // Заказ для авторизованного пользователя
         const token = localStorage.getItem('token');
         if (token) {
-          response = await fetch(`http://45.144.221.227:3001/api/orders`, {
+          response = await fetch(`https://45.144.221.227:3443/api/orders`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ export const CheckoutPage: React.FC = () => {
         }
       } else {
         // Заказ для гостя
-        response = await fetch(`http://45.144.221.227:3001/api/orders/guest`, {
+        response = await fetch(`https://45.144.221.227:3443/api/orders/guest`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
