@@ -52,8 +52,8 @@ export const LandingPage: React.FC = () => {
   const popularCategories = [
     { name: 'Роллы', count: 15, image: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&h=200&fit=crop' },
     { name: 'Сеты', count: 8, image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=300&h=200&fit=crop' },
-    { name: 'Пицца', count: 12, image: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&h=200&fit=crop' },
-    { name: 'Напитки', count: 6, image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=300&h=200&fit=crop' }
+    { name: 'Пицца', count: 12, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&h=200&fit=crop' },
+    { name: 'Напитки', count: 6, image: 'https://images.unsplash.com/photo-1513639725746-c5d3e861f32a?w=300&h=200&fit=crop' }
   ];
 
   const quickMenu = products.slice(0, 4);
