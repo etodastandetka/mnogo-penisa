@@ -99,17 +99,14 @@ ReadWritePaths=/var/www/mnogo-penisa
 WantedBy=multi-user.target
 EOF
 
-# Создаем SSL сертификаты (самоподписанные)
-echo -e "${YELLOW}🔒 Создаем SSL сертификаты...${NC}"
-mkdir -p /etc/ssl/private
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/ssl/private/mnogo-penisa.key \
-    -out /etc/ssl/certs/mnogo-penisa.crt \
-    -subj "/C=KG/ST=Bishkek/L=Bishkek/O=MnogoPenisa/CN=147.45.141.113"
-
-# Настраиваем права доступа
-chmod 600 /etc/ssl/private/mnogo-penisa.key
-chmod 644 /etc/ssl/certs/mnogo-penisa.crt
+# SSL сертификаты Let's Encrypt (если нужны)
+echo -e "${YELLOW}🔒 Проверяем SSL сертификаты...${NC}"
+if [ ! -f "/etc/letsencrypt/live/mnogo-rolly.online/fullchain.pem" ]; then
+    echo -e "${YELLOW}📝 Let's Encrypt сертификаты не найдены${NC}"
+    echo -e "${YELLOW}💡 Запустите: sudo certbot --nginx -d mnogo-rolly.online${NC}"
+else
+    echo -e "${GREEN}✅ Let's Encrypt сертификаты найдены${NC}"
+fi
 
 # Запускаем сервисы
 echo -e "${YELLOW}🚀 Запускаем сервисы...${NC}"

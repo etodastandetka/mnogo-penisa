@@ -7,7 +7,7 @@ console.log('🔒 Порт: 3444');
 console.log('🌐 URL: https://147.45.141.113:3444');
 
 // Запускаем сервер
-const server = spawn('node', ['api/index.ts'], {
+const server = spawn('npx', ['ts-node', 'api/index.ts'], {
   cwd: __dirname,
   stdio: 'inherit',
   env: { ...process.env, NODE_ENV: 'production' }

@@ -44,14 +44,29 @@ const createSelfSignedCert = () => {
 
 const startHttpsServer = () => {
   try {
-    const certPath = path.join(__dirname, 'certs');
-    const certFile = path.join(certPath, 'certificate.pem');
-    const keyFile = path.join(certPath, 'private-key.pem');
+    // Проверяем наличие Let's Encrypt сертификатов
+    const letsEncryptCert = '/etc/letsencrypt/live/mnogo-rolly.online/fullchain.pem';
+    const letsEncryptKey = '/etc/letsencrypt/live/mnogo-rolly.online/privkey.pem';
     
-    const options = {
-      cert: fs.readFileSync(certFile),
-      key: fs.readFileSync(keyFile)
-    };
+    let options;
+    
+    if (fs.existsSync(letsEncryptCert) && fs.existsSync(letsEncryptKey)) {
+      console.log('✅ Используем Let\'s Encrypt сертификаты');
+      options = {
+        cert: fs.readFileSync(letsEncryptCert),
+        key: fs.readFileSync(letsEncryptKey)
+      };
+    } else {
+      console.log('⚠️ Let\'s Encrypt сертификаты не найдены, используем самоподписанные');
+      const certPath = path.join(__dirname, 'certs');
+      const certFile = path.join(certPath, 'certificate.pem');
+      const keyFile = path.join(certPath, 'private-key.pem');
+      
+      options = {
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile)
+      };
+    }
     
     // Запускаем основной сервер на порту 3001
     const server = spawn('npx', ['ts-node', 'api/index.ts'], {
