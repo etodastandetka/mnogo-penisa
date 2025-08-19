@@ -168,15 +168,11 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
         <div class="total-section">
           <div class="total-row">
             <span>Подытог:</span>
-            <span>${Math.round((order.totalAmount || 0) / 1.12)} сом</span>
+            <span>${order.totalAmount || 0} сом</span>
           </div>
           <div class="total-row">
             <span>Доставка:</span>
             <span>0 сом</span>
-          </div>
-          <div class="total-row">
-            <span>НДС (12%):</span>
-            <span>${Math.round((order.totalAmount || 0) - ((order.totalAmount || 0) / 1.12))} сом</span>
           </div>
           <div class="total-row total-final">
             <span>ИТОГО:</span>

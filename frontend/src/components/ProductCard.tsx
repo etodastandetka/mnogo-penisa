@@ -27,14 +27,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const getImageUrl = (imageUrl: string): string | null => {
     // Если есть изображение - используем его
     if (imageUrl && imageUrl.trim() && imageUrl !== 'null') {
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      console.log('🖼️ Обрабатываем изображение:', {
+        productName: product.name,
+        originalUrl: imageUrl,
+        isMobile,
+        userAgent: navigator.userAgent.substring(0, 50)
+      });
+      
       // Добавляем timestamp для борьбы с кэшированием на мобильных (только для наших изображений)
       if (!imageUrl.includes('unsplash')) {
         const separator = imageUrl.includes('?') ? '&' : '?';
-        return `${imageUrl}${separator}v=${Date.now()}`;
+        const finalUrl = `${imageUrl}${separator}v=${Date.now()}`;
+        console.log('🔄 Добавлен timestamp:', finalUrl);
+        return finalUrl;
       }
       // Unsplash изображения возвращаем как есть
+      console.log('🌐 Unsplash изображение:', imageUrl);
       return imageUrl;
     }
+    console.log('❌ Нет изображения для товара:', product.name);
     return null; // Нет изображения - покажем иконку
   };
 
@@ -45,7 +58,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.error('❌ Ошибка загрузки изображения для товара:', product.name, 'URL:', e.currentTarget.src);
+    const originalUrl = e.currentTarget.src;
+    console.error('❌ Ошибка загрузки изображения для товара:', product.name);
+    console.error('❌ URL:', originalUrl);
+    console.error('❌ User Agent:', navigator.userAgent);
+    console.error('❌ Is Mobile:', /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    
     setImageError(true);
     setImageLoading(false);
     // Показываем категорийную иконку вместо попытки загрузить другое изображение
@@ -92,6 +110,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               onError={handleImageError}
               loading="lazy"
               crossOrigin="anonymous"
+              referrerPolicy="no-referrer"
+              decoding="async"
+              style={{ 
+                imageRendering: 'auto',
+                WebkitUserSelect: 'none',
+                userSelect: 'none'
+              }}
             />
             
             {/* Fallback для ошибок изображения - показываем категорийные иконки */}
