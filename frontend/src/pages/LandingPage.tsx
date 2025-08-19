@@ -228,15 +228,35 @@ export const LandingPage: React.FC = () => {
             {quickMenu.map((product) => (
               <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer" onClick={() => navigate('/menu')}>
                 <div className="relative overflow-hidden rounded-t-xl">
-                  <img
-                    src={product.image_url || product.image || 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'}
+                  {(product.image_url || product.image) ? (
+                    <img
+                      src={product.image_url || product.image}
                       alt={product.name}
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
-                    }}
-                  />
+                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                              <div class="text-center">
+                                <div class="w-16 h-16 text-gray-400 mx-auto mb-2">📷</div>
+                                <p class="text-sm text-gray-500">Нет фото</p>
+                              </div>
+                            </div>
+                          `;
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                      <div className="text-center">
+                        <div className="w-16 h-16 text-gray-400 mx-auto mb-2">📷</div>
+                        <p className="text-sm text-gray-500">Нет фото</p>
+                      </div>
+                    </div>
+                  )}
                   {product.isPopular && (
                     <div className="absolute top-3 left-3">
                       <Badge variant="primary" className="bg-red-500 text-white">

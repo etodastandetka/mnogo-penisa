@@ -156,34 +156,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </>
         ) : (
-          /* Нет изображения - показываем иконку категории */
-          <div className="w-full h-24 sm:h-32 md:h-40 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+          /* Нет изображения - показываем серый блок */
+          <div className="w-full h-24 sm:h-32 md:h-40 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
             <div className="text-center">
-              {product.category === 'rolls' && (
-                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍣</div>
-              )}
-              {product.category === 'pizza' && (
-                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍕</div>
-              )}
-              {product.category === 'wings' && (
-                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍗</div>
-              )}
-              {product.category === 'snacks' && (
-                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍟</div>
-              )}
-              {product.category === 'drinks' && (
-                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🥤</div>
-              )}
-              {product.category === 'sauces' && (
-                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🥫</div>
-              )}
-              {product.category === 'sets' && (
-                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍱</div>
-              )}
-              {!['rolls', 'pizza', 'wings', 'snacks', 'drinks', 'sauces', 'sets'].includes(product.category) && (
-                <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-1" />
-              )}
-              <p className="text-xs text-gray-500 px-2 hidden sm:block">Без фото</p>
+              <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-1" />
+              <p className="text-xs text-gray-500 px-2 hidden sm:block">Нет фото</p>
             </div>
           </div>
         )}

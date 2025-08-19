@@ -463,8 +463,8 @@ app.get('/api/products', (req, res) => {
           processedImageUrl = product.image_url;
         }
       
-      // Если нет изображения, оставляем null для отображения SVG иконки категории
-      if (!product.image_url || product.image_url === '') {
+      // Если нет изображения или это Unsplash, оставляем null
+      if (!product.image_url || product.image_url === '' || product.image_url.includes('unsplash')) {
         processedImageUrl = null;
       }
       
@@ -1166,8 +1166,8 @@ app.get('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
         processedImageUrl = product.image_url;
       }
       
-      // Если нет изображения, оставляем null для отображения SVG иконки
-      if (!product.image_url || product.image_url === '' || product.image_url.includes('/images/products/')) {
+      // Если нет изображения, это Unsplash или старые placeholder, оставляем null
+      if (!product.image_url || product.image_url === '' || product.image_url.includes('/images/products/') || product.image_url.includes('unsplash')) {
         processedImageUrl = null;
       }
       
