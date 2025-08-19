@@ -1834,10 +1834,9 @@ const createHttpsServer = () => {
 
 // Запускаем сервер если файл запущен напрямую
 if (require.main === module) {
-  const PORT = process.env.PORT || 3001;
   const HTTPS_PORT = process.env.HTTPS_PORT || 3444;
   
-  // Пробуем запустить HTTPS сервер
+  // Запускаем только HTTPS сервер
   const httpsServer = createHttpsServer();
   
   if (httpsServer) {
@@ -1845,13 +1844,9 @@ if (require.main === module) {
       console.log('🔒 HTTPS Server started on port:', HTTPS_PORT);
       console.log('🌐 URL: https://45.144.221.227:' + HTTPS_PORT);
     });
+  } else {
+    console.log('❌ Не удалось запустить HTTPS сервер');
   }
-  
-  // Всегда запускаем HTTP сервер для совместимости
-  app.listen(Number(PORT), '0.0.0.0', () => {
-    console.log('🌐 HTTP Server started on port:', PORT);
-    console.log('🔗 URL: http://45.144.221.227:' + PORT);
-    });
 }
 
 // Endpoint для тестирования на мобильных устройствах
