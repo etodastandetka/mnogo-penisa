@@ -2,7 +2,11 @@ import axios from 'axios';
 
 // Определяем базовый URL в зависимости от среды
 const getBaseURL = () => {
-  // Используем HTTPS для всех устройств
+  // В продакшене используем относительный путь, nginx проксирует на бекенд
+  if (process.env.NODE_ENV === 'production') {
+    return '/api';
+  }
+  // В разработке используем внешний IP
   return 'https://147.45.141.113:3444/api';
 };
 
