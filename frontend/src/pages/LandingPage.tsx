@@ -53,7 +53,7 @@ export const LandingPage: React.FC = () => {
     { name: 'Роллы', count: 15, image: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&h=200&fit=crop' },
     { name: 'Сеты', count: 8, image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=300&h=200&fit=crop' },
     { name: 'Пицца', count: 12, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&h=200&fit=crop' },
-    { name: 'Напитки', count: 6, image: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.shutterstock.com%2Fru%2Fsearch%2Fcoca-cola-fanta-sprite&psig=AOvVaw20JWAr7vonm0Mj-wqIwpQK&ust=1755612486997000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCKi-0bXElI8DFQAAAAAdAAAAABAL' }
+    { name: 'Напитки', count: 6, image: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=300&h=200&fit=crop' }
   ];
 
   const quickMenu = products.slice(0, 4);
@@ -125,18 +125,18 @@ export const LandingPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <Button 
                 onClick={() => navigate('/menu')}
-                  className="bg-white text-red-600 hover:bg-gray-100 font-semibold text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  className="bg-white text-red-600 hover:bg-gray-100 font-bold text-lg px-10 py-5 rounded-2xl shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 border-2 border-white/20"
               >
-                <ShoppingCart className="w-5 h-5 mr-2" />
+                <ShoppingCart className="w-6 h-6 mr-3" />
                 Заказать сейчас
               </Button>
               <Button 
                 variant="outline"
-                onClick={() => navigate('/contact')}
-                  className="bg-black/20 border-white text-white hover:bg-white hover:text-red-600 font-semibold text-lg px-8 py-4 rounded-xl backdrop-blur-sm transition-all duration-300 shadow-lg"
+                onClick={() => window.location.href = 'tel:+996555123456'}
+                  className="bg-white/10 border-2 border-white/30 text-white hover:bg-white hover:text-red-600 font-bold text-lg px-10 py-5 rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transform hover:scale-105 hover:-translate-y-1"
               >
-                <Phone className="w-5 h-5 mr-2" />
-                  Позвонить
+                <Phone className="w-6 h-6 mr-3" />
+                  +996 555 123 456
               </Button>
               </div>
               
@@ -271,13 +271,13 @@ export const LandingPage: React.FC = () => {
             ))}
           </div>
 
-          <div className="text-center mt-8">
+          <div className="text-center mt-12">
             <Button 
               onClick={() => navigate('/menu')}
-              className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-semibold px-8 py-3 rounded-xl"
+              className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold text-lg px-10 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
             >
               Смотреть все меню
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <ArrowRight className="w-6 h-6 ml-3" />
             </Button>
           </div>
         </div>
@@ -365,21 +365,21 @@ export const LandingPage: React.FC = () => {
           <p className="text-xl mb-8 text-white/90">
             Присоединяйтесь к тысячам довольных клиентов и насладитесь лучшими роллами в городе
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Button 
               onClick={() => navigate('/menu')}
-              className="bg-white text-red-600 hover:bg-gray-100 font-semibold text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              className="bg-white text-red-600 hover:bg-gray-100 font-bold text-xl px-12 py-6 rounded-2xl shadow-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.4)] transition-all duration-300 transform hover:scale-110 hover:-translate-y-2 border-2 border-white/20"
             >
-              <ShoppingCart className="w-5 h-5 mr-2" />
+              <ShoppingCart className="w-7 h-7 mr-3" />
               Заказать сейчас
             </Button>
             <Button 
               variant="outline"
-              onClick={() => navigate('/contact')}
-              className="border-white/30 text-white hover:bg-white/10 font-semibold text-lg px-8 py-4 rounded-xl backdrop-blur-sm"
+              onClick={() => window.location.href = 'tel:+996555123456'}
+              className="bg-white/10 border-2 border-white/40 text-white hover:bg-white hover:text-red-600 font-bold text-xl px-12 py-6 rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.4)] transform hover:scale-110 hover:-translate-y-2"
             >
-              <Phone className="w-5 h-5 mr-2" />
-              Связаться с нами
+              <Phone className="w-7 h-7 mr-3" />
+              +996 555 123 456
             </Button>
           </div>
         </div>

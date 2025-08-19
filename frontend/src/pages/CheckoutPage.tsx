@@ -111,7 +111,7 @@ export const CheckoutPage: React.FC = () => {
         });
       } else {
         // Заказ для гостя
-        const response = await fetch(`https://89.169.44.75:3444/api/orders/guest`, {
+        const response = await fetch(`https://147.45.141.113:3444/api/orders/guest`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

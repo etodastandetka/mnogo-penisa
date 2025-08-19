@@ -4,7 +4,7 @@ const path = require('path');
 console.log('🚀 Запуск Mnogo Rolly сервера (режим разработки)...');
 console.log('📁 Директория:', __dirname);
 console.log('🔒 Порт: 3444');
-console.log('🌐 URL: https://89.169.44.75:3444');
+console.log('🌐 URL: https://147.45.141.113:3444');
 
 // Запускаем сервер с ts-node
 const server = spawn('npx', ['ts-node', 'api/index.ts'], {
