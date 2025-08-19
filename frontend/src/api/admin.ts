@@ -20,6 +20,9 @@ export interface AdminOrder {
   paymentMethod: string;
   paymentStatus: string;
   createdAt: string;
+  paymentProof?: string;
+  paymentProofDate?: string;
+  notes?: string;
   items: Array<{
     id: number;
     productName: string;

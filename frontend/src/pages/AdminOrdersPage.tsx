@@ -551,9 +551,9 @@ export const AdminOrdersPage: React.FC = () => {
             total: item.totalPrice,
             product_id: item.id
           })),
-          payment_proof: undefined,
-          payment_proof_date: undefined,
-          notes: undefined
+          payment_proof: selectedOrder.paymentProof,
+          payment_proof_date: selectedOrder.paymentProofDate,
+          notes: selectedOrder.notes
         } : null}
         isOpen={isDetailModalOpen}
         onClose={closeOrderDetail}

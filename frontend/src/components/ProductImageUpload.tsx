@@ -106,12 +106,40 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
     setUploading(true);
     
     try {
-      // ОТКЛЮЧЕНО: Не загружаем фото
-      console.log('Загрузка фото отключена');
+      console.log('🖼️ Начинаем загрузку изображения...');
       
-      // Просто закрываем окно без загрузки
+      // Сжимаем изображение
+      const compressedImage = await compressImage(selectedFile);
+      
+      // Создаем FormData для отправки
+      const formData = new FormData();
+      
+      // Конвертируем base64 обратно в blob для отправки
+      const response = await fetch(compressedImage);
+      const blob = await response.blob();
+      
+      formData.append('image', blob, selectedFile.name);
+      
+      console.log('📤 Отправляем изображение на сервер...');
+      
+      // Отправляем на сервер
+      const uploadResponse = await fetch('/api/admin/upload-image', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error(`Ошибка загрузки: ${uploadResponse.status}`);
+      }
+      
+      const result = await uploadResponse.json();
+      console.log('✅ Изображение успешно загружено:', result);
+      
       setUploaded(true);
-      onImageUpload(''); // Пустая строка вместо фото
+      onImageUpload(result.imageUrl || result.url || result.path);
       
       setTimeout(() => {
         onClose();
