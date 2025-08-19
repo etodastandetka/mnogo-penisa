@@ -1270,6 +1270,40 @@ app.delete('/api/admin/products/:id', authenticateToken, requireAdmin, (req, res
   });
 });
 
+// Загрузка изображения товара
+app.post('/api/admin/upload-image', upload.single('image'), authenticateToken, requireAdmin, (req, res) => {
+  try {
+    console.log('🖼️ ADMIN UPLOAD: Получен запрос на загрузку изображения товара');
+    console.log('🖼️ ADMIN UPLOAD: File:', req.file ? req.file.filename : 'Нет файла');
+    
+    if (!req.file) {
+      console.log('❌ ADMIN UPLOAD: Изображение не загружено');
+      return res.status(400).json({ 
+        success: false,
+        message: "Изображение не загружено" 
+      });
+    }
+
+    const imageUrl = `/uploads/${req.file.filename}`;
+    console.log(`✅ ADMIN UPLOAD: Изображение загружено: ${imageUrl}`);
+    
+    res.json({ 
+      success: true,
+      message: "Изображение успешно загружено", 
+      imageUrl: imageUrl,
+      url: imageUrl,  // альтернативное поле
+      path: imageUrl, // еще один вариант
+      filename: req.file.filename
+    });
+  } catch (error) {
+    console.error("❌ ADMIN UPLOAD: Ошибка при загрузке изображения:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Ошибка при загрузке изображения" 
+    });
+  }
+});
+
 // API для управления корзиной
 // Получение корзины пользователя
 app.get('/api/cart', authenticateToken, (req: any, res) => {
