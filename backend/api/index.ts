@@ -1834,7 +1834,7 @@ const createHttpsServer = () => {
 
 // Запускаем сервер если файл запущен напрямую
 if (require.main === module) {
-  const HTTPS_PORT = process.env.HTTPS_PORT || 3444;
+  const HTTPS_PORT = 3444; // Принудительно устанавливаем порт 3444
   
   // Запускаем только HTTPS сервер
   const httpsServer = createHttpsServer();
