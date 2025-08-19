@@ -1,16 +1,16 @@
 const { spawn } = require('child_process');
 const path = require('path');
 
-console.log('🚀 Запуск Mnogo Rolly сервера...');
+console.log('🚀 Запуск Mnogo Rolly сервера (режим разработки)...');
 console.log('📁 Директория:', __dirname);
 console.log('🔒 Порт: 3444');
 console.log('🌐 URL: https://89.169.44.75:3444');
 
-// Запускаем сервер
-const server = spawn('node', ['api/index.ts'], {
+// Запускаем сервер с ts-node
+const server = spawn('npx', ['ts-node', 'api/index.ts'], {
   cwd: __dirname,
   stdio: 'inherit',
-  env: { ...process.env, NODE_ENV: 'production' }
+  env: { ...process.env, NODE_ENV: 'development' }
 });
 
 server.on('error', (error) => {

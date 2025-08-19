@@ -27,7 +27,7 @@ ST = Bishkek
 L = Bishkek
 O = Mnogo Rolly
 OU = IT Department
-CN = 45.144.221.227
+CN = 89.169.44.75
 
 [v3_req]
 keyUsage = keyEncipherment, dataEncipherment

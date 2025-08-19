@@ -450,7 +450,7 @@ app.get('/api/products', (req, res) => {
       
       // Если есть относительный путь к изображению, делаем его полным
       if (product.image_url && product.image_url.startsWith('/uploads/')) {
-        processedImageUrl = `https://45.144.221.227:3444${product.image_url}`;
+        processedImageUrl = `https://89.169.44.75:3444${product.image_url}`;
       }
       
       // Если это внешний URL (Unsplash или другие), оставляем как есть
@@ -465,7 +465,7 @@ app.get('/api/products', (req, res) => {
       
       // Если нет изображения, добавляем placeholder
       if (!product.image_url || product.image_url === '') {
-        processedImageUrl = 'https://45.144.221.227:3444/images/placeholder.svg';
+        processedImageUrl = 'https://89.169.44.75:3444/images/placeholder.svg';
       }
       
         return {
@@ -861,7 +861,7 @@ app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
     fs.writeFileSync(filePath, req.file.buffer);
     
     // Создаем URL для файла
-    const fileUrl = 'https://45.144.221.227:3444/uploads/' + fileName;
+    const fileUrl = 'https://89.169.44.75:3444/uploads/' + fileName;
     
     console.log('Обновляем заказ в базе:', { orderId, orderNumber, fileUrl });
     
@@ -946,7 +946,7 @@ app.post('/api/admin/orders/:orderNumber/payment-proof', upload.single('file'), 
     fs.writeFileSync(filePath, req.file.buffer);
     
     // Создаем URL для файла
-    const fileUrl = 'https://45.144.221.227:3444/uploads/' + fileName;
+    const fileUrl = 'https://89.169.44.75:3444/uploads/' + fileName;
     
     // Ищем заказ по номеру
     db.get('SELECT id, order_number FROM orders WHERE order_number = ?', [orderNumber], (err, order) => {
@@ -1788,7 +1788,7 @@ if (require.main === module) {
   if (httpsServer) {
     httpsServer.listen(Number(HTTPS_PORT), '0.0.0.0', () => {
       console.log('🔒 HTTPS Server started on port:', HTTPS_PORT);
-      console.log('🌐 URL: https://45.144.221.227:' + HTTPS_PORT);
+      console.log('🌐 URL: https://89.169.44.75:' + HTTPS_PORT);
     });
   } else {
     console.log('❌ Не удалось запустить HTTPS сервер');
@@ -1854,7 +1854,7 @@ app.get('/api/check-image/:filename(*)', (req, res) => {
     extension: ext,
     created: stats.birthtime,
     modified: stats.mtime,
-    url: `https://45.144.221.227:3444/uploads/${filename}`
+          url: `https://89.169.44.75:3444/uploads/${filename}`
   });
 });
 
