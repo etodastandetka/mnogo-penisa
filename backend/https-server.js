@@ -53,6 +53,15 @@ const startHttpsServer = () => {
       key: fs.readFileSync(keyFile)
     };
     
+    // Запускаем основной сервер на порту 3001
+    const server = spawn('npx', ['ts-node', 'api/index.ts'], {
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        PORT: '3001'
+      }
+    });
+    
     // Создаем HTTPS сервер напрямую
     const httpsServer = https.createServer(options, (req, res) => {
       // Добавляем CORS заголовки
@@ -69,7 +78,7 @@ const startHttpsServer = () => {
       
       // Проксируем запросы на HTTP сервер
       const proxyReq = http.request({
-        hostname: 'localhost',
+        hostname: '0.0.0.0',
         port: 3001,
         path: req.url,
         method: req.method,
