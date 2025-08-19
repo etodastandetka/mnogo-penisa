@@ -148,12 +148,12 @@ export const MenuPage: React.FC = () => {
           />
         </div>
 
-        <div className="mb-3 sm:mb-4 lg:mb-6">
-          <div className="flex flex-wrap gap-1 sm:gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+        <div className="mb-4 sm:mb-6 lg:mb-6">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <Button
               variant={selectedCategory === 'all' ? 'primary' : 'outline'}
               onClick={() => handleCategoryChange('all')}
-              className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+              className="flex-shrink-0 whitespace-nowrap text-sm px-4 py-2 rounded-full"
             >
               Все
             </Button>
@@ -162,7 +162,7 @@ export const MenuPage: React.FC = () => {
                 key={category}
                 variant={selectedCategory === category ? 'primary' : 'outline'}
                 onClick={() => handleCategoryChange(category)}
-                className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+                className="flex-shrink-0 whitespace-nowrap text-sm px-4 py-2 rounded-full"
               >
                 {getCategoryName(category)}
               </Button>

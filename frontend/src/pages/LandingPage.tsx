@@ -104,53 +104,54 @@ export const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Левая колонка - основной контент */}
             <div className="text-left lg:-ml-16">
-              <div className="flex items-center gap-2 mb-6">
-                <Badge variant="primary" className="bg-white/20 text-white border-white/30">
-                  🍣 Лучшие роллы в городе
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-6">
+                <Badge variant="primary" className="bg-white/20 text-white border-white/30 text-xs sm:text-sm">
+                  🍣 Лучшие роллы
                 </Badge>
-                <Badge variant="primary" className="bg-white/20 text-white border-white/30">
+                <Badge variant="primary" className="bg-white/20 text-white border-white/30 text-xs sm:text-sm">
                   ⚡ Быстрая доставка
                 </Badge>
               </div>
               
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
                 Вкусные роллы
                 <span className="block text-yellow-300">с доставкой</span>
             </h1>
               
-              <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
+              <p className="text-base sm:text-xl md:text-2xl text-white/90 mb-6 sm:mb-8 leading-relaxed">
                 Свежие ингредиенты, оригинальные рецепты и быстрая доставка прямо к вашему столу
             </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
               <Button 
                 onClick={() => navigate('/menu')}
-                  className="bg-white text-red-600 hover:bg-gray-100 font-bold text-lg px-10 py-5 rounded-2xl shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 border-2 border-white/20"
+                  className="bg-white text-red-600 hover:bg-gray-100 font-bold text-base sm:text-lg px-6 sm:px-10 py-3 sm:py-5 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 border-2 border-white/20"
               >
-                <ShoppingCart className="w-6 h-6 mr-3" />
+                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                 Заказать сейчас
               </Button>
               <Button 
                 variant="outline"
                 onClick={() => window.location.href = 'tel:+996555123456'}
-                  className="bg-white/10 border-2 border-white/30 text-white hover:bg-white hover:text-red-600 font-bold text-lg px-10 py-5 rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transform hover:scale-105 hover:-translate-y-1"
+                  className="bg-white/10 border-2 border-white/30 text-white hover:bg-white hover:text-red-600 font-bold text-base sm:text-lg px-6 sm:px-10 py-3 sm:py-5 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transform hover:scale-105 hover:-translate-y-1"
               >
-                <Phone className="w-6 h-6 mr-3" />
-                  +996 555 123 456
+                <Phone className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
+                  <span className="hidden sm:inline">+996 555 123 456</span>
+                  <span className="sm:hidden">Позвонить</span>
               </Button>
               </div>
               
-              <div className="flex items-center gap-8 text-white/80">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 text-white/80 text-sm sm:text-base">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>30-60 мин</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>По всему городу</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow-300" />
+                  <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-300" />
                   <span>4.9/5</span>
                 </div>
               </div>
@@ -214,16 +215,16 @@ export const LandingPage: React.FC = () => {
       {/* Quick Menu Section */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
               Попробуйте наши лучшие блюда
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4 sm:px-0">
               Выберите из нашего разнообразного меню свежих роллов, сетов и других блюд японской кухни
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {quickMenu.map((product) => (
               <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer" onClick={() => navigate('/menu')}>
                 <div className="relative overflow-hidden rounded-t-xl">
@@ -359,27 +360,28 @@ export const LandingPage: React.FC = () => {
         </div>
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
             Готовы заказать вкусные роллы?
           </h2>
-          <p className="text-xl mb-8 text-white/90">
+          <p className="text-base sm:text-xl mb-6 sm:mb-8 text-white/90">
             Присоединяйтесь к тысячам довольных клиентов и насладитесь лучшими роллами в городе
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
             <Button 
               onClick={() => navigate('/menu')}
-              className="bg-white text-red-600 hover:bg-gray-100 font-bold text-xl px-12 py-6 rounded-2xl shadow-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.4)] transition-all duration-300 transform hover:scale-110 hover:-translate-y-2 border-2 border-white/20"
+              className="bg-white text-red-600 hover:bg-gray-100 font-bold text-base sm:text-xl px-8 sm:px-12 py-4 sm:py-6 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.4)] transition-all duration-300 transform hover:scale-110 hover:-translate-y-2 border-2 border-white/20"
             >
-              <ShoppingCart className="w-7 h-7 mr-3" />
+              <ShoppingCart className="w-5 h-5 sm:w-7 sm:h-7 mr-2 sm:mr-3" />
               Заказать сейчас
             </Button>
             <Button 
               variant="outline"
               onClick={() => window.location.href = 'tel:+996555123456'}
-              className="bg-white/10 border-2 border-white/40 text-white hover:bg-white hover:text-red-600 font-bold text-xl px-12 py-6 rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.4)] transform hover:scale-110 hover:-translate-y-2"
+              className="bg-white/10 border-2 border-white/40 text-white hover:bg-white hover:text-red-600 font-bold text-base sm:text-xl px-8 sm:px-12 py-4 sm:py-6 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.4)] transform hover:scale-110 hover:-translate-y-2"
             >
-              <Phone className="w-7 h-7 mr-3" />
-              +996 555 123 456
+              <Phone className="w-5 h-5 sm:w-7 sm:h-7 mr-2 sm:mr-3" />
+              <span className="hidden sm:inline">+996 555 123 456</span>
+              <span className="sm:hidden">Позвонить</span>
             </Button>
           </div>
         </div>

@@ -100,28 +100,29 @@ export const AdminDashboardPage: React.FC = () => {
     <AdminLayout>
       <div className="p-4 sm:p-6 lg:p-8">
         {/* Заголовок и кнопки */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Дашборд</h2>
-            <p className="text-gray-600 mt-1">Обзор статистики и активности</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Дашборд</h2>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">Обзор статистики и активности</p>
           </div>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             <Button
               onClick={() => navigate('/admin/orders')}
-              className="bg-japanese-indigo hover:bg-japanese-indigo/90 flex items-center space-x-2"
+              className="bg-japanese-indigo hover:bg-japanese-indigo/90 flex items-center justify-center space-x-2 text-sm sm:text-base py-2 sm:py-2"
             >
-              <span>Управление заказами</span>
-              <ArrowRight className="h-4 w-4" />
+              <span className="hidden sm:inline">Управление заказами</span>
+              <span className="sm:hidden">Заказы</span>
+              <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
             
             <Button
               variant="outline"
               onClick={handleRefresh}
               disabled={loading}
-              className="flex items-center space-x-2"
+              className="flex items-center justify-center space-x-2 text-sm sm:text-base py-2 sm:py-2"
             >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${loading ? 'animate-spin' : ''}`} />
               <span>Обновить</span>
             </Button>
           </div>
@@ -135,19 +136,19 @@ export const AdminDashboardPage: React.FC = () => {
         )}
 
         {/* Статистика */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           {/* Общее количество заказов */}
           <Card className="border-0 shadow-soft hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Всего заказов</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Всего заказов</p>
+                  <p className="text-lg sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">
                     {loading ? '...' : stats.totalOrders || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <ShoppingCart className="w-6 h-6 text-blue-600" />
+                <div className="w-8 h-8 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <ShoppingCart className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600" />
                 </div>
               </div>
             </CardContent>
@@ -155,16 +156,16 @@ export const AdminDashboardPage: React.FC = () => {
 
           {/* Общая выручка */}
           <Card className="border-0 shadow-soft hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Общая выручка</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
-                    {loading ? '...' : `${stats.totalRevenue.toLocaleString() || 0} сом`}
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Выручка</p>
+                  <p className="text-lg sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">
+                    {loading ? '...' : `${stats.totalRevenue.toLocaleString() || 0} с.`}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-green-600" />
+                <div className="w-8 h-8 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-green-600" />
                 </div>
               </div>
             </CardContent>
@@ -172,16 +173,16 @@ export const AdminDashboardPage: React.FC = () => {
 
           {/* Средний чек */}
           <Card className="border-0 shadow-soft hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                                      <p className="text-sm font-medium text-gray-600">Средний чек</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">
-                      {loading ? '...' : `${Math.round((stats.totalRevenue || 0) / Math.max(stats.totalOrders || 1, 1)).toLocaleString()} сом`}
-                    </p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Средний чек</p>
+                  <p className="text-lg sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">
+                    {loading ? '...' : `${Math.round((stats.totalRevenue || 0) / Math.max(stats.totalOrders || 1, 1)).toLocaleString()} с.`}
+                  </p>
                 </div>
-                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-purple-600" />
+                <div className="w-8 h-8 sm:w-12 sm:h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600" />
                 </div>
               </div>
             </CardContent>
@@ -189,16 +190,16 @@ export const AdminDashboardPage: React.FC = () => {
 
           {/* Активные заказы */}
           <Card className="border-0 shadow-soft hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">В обработке</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">В обработке</p>
+                  <p className="text-lg sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">
                     {loading ? '...' : stats.activeOrders || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-orange-600" />
+                <div className="w-8 h-8 sm:w-12 sm:h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <Clock className="w-4 h-4 sm:w-6 sm:h-6 text-orange-600" />
                 </div>
               </div>
             </CardContent>
@@ -206,19 +207,20 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
 
         {/* Последние заказы и популярные товары */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
           {/* Последние заказы */}
           <Card className="border-0 shadow-soft">
-            <CardHeader>
+            <CardHeader className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Последние заказы</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Последние заказы</h3>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => navigate('/admin/orders')}
-                  className="text-xs"
+                  className="text-xs px-2 py-1 sm:px-3 sm:py-2"
                 >
-                  Все заказы
+                  <span className="hidden sm:inline">Все заказы</span>
+                  <span className="sm:hidden">Все</span>
                   <ArrowRight className="h-3 w-3 ml-1" />
                 </Button>
               </div>
@@ -274,16 +276,17 @@ export const AdminDashboardPage: React.FC = () => {
 
           {/* Популярные товары */}
           <Card className="border-0 shadow-soft">
-            <CardHeader>
+            <CardHeader className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Популярные товары</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Популярные товары</h3>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => navigate('/admin/products')}
-                  className="text-xs"
+                  className="text-xs px-2 py-1 sm:px-3 sm:py-2"
                 >
-                  Все товары
+                  <span className="hidden sm:inline">Все товары</span>
+                  <span className="sm:hidden">Все</span>
                   <ArrowRight className="h-3 w-3 ml-1" />
                 </Button>
               </div>
