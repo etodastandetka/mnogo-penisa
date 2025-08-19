@@ -25,11 +25,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   // Функция для получения URL изображения 
   const getImageUrl = (imageUrl: string): string | null => {
-    // Если есть изображение - используем его, если нет - null (покажем иконку)
-    if (imageUrl && imageUrl.trim() && imageUrl !== 'null' && !imageUrl.includes('unsplash')) {
-      // Добавляем timestamp для борьбы с кэшированием на мобильных
-      const separator = imageUrl.includes('?') ? '&' : '?';
-      return `${imageUrl}${separator}v=${Date.now()}`;
+    // Если есть изображение - используем его
+    if (imageUrl && imageUrl.trim() && imageUrl !== 'null') {
+      // Добавляем timestamp для борьбы с кэшированием на мобильных (только для наших изображений)
+      if (!imageUrl.includes('unsplash')) {
+        const separator = imageUrl.includes('?') ? '&' : '?';
+        return `${imageUrl}${separator}v=${Date.now()}`;
+      }
+      // Unsplash изображения возвращаем как есть
+      return imageUrl;
     }
     return null; // Нет изображения - покажем иконку
   };
@@ -44,13 +48,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     console.error('❌ Ошибка загрузки изображения для товара:', product.name, 'URL:', e.currentTarget.src);
     setImageError(true);
     setImageLoading(false);
-    
-    // Пробуем загрузить placeholder
-    const target = e.target as HTMLImageElement;
-    if (target.src !== 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop') {
-      console.log('🔄 Пробуем загрузить placeholder...');
-      target.src = 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
-    }
+    // Показываем категорийную иконку вместо попытки загрузить другое изображение
   };
 
   const handleAddToCart = () => {
@@ -96,12 +94,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               crossOrigin="anonymous"
             />
             
-            {/* Fallback для ошибок изображения */}
+            {/* Fallback для ошибок изображения - показываем категорийные иконки */}
             {imageError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
                 <div className="text-center">
-                  <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-xs text-gray-500">Фото недоступно</p>
+                  {product.category === 'rolls' && (<div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍣</div>)}
+                  {product.category === 'pizza' && (<div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍕</div>)}
+                  {product.category === 'wings' && (<div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍗</div>)}
+                  {product.category === 'snacks' && (<div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍟</div>)}
+                  {product.category === 'drinks' && (<div className="text-2xl sm:text-4xl md:text-5xl mb-1">🥤</div>)}
+                  {product.category === 'sauces' && (<div className="text-2xl sm:text-4xl md:text-5xl mb-1">🥫</div>)}
+                  {product.category === 'sets' && (<div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍱</div>)}
+                  {!['rolls', 'pizza', 'wings', 'snacks', 'drinks', 'sauces', 'sets'].includes(product.category) && (
+                    <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-1" />
+                  )}
+                  <p className="text-xs text-gray-500 px-2 hidden sm:block">Изображение</p>
                 </div>
               </div>
             )}
