@@ -25,23 +25,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   // Функция для получения URL изображения с кеш-бастером
   const getImageUrl = (imageUrl: string): string => {
-    // Если это base64 изображение, возвращаем как есть
-    if (imageUrl && imageUrl.startsWith('data:image/')) {
-      return imageUrl;
-    }
-    
-    // Если это внешний URL, возвращаем как есть
-    if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
-      return imageUrl;
-    }
-    
-    // Если нет изображения, возвращаем placeholder
-    if (!imageUrl || imageUrl === '') {
-      return 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
-    }
-    
-    // Для всех остальных случаев возвращаем как есть
-    return imageUrl;
+    // ОТКЛЮЧЕНО: Не показываем фото товаров
+    return 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
   };
 
   const handleImageLoad = () => {

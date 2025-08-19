@@ -106,41 +106,20 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
     setUploading(true);
     
     try {
-      console.log('Сжимаем изображение перед загрузкой:', selectedFile.name);
+      // ОТКЛЮЧЕНО: Не загружаем фото
+      console.log('Загрузка фото отключена');
       
-      // Сжимаем изображение перед отправкой
-      const compressedBase64 = await compressImage(selectedFile);
+      // Просто закрываем окно без загрузки
+      setUploaded(true);
+      onImageUpload(''); // Пустая строка вместо фото
       
-      console.log('Размер сжатого изображения:', Math.round(compressedBase64.length / 1024), 'KB');
-      
-      // Отправляем сжатое base64 на сервер
-      const response = await fetch('https://45.144.221.227:3444/api/upload-base64', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          image: compressedBase64,
-          filename: selectedFile.name
-        }),
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Файл успешно загружен:', result.imageUrl);
-        setUploaded(true);
-        onImageUpload(result.imageUrl);
-        
-        setTimeout(() => {
-          onClose();
-        }, 2000);
-      } else {
-        throw new Error('Ошибка загрузки');
-      }
+      setTimeout(() => {
+        onClose();
+      }, 1000);
       
     } catch (error) {
-      console.error('Ошибка загрузки фото:', error);
-      alert('Ошибка при загрузке фото. Попробуйте еще раз.');
+      console.error('Ошибка:', error);
+      alert('Загрузка фото отключена.');
     } finally {
       setUploading(false);
     }
@@ -158,12 +137,12 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
           <div className="text-green-500 mb-4">
             <CheckCircle className="h-16 w-16 mx-auto" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
-            Фото успешно загружено! 🎉
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Фото товара добавлено в базу данных
-          </p>
+                     <h3 className="text-xl font-bold text-gray-900 mb-2">
+             Загрузка фото отключена! ⚠️
+           </h3>
+           <p className="text-gray-600 mb-4">
+             Фото товаров временно отключены
+           </p>
           <Button onClick={onClose} className="w-full">
             Закрыть
           </Button>

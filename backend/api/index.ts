@@ -462,7 +462,7 @@ app.get('/api/user/me', authenticateToken, (req: any, res) => {
 
 // Продукты
 app.get('/api/products', (req, res) => {
-  console.log('📱 Запрос товаров с устройства:', req.headers['user-agent']);
+
   console.log('📱 Origin:', req.headers.origin);
   console.log('📱 Referer:', req.headers.referer);
   
@@ -1239,7 +1239,7 @@ app.delete('/api/admin/clear-all-products', authenticateToken, requireAdmin, (re
 app.post('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
   const { name, description, price, category, isPopular, isAvailable, is_available, image_url } = req.body;
   
-  console.log('Получены данные для создания товара:', { name, description, price, category, isPopular, isAvailable, is_available, image_url });
+  
   
   if (!name || !price) {
     return res.status(400).json({ message: 'Название и цена обязательны' });
@@ -1252,16 +1252,6 @@ app.post('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
   const isAvailableValue = isAvailable !== undefined ? isAvailable : is_available !== undefined ? is_available : true;
   const isPopularValue = isPopular !== undefined ? isPopular : false;
 
-  console.log('Создаем товар с параметрами:', { 
-    name, 
-    description, 
-    price, 
-    category, 
-    imageUrl, 
-    isAvailable: isAvailableValue, 
-    isPopular: isPopularValue 
-  });
-
   db.run(`
     INSERT INTO products (name, description, price, image_url, category, is_popular, is_available)
     VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -1271,7 +1261,7 @@ app.post('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
       return res.status(500).json({ message: 'Ошибка создания товара' });
     }
     
-    console.log('Товар создан успешно:', { productId: this.lastID, imageUrl, isAvailable: isAvailableValue, isPopular: isPopularValue });
+
     
     res.json({
       message: 'Товар создан успешно',
@@ -1286,7 +1276,7 @@ app.put('/api/admin/products/:id', authenticateToken, requireAdmin, (req, res) =
   const { id } = req.params;
   const { name, description, price, category, isPopular, isAvailable, is_available, image_url } = req.body;
   
-  console.log('Получены данные для обновления товара:', { id, name, description, price, category, isPopular, isAvailable, is_available, image_url });
+
   
   if (!name || !price) {
     return res.status(400).json({ message: 'Название и цена обязательны' });
@@ -1299,16 +1289,7 @@ app.put('/api/admin/products/:id', authenticateToken, requireAdmin, (req, res) =
   const isAvailableValue = isAvailable !== undefined ? isAvailable : is_available !== undefined ? is_available : true;
   const isPopularValue = isPopular !== undefined ? isPopular : false;
 
-  console.log('Обновляем товар с параметрами:', { 
-    id, 
-    name, 
-    description, 
-    price, 
-    category, 
-    imageUrl, 
-    isAvailable: isAvailableValue, 
-    isPopular: isPopularValue 
-  });
+
 
   // Обновляем товар
     db.run(`
@@ -1321,7 +1302,7 @@ app.put('/api/admin/products/:id', authenticateToken, requireAdmin, (req, res) =
         return res.status(500).json({ message: 'Ошибка обновления товара' });
       }
     
-    console.log('Товар обновлен успешно:', { id, imageUrl, isAvailable: isAvailableValue, isPopular: isPopularValue });
+
       
       res.json({
         message: 'Товар обновлен успешно',
