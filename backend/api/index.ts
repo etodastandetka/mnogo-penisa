@@ -10,7 +10,7 @@ import path from 'path';
 import multer from 'multer';
 import fs from 'fs';
 import https from 'https';
-import { sendNewOrderNotification, sendStatusUpdateNotification, testTelegramBot, getBotInfo } from '../src/telegramBot';
+import { sendNewOrderNotification, sendStatusUpdateNotification, getBotInfo } from '../src/telegramBot';
 
 // Типы для базы данных
 interface StatsResult {
@@ -125,34 +125,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
   }
 }));
 
-// Статическая папка для HTML файлов
-app.use('/test', express.static(path.join(__dirname, '../public'), {
-  setHeaders: (res, filePath) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
-    
-    // Определяем тип контента по расширению файла
-    const ext = path.extname(filePath).toLowerCase();
-    
-    switch (ext) {
-      case '.html':
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        break;
-      case '.css':
-        res.setHeader('Content-Type', 'text/css; charset=utf-8');
-        break;
-      case '.js':
-        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-        break;
-      default:
-        res.setHeader('Content-Type', 'application/octet-stream');
-    }
-    
-    console.log('📄 Обслуживаем HTML файл:', filePath, 'Content-Type:', res.getHeader('Content-Type'));
-  }
-}));
+
 
 // Статическая папка для изображений
 app.use('/images', express.static(path.join(__dirname, '../public/images'), {
@@ -333,10 +306,7 @@ const initDatabase = () => {
     db.run(`INSERT OR IGNORE INTO users (email, password, name, role, is_admin) VALUES (?, ?, ?, ?, ?)`, 
       ['admin@gmail.com', denmakPassword, 'Denmak', 'admin', 1]);
     
-    // Создание тестового пользователя
-    const testUserPassword = bcrypt.hashSync('test123', 10);
-    db.run(`INSERT OR IGNORE INTO users (email, password, name, phone, role, is_admin) VALUES (?, ?, ?, ?, ?, ?)`, 
-      ['test@example.com', testUserPassword, 'Тестовый пользователь', '+996 555 123 456', 'user', 0]);
+    // Тестовый пользователь удален
 
     // Тестовые продукты больше не создаются автоматически
     // Используйте админ-панель для добавления товаров
@@ -406,7 +376,7 @@ app.get('/api/health', (req, res) => {
     }
     
     // Проверяем подключение к базе данных
-    db.get('SELECT 1 as test', (err, result) => {
+    db.get('SELECT 1 as check', (err, result) => {
       if (err) {
         console.error('Ошибка проверки базы данных:', err);
         return res.status(500).json({ 
@@ -1173,14 +1143,7 @@ app.get('/api/admin/telegram/config', authenticateToken, requireAdmin, (req, res
   res.json(config);
 });
 
-app.post('/api/admin/telegram/test', authenticateToken, requireAdmin, async (req, res) => {
-  try {
-    const result = await testTelegramBot();
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ message: 'Ошибка тестирования бота' });
-  }
-});
+
 
 // API для управления товарами
 app.get('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
@@ -1205,23 +1168,7 @@ app.get('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
   });
 });
 
-// API для очистки тестовых данных (только для админов)
-app.delete('/api/admin/clear-test-data', authenticateToken, requireAdmin, (req, res) => {
-  // Удаляем все заказы и связанные товары
-  db.run('DELETE FROM order_items', (err) => {
-    if (err) {
-      return res.status(500).json({ message: 'Ошибка очистки данных' });
-    }
-    
-    db.run('DELETE FROM orders', (err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Ошибка очистки данных' });
-      }
-      
-      res.json({ message: 'Тестовые данные успешно очищены' });
-    });
-  });
-});
+
 
 // API для удаления всех товаров (только для админов)
 app.delete('/api/admin/clear-all-products', authenticateToken, requireAdmin, (req, res) => {
@@ -1848,20 +1795,7 @@ if (require.main === module) {
   }
 }
 
-// Endpoint для тестирования на мобильных устройствах
-app.get('/api/mobile-test', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Мобильный тест работает!',
-    timestamp: new Date().toISOString(),
-    server: 'https://45.144.221.227:3444',
-    endpoints: {
-      products: '/api/products',
-      upload: '/api/upload',
-      test: '/test/mobile-test.html'
-    }
-  });
-});
+
 
 // Endpoint для проверки изображений
 app.get('/api/check-image/:filename(*)', (req, res) => {

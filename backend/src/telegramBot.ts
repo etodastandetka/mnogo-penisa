@@ -134,29 +134,7 @@ function formatDate(dateString: string): string {
   });
 }
 
-export async function testTelegramBot(): Promise<void> {
-  if (!bot || !TELEGRAM_CHAT_ID) {
-    throw new Error('Telegram бот не настроен');
-  }
-
-  try {
-    const message = `
-🧪 <b>Тестовое сообщение</b>
-
-Это тестовое сообщение от Telegram бота Mnogo Rolly.
-Если вы видите это сообщение, значит бот настроен правильно!
-
-⏰ <b>Время отправки:</b> ${formatDate(new Date().toISOString())}
-    `.trim();
-
-    await bot.sendMessage(TELEGRAM_CHAT_ID, message, {
-      parse_mode: 'HTML',
-      disable_web_page_preview: true
-    });
-    } catch (error) {
-    throw error;
-  }
-}
+// Тестовая функция удалена
 
 export function getBotInfo(): { isConfigured: boolean; chatId?: string } {
   return {

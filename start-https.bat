@@ -3,3 +3,4 @@ echo 🚀 Запуск HTTPS сервера для мобильных устро
 cd backend
 node https-server.js
 pause
+

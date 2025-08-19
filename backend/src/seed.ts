@@ -265,104 +265,11 @@ async function seed() {
         } else {
         }
       
-      // Если это последний продукт, создаем тестовые заказы
-      if (index === products.length - 1) {
-        createTestOrders();
-      }
+      // Тестовые заказы больше не создаются автоматически
     });
   });
 }
 
-// Создание тестовых заказов
-function createTestOrders() {
-  const orders = [
-    {
-      user_id: 1,
-      total_amount: 850,
-      status: 'pending',
-      customer_address: 'ул. Пушкина, д. 10, кв. 5',
-      phone: '+7 (999) 123-45-67'
-    },
-    {
-      user_id: 1,
-      total_amount: 1200,
-      status: 'preparing',
-      customer_address: 'ул. Ленина, д. 25, кв. 12',
-      phone: '+7 (999) 234-56-78'
-    },
-    {
-      user_id: 1,
-      total_amount: 680,
-      status: 'ready',
-      customer_address: 'пр. Мира, д. 15, кв. 8',
-      phone: '+7 (999) 345-67-89'
-    },
-    {
-      user_id: 1,
-      total_amount: 950,
-      status: 'delivering',
-      customer_address: 'ул. Гагарина, д. 7, кв. 3',
-      phone: '+7 (999) 456-78-90'
-    },
-    {
-      user_id: 1,
-      total_amount: 1500,
-      status: 'completed',
-      customer_address: 'ул. Королева, д. 33, кв. 15',
-      phone: '+7 (999) 567-89-01'
-    }
-  ];
-
-  orders.forEach((order, index) => {
-    db.run(`
-      INSERT OR IGNORE INTO orders (user_id, total_amount, status, customer_address, phone) 
-      VALUES (?, ?, ?, ?, ?)
-    `, [order.user_id, order.total_amount, order.status, order.customer_address, order.phone], function(err) {
-      if (err) {
-        } else {
-        const orderId = this.lastID;
-        `);
-        
-        // Добавляем элементы заказа
-        addOrderItems(orderId);
-      }
-      
-      // Если это последний заказ, закрываем соединение
-      if (index === orders.length - 1) {
-        setTimeout(() => {
-          db.close((err) => {
-            if (err) {
-              } else {
-              }
-          });
-        }, 2000);
-      }
-    });
-  });
-}
-
-// Добавление элементов заказа
-function addOrderItems(orderId: number) {
-  const orderItems = [
-    { product_id: 1, quantity: 2, price: 450 }, // Филадельфия ролл
-    { product_id: 2, quantity: 1, price: 380 }, // Калифорния ролл
-    { product_id: 6, quantity: 1, price: 1200 }, // Сет "Семейный"
-    { product_id: 8, quantity: 2, price: 150 }, // Мисо суп
-    { product_id: 9, quantity: 1, price: 80 }, // Зеленый чай
-  ];
-
-  orderItems.forEach((item, index) => {
-    db.run(`
-      INSERT OR IGNORE INTO order_items (order_id, product_id, quantity, price) 
-      VALUES (?, ?, ?, ?)
-    `, [orderId, item.product_id, item.quantity, item.price], function(err) {
-      if (err) {
-        console.error('Error inserting order item:', err);
-      } else {
-        console.log('Order item inserted successfully');
-      }
-    });
-  });
-}
+// Тестовые функции удалены
 
 seed().catch(console.error);
