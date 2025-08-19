@@ -23,10 +23,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [imageLoading, setImageLoading] = useState(true);
   const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
 
-  // Функция для получения URL изображения с кеш-бастером
-  const getImageUrl = (imageUrl: string): string => {
-    // ОТКЛЮЧЕНО: Не показываем фото товаров
-    return 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop';
+  // Функция для получения URL изображения 
+  const getImageUrl = (imageUrl: string): string | null => {
+    // Если есть изображение - используем его, если нет - null (покажем иконку)
+    if (imageUrl && imageUrl.trim() && !imageUrl.includes('unsplash')) {
+      return imageUrl;
+    }
+    return null; // Нет изображения - покажем иконку
   };
 
   const handleImageLoad = () => {
@@ -69,32 +72,67 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 h-full flex flex-col border border-gray-200 bg-white">
       <div className="relative overflow-hidden rounded-t-xl bg-gray-100">
-        {/* Индикатор загрузки */}
-        {imageLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-          </div>
-        )}
-        
-        {/* Изображение */}
-        <img
-          src={imageUrl}
-          alt={product.name}
-          className={`w-full h-32 sm:h-40 md:h-48 object-cover group-hover:scale-110 transition-transform duration-300 ${
-            imageLoading ? 'opacity-0' : 'opacity-100'
-          }`}
-          onLoad={handleImageLoad}
-          onError={handleImageError}
-          loading="lazy"
-          crossOrigin="anonymous"
-        />
-        
-        {/* Fallback для ошибок изображения */}
-        {imageError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
+        {imageUrl ? (
+          <>
+            {/* Индикатор загрузки */}
+            {imageLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+              </div>
+            )}
+            
+            {/* Изображение */}
+            <img
+              src={imageUrl}
+              alt={product.name}
+              className={`w-full h-32 sm:h-40 md:h-48 object-cover group-hover:scale-110 transition-transform duration-300 ${
+                imageLoading ? 'opacity-0' : 'opacity-100'
+              }`}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              loading="lazy"
+              crossOrigin="anonymous"
+            />
+            
+            {/* Fallback для ошибок изображения */}
+            {imageError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                <div className="text-center">
+                  <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                  <p className="text-xs text-gray-500">Фото недоступно</p>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          /* Нет изображения - показываем иконку блюда */
+          <div className="w-full h-32 sm:h-40 md:h-48 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
             <div className="text-center">
-              <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-xs text-gray-500">Фото недоступно</p>
+              {product.category === 'rolls' && (
+                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🍣</div>
+              )}
+              {product.category === 'pizza' && (
+                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🍕</div>
+              )}
+              {product.category === 'wings' && (
+                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🍗</div>
+              )}
+              {product.category === 'snacks' && (
+                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🍟</div>
+              )}
+              {product.category === 'drinks' && (
+                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🥤</div>
+              )}
+              {product.category === 'sauces' && (
+                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🥢</div>
+              )}
+              {product.category === 'sets' && (
+                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🍱</div>
+              )}
+              {!['rolls', 'pizza', 'wings', 'snacks', 'drinks', 'sauces', 'sets'].includes(product.category) && (
+                <ImageIcon className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 text-gray-400 mx-auto mb-2" />
+              )}
+              <p className="text-xs text-gray-500 px-2">Без фото</p>
             </div>
           </div>
         )}
