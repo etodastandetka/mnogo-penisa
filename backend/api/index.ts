@@ -10,7 +10,6 @@ import path from 'path';
 import multer from 'multer';
 import fs from 'fs';
 import https from 'https';
-import http from 'http';
 import { sendNewOrderNotification, sendStatusUpdateNotification, testTelegramBot, getBotInfo } from '../src/telegramBot';
 
 // Типы для базы данных
