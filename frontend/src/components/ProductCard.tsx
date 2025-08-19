@@ -20,8 +20,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem, removeItem, updateQuantity, getItemQuantity } = useCartStore();
   const quantity = getItemQuantity(product.id.toString());
   const [imageError, setImageError] = useState(false);
-  const [imageLoading, setImageLoading] = useState(false); // Начинаем с false
-  const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
 
   // Функция для получения URL изображения 
   const getImageUrl = (imageUrl: string): string | null => {
@@ -49,7 +47,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const handleImageLoad = () => {
     console.log('✅ Изображение загружено для товара:', product.name);
-    setImageLoading(false);
     setImageError(false);
   };
 
@@ -60,7 +57,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     console.error('❌ URL:', originalUrl);
     
     setImageError(true);
-    setImageLoading(false);
     // Показываем эмодзи fallback
   };
 
@@ -110,46 +106,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Сброс состояния при смене изображения
   React.useEffect(() => {
     setImageError(false);
-    // Только если есть реальный URL изображения
-    if (imageUrl && imageUrl.trim()) {
-      setImageLoading(true);
-    } else {
-      setImageLoading(false);
-    }
   }, [imageUrl]);
-
-  // Таймаут для загрузки изображений
-  React.useEffect(() => {
-    if (imageUrl && imageLoading) {
-      const timeout = setTimeout(() => {
-        console.log('⏰ Таймаут загрузки изображения для:', product.name);
-        setImageLoading(false);
-        setImageError(true);
-      }, 5000); // 5 секунд таймаут
-      
-      return () => clearTimeout(timeout);
-    }
-  }, [imageUrl, imageLoading, product.name]);
 
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 h-full flex flex-col border border-gray-200 bg-white touch-manipulation">
       <div className="relative overflow-hidden rounded-t-xl bg-gray-100 touch-manipulation">
         {imageUrl && !imageError ? (
           <>
-            {/* Индикатор загрузки */}
-            {imageLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-              </div>
-            )}
-            
             {/* Изображение */}
             <img
               src={imageUrl}
               alt={product.name}
-              className={`w-full h-24 sm:h-32 md:h-40 object-cover group-hover:scale-110 transition-all duration-300 ${
-                imageLoading ? 'opacity-0' : 'opacity-100'
-              }`}
+              className="w-full h-24 sm:h-32 md:h-40 object-cover group-hover:scale-110 transition-all duration-300"
               onLoad={handleImageLoad}
               onError={handleImageError}
               loading="lazy"
