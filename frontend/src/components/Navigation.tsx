@@ -74,12 +74,12 @@ export const Navigation: React.FC = () => {
             
             {/* Логотип */}
             <div 
-              className="flex items-center cursor-pointer group"
+              className="flex items-center cursor-pointer group flex-shrink-0"
               onClick={() => navigate('/')}
             >
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-red-600 group-hover:text-red-700 transition-colors">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-red-600 group-hover:text-red-700 transition-colors">
                 Mnogo Rolly
-                <span className="text-xs md:text-sm lg:text-base font-normal text-gray-500 ml-2">🍣</span>
+                <span className="text-sm ml-1 sm:ml-2">🍣</span>
               </h1>
             </div>
             
@@ -129,21 +129,22 @@ export const Navigation: React.FC = () => {
             </nav>
             
             {/* Правая часть - кнопки и пользователь */}
-            <div className="flex items-center gap-3 lg:gap-4">
+            <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
               
               {/* Корзина на странице меню */}
               {isMenuPage && (
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => navigate('/checkout')}
-                  className="relative"
+                  className="relative p-2"
                 >
-                  <ShoppingCart className="w-5 h-5" />
+                  <ShoppingCart className="w-4 h-4" />
                   {getItemCount() > 0 && (
                     <Badge
                       variant="primary"
                       size="sm"
-                      className="absolute -top-2 -right-2 bg-red-500 text-white"
+                      className="absolute -top-1 -right-1 bg-red-500 text-white min-w-[16px] h-4 text-xs"
                     >
                       {getItemCount()}
                     </Badge>
@@ -153,18 +154,18 @@ export const Navigation: React.FC = () => {
 
               {/* Пользователь */}
               {user ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   {/* Кнопка админ панели */}
                   <AdminPanelButton />
                   
-                  <span className="text-sm text-gray-700 hidden sm:block">
-                    Привет, {user?.name || 'Пользователь'}!
+                  <span className="text-xs text-gray-700 hidden lg:block max-w-20 truncate">
+                    {user?.name || 'Пользователь'}
                   </span>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate('/profile')}
-                    className="text-gray-700 hover:text-red-600 hover:bg-red-50"
+                    className="text-gray-700 hover:text-red-600 hover:bg-red-50 p-2"
                   >
                     <User className="w-4 h-4" />
                   </Button>
@@ -172,7 +173,7 @@ export const Navigation: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     onClick={handleLogout}
-                    className="text-gray-700 hover:text-red-600 hover:bg-red-50"
+                    className="text-gray-700 hover:text-red-600 hover:bg-red-50 p-2"
                   >
                     <LogOut className="w-4 h-4" />
                   </Button>
@@ -182,10 +183,10 @@ export const Navigation: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => navigate('/auth')}
-                  className="text-gray-700 hover:text-red-600 hover:bg-red-50"
+                  className="text-gray-700 hover:text-red-600 hover:bg-red-50 px-3 py-2"
                 >
-                  <User className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:block">Войти</span>
+                  <User className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:block text-sm">Войти</span>
                 </Button>
               )}
               
@@ -193,10 +194,10 @@ export const Navigation: React.FC = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="md:hidden"
+                className="md:hidden p-2"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </Button>
             </div>
           </div>

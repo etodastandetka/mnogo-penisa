@@ -85,7 +85,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <img
               src={imageUrl}
               alt={product.name}
-              className={`w-full h-32 sm:h-40 md:h-48 object-cover group-hover:scale-110 transition-transform duration-300 ${
+              className={`w-full h-24 sm:h-32 md:h-40 object-cover group-hover:scale-110 transition-transform duration-300 ${
                 imageLoading ? 'opacity-0' : 'opacity-100'
               }`}
               onLoad={handleImageLoad}
@@ -106,33 +106,33 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </>
         ) : (
           /* Нет изображения - показываем иконку блюда */
-          <div className="w-full h-32 sm:h-40 md:h-48 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="w-full h-24 sm:h-32 md:h-40 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
             <div className="text-center">
               {product.category === 'rolls' && (
-                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🍣</div>
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍣</div>
               )}
               {product.category === 'pizza' && (
-                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🍕</div>
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍕</div>
               )}
               {product.category === 'wings' && (
-                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🍗</div>
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍗</div>
               )}
               {product.category === 'snacks' && (
-                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🍟</div>
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍟</div>
               )}
               {product.category === 'drinks' && (
-                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🥤</div>
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🥤</div>
               )}
               {product.category === 'sauces' && (
-                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🥢</div>
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🥢</div>
               )}
               {product.category === 'sets' && (
-                <div className="text-4xl sm:text-5xl md:text-6xl mb-2">🍱</div>
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍱</div>
               )}
               {!['rolls', 'pizza', 'wings', 'snacks', 'drinks', 'sauces', 'sets'].includes(product.category) && (
-                <ImageIcon className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 text-gray-400 mx-auto mb-2" />
+                <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-1" />
               )}
-              <p className="text-xs text-gray-500 px-2">Без фото</p>
+              <p className="text-xs text-gray-500 px-2 hidden sm:block">Без фото</p>
             </div>
           </div>
         )}
@@ -161,46 +161,46 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
       
       <CardContent className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col">
-        <h3 className="font-semibold text-gray-900 mb-1 sm:mb-2 group-hover:text-red-600 transition-colors text-sm sm:text-base line-clamp-2 min-h-[2rem] leading-tight">
+        <h3 className="font-semibold text-gray-900 mb-1 sm:mb-2 group-hover:text-red-600 transition-colors text-xs sm:text-sm md:text-base line-clamp-2 min-h-[1.5rem] sm:min-h-[2rem] leading-tight">
           {product.name}
         </h3>
-        <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2 flex-1 min-h-[2rem] leading-tight">
+        <p className="text-gray-600 text-xs mb-1 sm:mb-2 line-clamp-1 sm:line-clamp-2 flex-1 min-h-[1rem] sm:min-h-[2rem] leading-tight">
           {product.description || 'Описание отсутствует'}
         </p>
         
         <div className="flex items-center justify-between mt-auto pt-1 sm:pt-2">
-          <span className="text-base sm:text-lg md:text-xl font-bold text-red-600">
+          <span className="text-sm sm:text-base md:text-lg font-bold text-red-600">
             {formatPrice(product.price)}
           </span>
           
           {quantity > 0 ? (
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-1">
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => handleUpdateQuantity(quantity - 1)}
-                className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 p-0 border border-gray-300 flex items-center justify-center"
+                className="w-6 h-6 sm:w-7 sm:h-7 p-0 border border-gray-300 flex items-center justify-center"
               >
-                <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Minus className="w-3 h-3" />
               </Button>
-              <span className="font-semibold min-w-[1.2rem] sm:min-w-[1.5rem] md:min-w-[2rem] text-center text-xs sm:text-sm md:text-base">{quantity}</span>
+              <span className="font-semibold min-w-[1rem] sm:min-w-[1.2rem] text-center text-xs sm:text-sm">{quantity}</span>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => handleUpdateQuantity(quantity + 1)}
-                className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 p-0 border border-gray-300 flex items-center justify-center"
+                className="w-6 h-6 sm:w-7 sm:h-7 p-0 border border-gray-300 flex items-center justify-center"
               >
-                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Plus className="w-3 h-3" />
               </Button>
             </div>
           ) : (
             <Button 
               size="sm"
               onClick={handleAddToCart}
-              className="bg-red-600 hover:bg-red-700 text-white w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 p-0 border border-red-600 flex items-center justify-center"
+              className="bg-red-600 hover:bg-red-700 text-white w-6 h-6 sm:w-7 sm:h-7 p-0 border border-red-600 flex items-center justify-center"
               disabled={product.is_available === false}
             >
-              <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+              <Plus className="w-3 h-3" />
             </Button>
           )}
         </div>
