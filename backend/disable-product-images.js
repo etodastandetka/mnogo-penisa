@@ -31,3 +31,4 @@ db.run('UPDATE products SET image_url = NULL', (err) => {
   });
 });
 
+

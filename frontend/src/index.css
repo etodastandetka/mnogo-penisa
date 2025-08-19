@@ -62,6 +62,47 @@
   display: none;  /* Safari and Chrome */
 }
 
+/* Поддержка эмодзи для всех устройств */
+.emoji-font {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", "EmojiSymbols", emoji, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-variant-emoji: unicode;
+}
+
+/* Улучшенное отображение эмодзи на мобильных */
+@media (max-width: 768px) {
+  .emoji-font {
+    font-feature-settings: "liga" 1, "kern" 1, "rlig" 1, "calt" 1;
+    font-synthesis: none;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Fallback для устройств без поддержки эмодзи */
+.fallback-emoji {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Оптимизация для Android */
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (max-width: 768px) {
+  .emoji-font {
+    font-family: "Noto Color Emoji", "Android Emoji", "Apple Color Emoji", "Segoe UI Emoji", emoji, sans-serif;
+  }
+}
+
+/* Оптимизация для iOS */
+@supports (-webkit-touch-callout: none) {
+  .emoji-font {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", emoji, sans-serif;
+  }
+}
+
 /* Улучшения для мобильных устройств */
 @media (max-width: 768px) {
   /* Уменьшаем размеры шрифтов на мобильных */
@@ -79,6 +120,24 @@
   .mobile-btn-sm {
     padding: 0.375rem 0.75rem;
     font-size: 0.875rem;
+  }
+
+  /* Улучшенное тач взаимодействие */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Оптимизация изображений на мобильных */
+  .mobile-image-optimization {
+    image-rendering: auto;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
   }
 }
 
