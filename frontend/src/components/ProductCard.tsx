@@ -20,9 +20,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem, removeItem, updateQuantity, getItemQuantity } = useCartStore();
   const quantity = getItemQuantity(product.id.toString());
   const [imageError, setImageError] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
+  const [imageLoading, setImageLoading] = useState(false); // Начинаем с false
   const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
-  const [retryCount, setRetryCount] = useState(0);
 
   // Функция для получения URL изображения 
   const getImageUrl = (imageUrl: string): string | null => {
@@ -35,38 +34,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     
     // Если есть изображение - используем его
     if (imageUrl && imageUrl.trim() && imageUrl !== 'null') {
-      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      console.log('✅ Изображение найдено для', product.name, ':', imageUrl);
       
-      console.log('✅ Изображение найдено для', product.name, ':', {
-        originalUrl: imageUrl,
-        isMobile,
-        userAgent: navigator.userAgent.substring(0, 50)
-      });
-      
-      // Для мобильных устройств улучшаем загрузку изображений
-      if (isMobile) {
-        // Добавляем параметры для оптимизации на мобильных
-        const separator = imageUrl.includes('?') ? '&' : '?';
-        const mobileOptimizations = `${separator}mobile=1&w=400&q=80&f=webp&t=${Date.now()}`;
-        const finalUrl = `${imageUrl}${mobileOptimizations}`;
-        console.log('📱 Оптимизировано для мобильного:', product.name, ':', finalUrl);
-        return finalUrl;
+      // Простая проверка - если URL выглядит валидно, возвращаем как есть
+      // Убираем проблемные оптимизации которые могут ломать загрузку
+      if (imageUrl.startsWith('http') || imageUrl.startsWith('/')) {
+        return imageUrl;
       }
-      
-      // Для десктопа - обычная загрузка с cache busting только для локальных изображений
-      if (!imageUrl.includes('unsplash') && !imageUrl.includes('cdn.')) {
-        const separator = imageUrl.includes('?') ? '&' : '?';
-        const finalUrl = `${imageUrl}${separator}v=${Date.now()}`;
-        console.log('🔄 Добавлен timestamp для', product.name, ':', finalUrl);
-        return finalUrl;
-      }
-      
-      // Внешние CDN изображения возвращаем как есть
-      console.log('🌐 Внешнее изображение для', product.name, ':', imageUrl);
-      return imageUrl;
     }
+    
     console.log('❌ НЕТ изображения для товара:', product.name, 'input:', imageUrl);
-    return null; // Нет изображения - покажем иконку
+    return null; // Нет изображения - покажем эмодзи
   };
 
   const handleImageLoad = () => {
@@ -77,31 +55,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const originalUrl = e.currentTarget.src;
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     console.error('❌ Ошибка загрузки изображения для товара:', product.name);
     console.error('❌ URL:', originalUrl);
-    console.error('❌ Попытка №:', retryCount + 1);
-    console.error('❌ User Agent:', navigator.userAgent);
-    console.error('❌ Is Mobile:', isMobile);
-    
-    // На мобильных делаем 1 попытку пересоздать URL с другими параметрами
-    if (isMobile && retryCount < 1 && originalUrl.includes('mobile=1')) {
-      setRetryCount(prev => prev + 1);
-      setImageLoading(true);
-      
-      // Пробуем без WebP и с меньшим качеством
-      const baseUrl = originalUrl.split('?')[0];
-      const fallbackUrl = `${baseUrl}?mobile=1&w=300&q=60&t=${Date.now()}`;
-      
-      console.log('🔄 Повторная попытка загрузки:', fallbackUrl);
-      e.currentTarget.src = fallbackUrl;
-      return;
-    }
     
     setImageError(true);
     setImageLoading(false);
-    // Показываем категорийную иконку вместо изображения
+    // Показываем эмодзи fallback
   };
 
   const handleAddToCart = () => {
@@ -122,6 +82,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const imageUrl = getImageUrl(product.image_url || product.image || '');
   
+  // Функция для получения эмодзи по категории
+  const getCategoryEmoji = (category: string) => {
+    const emojiMap: { [key: string]: string } = {
+      'rolls': '🍣',
+      'pizza': '🍕', 
+      'wings': '🍗',
+      'snacks': '🍟',
+      'drinks': '🥤',
+      'sauces': '🥫',
+      'sets': '🍱'
+    };
+    return emojiMap[category] || '🍽️';
+  };
+  
   // Дополнительное логирование для отладки
   React.useEffect(() => {
     console.log(`📦 ТОВАР: ${product.name}`, {
@@ -133,35 +107,34 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     });
   }, [product, imageUrl]);
 
-  // Сброс счетчика ошибок при смене изображения
+  // Сброс состояния при смене изображения
   React.useEffect(() => {
-    setRetryCount(0);
     setImageError(false);
-    setImageLoading(true);
+    // Только если есть реальный URL изображения
+    if (imageUrl && imageUrl.trim()) {
+      setImageLoading(true);
+    } else {
+      setImageLoading(false);
+    }
   }, [imageUrl]);
 
-  // Предзагрузка изображения для мобильных устройств
+  // Таймаут для загрузки изображений
   React.useEffect(() => {
-    if (imageUrl && typeof window !== 'undefined') {
-      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (imageUrl && imageLoading) {
+      const timeout = setTimeout(() => {
+        console.log('⏰ Таймаут загрузки изображения для:', product.name);
+        setImageLoading(false);
+        setImageError(true);
+      }, 5000); // 5 секунд таймаут
       
-      if (isMobile) {
-        const img = new Image();
-        img.onload = () => {
-          console.log('✅ Предзагрузка завершена для:', product.name);
-        };
-        img.onerror = () => {
-          console.log('❌ Ошибка предзагрузки для:', product.name);
-        };
-        img.src = imageUrl;
-      }
+      return () => clearTimeout(timeout);
     }
-  }, [imageUrl, product.name]);
+  }, [imageUrl, imageLoading, product.name]);
 
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 h-full flex flex-col border border-gray-200 bg-white touch-manipulation">
       <div className="relative overflow-hidden rounded-t-xl bg-gray-100 touch-manipulation">
-        {imageUrl ? (
+        {imageUrl && !imageError ? (
           <>
             {/* Индикатор загрузки */}
             {imageLoading && (
@@ -174,7 +147,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <img
               src={imageUrl}
               alt={product.name}
-              className={`w-full h-24 sm:h-32 md:h-40 object-cover group-hover:scale-110 transition-transform duration-300 mobile-image-optimization ${
+              className={`w-full h-24 sm:h-32 md:h-40 object-cover group-hover:scale-110 transition-all duration-300 ${
                 imageLoading ? 'opacity-0' : 'opacity-100'
               }`}
               onLoad={handleImageLoad}
@@ -184,115 +157,29 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               referrerPolicy="no-referrer"
               decoding="async"
               style={{ 
-                imageRendering: 'auto',
-                WebkitUserSelect: 'none',
-                userSelect: 'none',
-                maxWidth: '100%',
-                height: 'auto',
-                objectFit: 'cover',
-                WebkitBackfaceVisibility: 'hidden',
-                backfaceVisibility: 'hidden',
-                WebkitTransform: 'translateZ(0)',
-                transform: 'translateZ(0)'
+                objectFit: 'cover'
               }}
             />
             
-            {/* Fallback для ошибок изображения - показываем категорийные иконки */}
+            {/* Fallback для ошибок изображения */}
             {imageError && (
               <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
                 <div className="text-center">
-                  {product.category === 'rolls' && (
-                    <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                      🍣
-                    </div>
-                  )}
-                  {product.category === 'pizza' && (
-                    <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                      🍕
-                    </div>
-                  )}
-                  {product.category === 'wings' && (
-                    <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                      🍗
-                    </div>
-                  )}
-                  {product.category === 'snacks' && (
-                    <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                      🍟
-                    </div>
-                  )}
-                  {product.category === 'drinks' && (
-                    <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                      🥤
-                    </div>
-                  )}
-                  {product.category === 'sauces' && (
-                    <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                      🥫
-                    </div>
-                  )}
-                  {product.category === 'sets' && (
-                    <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                      🍱
-                    </div>
-                  )}
-                  {!['rolls', 'pizza', 'wings', 'snacks', 'drinks', 'sauces', 'sets'].includes(product.category) && (
-                    <div className="fallback-emoji">
-                      <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-1" />
-                      <span className="text-2xl sm:text-3xl md:text-4xl filter drop-shadow-sm emoji-font">
-                        🍽️
-                      </span>
-                    </div>
-                  )}
-                  <p className="text-xs text-gray-500 px-2 hidden sm:block">Изображение</p>
+                  <div className="text-4xl sm:text-5xl md:text-6xl mb-2 emoji-font">
+                    {getCategoryEmoji(product.category)}
+                  </div>
+                  <p className="text-xs text-gray-500 px-2 hidden sm:block">Изображение недоступно</p>
                 </div>
               </div>
             )}
           </>
         ) : (
-          /* Нет изображения - показываем категорийные иконки */
+          /* Нет изображения - показываем эмодзи */
           <div className="w-full h-24 sm:h-32 md:h-40 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
             <div className="text-center">
-              {product.category === 'rolls' && (
-                <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                  🍣
-                </div>
-              )}
-              {product.category === 'pizza' && (
-                <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                  🍕
-                </div>
-              )}
-              {product.category === 'wings' && (
-                <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                  🍗
-                </div>
-              )}
-              {product.category === 'snacks' && (
-                <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                  🍟
-                </div>
-              )}
-              {product.category === 'drinks' && (
-                <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                  🥤
-                </div>
-              )}
-              {product.category === 'sauces' && (
-                <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                  🥫
-                </div>
-              )}
-              {product.category === 'sets' && (
-                <div className="text-3xl sm:text-4xl md:text-5xl mb-1 filter drop-shadow-sm emoji-font">
-                  🍱
-                </div>
-              )}
-              {!['rolls', 'pizza', 'wings', 'snacks', 'drinks', 'sauces', 'sets'].includes(product.category) && (
-                <div className="fallback-no-image">
-                  <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-1" />
-                </div>
-              )}
+              <div className="text-4xl sm:text-5xl md:text-6xl mb-2 emoji-font">
+                {getCategoryEmoji(product.category)}
+              </div>
               <p className="text-xs text-gray-500 px-2 hidden sm:block">Нет фото</p>
             </div>
           </div>
