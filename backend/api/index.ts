@@ -463,9 +463,9 @@ app.get('/api/products', (req, res) => {
           processedImageUrl = product.image_url;
         }
       
-      // Если нет изображения, добавляем placeholder
+      // Если нет изображения, оставляем null для отображения SVG иконки категории
       if (!product.image_url || product.image_url === '') {
-        processedImageUrl = 'https://147.45.141.113:3444/images/placeholder.svg';
+        processedImageUrl = null;
       }
       
         return {
@@ -1152,16 +1152,30 @@ app.get('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
       return res.status(500).json({ message: 'Ошибка загрузки товаров' });
     }
     
-    // Добавляем placeholder изображения для товаров без фото
+    // Обрабатываем изображения для товаров
     const productsWithPlaceholders = products.map((product: any) => {
-      if (!product.image_url || product.image_url === '' || product.image_url.includes('/images/products/')) {
-        // Используем placeholder изображение
-        return {
-          ...product,
-          image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
-        };
+      let processedImageUrl = product.image_url;
+      
+      // Если есть относительный путь к изображению, делаем его полным
+      if (product.image_url && product.image_url.startsWith('/uploads/')) {
+        processedImageUrl = `https://147.45.141.113:3444${product.image_url}`;
       }
-      return product;
+      
+      // Если это внешний URL, оставляем как есть
+      if (product.image_url && (product.image_url.startsWith('http://') || product.image_url.startsWith('https://'))) {
+        processedImageUrl = product.image_url;
+      }
+      
+      // Если нет изображения, оставляем null для отображения SVG иконки
+      if (!product.image_url || product.image_url === '' || product.image_url.includes('/images/products/')) {
+        processedImageUrl = null;
+      }
+      
+      return {
+        ...product,
+        image_url: processedImageUrl,
+        original_image_url: product.image_url
+      };
     });
     
     res.json(productsWithPlaceholders);

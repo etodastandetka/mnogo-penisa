@@ -26,8 +26,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Функция для получения URL изображения 
   const getImageUrl = (imageUrl: string): string | null => {
     // Если есть изображение - используем его, если нет - null (покажем иконку)
-    if (imageUrl && imageUrl.trim() && !imageUrl.includes('unsplash')) {
-      return imageUrl;
+    if (imageUrl && imageUrl.trim() && imageUrl !== 'null' && !imageUrl.includes('unsplash')) {
+      // Добавляем timestamp для борьбы с кэшированием на мобильных
+      const separator = imageUrl.includes('?') ? '&' : '?';
+      return `${imageUrl}${separator}v=${Date.now()}`;
     }
     return null; // Нет изображения - покажем иконку
   };

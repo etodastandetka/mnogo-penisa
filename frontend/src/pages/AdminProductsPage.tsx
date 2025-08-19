@@ -199,45 +199,67 @@ export const AdminProductsPage: React.FC = () => {
     }
 
     try {
-      // Если выбрано изображение, конвертируем в base64
-      let imageUrl = '';
-      if (selectedImage) {
-        try {
-          // Конвертируем изображение в base64
-          const reader = new FileReader();
-          const base64Promise = new Promise<string>((resolve, reject) => {
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-          });
-          
-          reader.readAsDataURL(selectedImage);
-          imageUrl = await base64Promise;
-          
-          console.log('Фото конвертировано в base64, размер:', imageUrl.length);
-        } catch (err) {
-          console.error('Ошибка конвертации фото:', err);
-          alert('Ошибка при обработке фото. Попробуйте еще раз.');
-          return;
-        }
-      }
+      console.log('🆕 Создаем новый товар...');
 
+      // Сначала создаем товар БЕЗ изображения
       const productData = {
         name: addForm.name,
         description: addForm.description,
         price: addForm.price,
         category: addForm.category,
-        image_url: imageUrl,
+        image_url: '', // Пустая строка изначально
         is_available: addForm.is_available
       };
 
       console.log('Создаем товар с данными:', productData);
-
       const result = await createProduct(productData);
-      
+      console.log('✅ Товар создан с ID:', result.productId);
+
+      // Если выбрано изображение, загружаем его отдельно
+      let finalImageUrl = '';
+      if (selectedImage) {
+        try {
+          console.log('📸 Загружаем изображение для нового товара...');
+          
+          // Создаем FormData для загрузки изображения
+          const formData = new FormData();
+          formData.append('image', selectedImage);
+          
+          const uploadResponse = await fetch('/api/admin/upload-image', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          
+          if (!uploadResponse.ok) {
+            throw new Error(`Ошибка загрузки изображения: ${uploadResponse.status}`);
+          }
+          
+          const uploadResult = await uploadResponse.json();
+          finalImageUrl = uploadResult.imageUrl || uploadResult.url || uploadResult.path;
+          console.log('✅ Изображение загружено:', finalImageUrl);
+          
+          // Обновляем товар с новым изображением
+          console.log('🔄 Обновляем товар с изображением...');
+          await updateProduct(String(result.productId), {
+            ...productData,
+            image_url: finalImageUrl
+          });
+          console.log('✅ Товар обновлен с изображением');
+          
+        } catch (err) {
+          console.error('❌ Ошибка загрузки изображения:', err);
+          alert('Товар создан, но не удалось загрузить изображение. Вы можете добавить его позже.');
+        }
+      }
+
       // Обновляем список товаров
       const newProduct = {
         id: result.productId,
         ...productData,
+        image_url: finalImageUrl,
         created_at: new Date().toISOString()
       };
       setProducts([newProduct, ...products]);
@@ -255,7 +277,7 @@ export const AdminProductsPage: React.FC = () => {
       setImagePreview('');
       alert('Товар успешно добавлен!');
     } catch (err) {
-      console.error('Ошибка создания товара:', err);
+      console.error('❌ Ошибка создания товара:', err);
       alert('Ошибка при добавлении товара');
     }
   };
@@ -396,6 +418,16 @@ export const AdminProductsPage: React.FC = () => {
         setProducts(updatedProducts);
         
         console.log('Товар успешно обновлен с новым фото');
+        
+        // Принудительно обновляем список товаров с сервера
+        console.log('🔄 Обновляем список товаров с сервера...');
+        try {
+          const updatedProductsFromServer = await getProducts();
+          setProducts(updatedProductsFromServer);
+          console.log('✅ Список товаров обновлен с сервера');
+        } catch (err) {
+          console.error('❌ Ошибка обновления списка товаров:', err);
+        }
       } catch (error) {
         console.error('Ошибка обновления товара:', error);
         alert('Ошибка обновления товара. Попробуйте еще раз.');
