@@ -25,12 +25,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   // Функция для получения URL изображения 
   const getImageUrl = (imageUrl: string): string | null => {
+    console.log('🖼️ getImageUrl для', product.name, ':', {
+      input: imageUrl,
+      trimmed: imageUrl?.trim(),
+      notNull: imageUrl !== 'null',
+      hasValue: !!imageUrl
+    });
+    
     // Если есть изображение - используем его
     if (imageUrl && imageUrl.trim() && imageUrl !== 'null') {
       const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      console.log('🖼️ Обрабатываем изображение:', {
-        productName: product.name,
+      console.log('✅ Изображение найдено для', product.name, ':', {
         originalUrl: imageUrl,
         isMobile,
         userAgent: navigator.userAgent.substring(0, 50)
@@ -40,14 +46,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       if (!imageUrl.includes('unsplash')) {
         const separator = imageUrl.includes('?') ? '&' : '?';
         const finalUrl = `${imageUrl}${separator}v=${Date.now()}`;
-        console.log('🔄 Добавлен timestamp:', finalUrl);
+        console.log('🔄 Добавлен timestamp для', product.name, ':', finalUrl);
         return finalUrl;
       }
       // Unsplash изображения возвращаем как есть
-      console.log('🌐 Unsplash изображение:', imageUrl);
+      console.log('🌐 Unsplash изображение для', product.name, ':', imageUrl);
       return imageUrl;
     }
-    console.log('❌ Нет изображения для товара:', product.name);
+    console.log('❌ НЕТ изображения для товара:', product.name, 'input:', imageUrl);
     return null; // Нет изображения - покажем иконку
   };
 
@@ -150,14 +156,36 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </>
         ) : (
-          /* Временно показываем Unsplash вместо смайликов для отладки */
-          <img
-            src="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop"
-            alt={product.name}
-            className="w-full h-24 sm:h-32 md:h-40 object-cover group-hover:scale-110 transition-transform duration-300"
-            onLoad={() => console.log('✅ Fallback Unsplash загружен для:', product.name)}
-            onError={() => console.error('❌ Даже Unsplash не загрузился для:', product.name)}
-          />
+          /* Нет изображения - показываем иконку категории */
+          <div className="w-full h-24 sm:h-32 md:h-40 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+            <div className="text-center">
+              {product.category === 'rolls' && (
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍣</div>
+              )}
+              {product.category === 'pizza' && (
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍕</div>
+              )}
+              {product.category === 'wings' && (
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍗</div>
+              )}
+              {product.category === 'snacks' && (
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍟</div>
+              )}
+              {product.category === 'drinks' && (
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🥤</div>
+              )}
+              {product.category === 'sauces' && (
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🥫</div>
+              )}
+              {product.category === 'sets' && (
+                <div className="text-2xl sm:text-4xl md:text-5xl mb-1">🍱</div>
+              )}
+              {!['rolls', 'pizza', 'wings', 'snacks', 'drinks', 'sauces', 'sets'].includes(product.category) && (
+                <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-1" />
+              )}
+              <p className="text-xs text-gray-500 px-2 hidden sm:block">Без фото</p>
+            </div>
+          </div>
         )}
         
         {/* Отладочная информация (только в development) */}
