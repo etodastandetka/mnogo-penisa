@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Card, CardContent } from './ui/Card';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
-import { Plus, Minus, Image as ImageIcon } from 'lucide-react';
+import { Plus, Minus, Image as ImageIcon, Eye } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { formatPrice } from '../utils/format';
 import { Product } from '../types';
+import { ProductDetailModal } from './ProductDetailModal';
 
 interface ProductCardProps {
   product: Product;
@@ -20,6 +21,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem, removeItem, updateQuantity, getItemQuantity } = useCartStore();
   const quantity = getItemQuantity(product.id.toString());
   const [imageError, setImageError] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   // Функция для получения URL изображения с учетом мобильной версии
   const getImageUrl = (): string | null => {
@@ -107,6 +109,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [imageUrl]);
 
   return (
+    <>
     <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 h-full flex flex-col border border-gray-200 bg-white touch-manipulation">
       <div className="relative overflow-hidden rounded-t-xl bg-gray-100 touch-manipulation">
         {imageUrl && !imageError ? (
@@ -177,43 +180,65 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {product.description || 'Описание отсутствует'}
         </p>
         
-        <div className="flex items-center justify-between mt-auto pt-1 sm:pt-2">
-          <span className="text-sm sm:text-base md:text-lg font-bold text-red-600">
-            {formatPrice(product.price)}
-          </span>
-          
-          {quantity > 0 ? (
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Button
+        <div className="mt-auto pt-1 sm:pt-2 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm sm:text-base md:text-lg font-bold text-red-600">
+              {formatPrice(product.price)}
+            </span>
+            
+            {quantity > 0 ? (
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleUpdateQuantity(quantity - 1)}
+                  className="w-8 h-8 sm:w-9 sm:h-9 p-0 border-2 border-gray-300 hover:border-red-400 hover:bg-red-50 flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
+                >
+                  <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Button>
+                <span className="font-bold min-w-[2rem] sm:min-w-[2.5rem] text-center text-sm sm:text-base text-gray-900 bg-gray-50 px-2 py-1 rounded-lg">{quantity}</span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleUpdateQuantity(quantity + 1)}
+                  className="w-8 h-8 sm:w-9 sm:h-9 p-0 border-2 border-gray-300 hover:border-green-400 hover:bg-green-50 flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
+                >
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Button>
+              </div>
+            ) : (
+              <Button 
                 size="sm"
-                variant="outline"
-                onClick={() => handleUpdateQuantity(quantity - 1)}
-                className="w-8 h-8 sm:w-9 sm:h-9 p-0 border-2 border-gray-300 hover:border-red-400 hover:bg-red-50 flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
-              >
-                <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
-              <span className="font-bold min-w-[2rem] sm:min-w-[2.5rem] text-center text-sm sm:text-base text-gray-900 bg-gray-50 px-2 py-1 rounded-lg">{quantity}</span>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleUpdateQuantity(quantity + 1)}
-                className="w-8 h-8 sm:w-9 sm:h-9 p-0 border-2 border-gray-300 hover:border-green-400 hover:bg-green-50 flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
+                onClick={handleAddToCart}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 text-white w-8 h-8 sm:w-9 sm:h-9 p-0 border-0 shadow-lg hover:shadow-xl flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
+                disabled={product.is_available === false}
               >
                 <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
-            </div>
-          ) : (
-            <Button 
-              size="sm"
-              onClick={handleAddToCart}
-              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 text-white w-8 h-8 sm:w-9 sm:h-9 p-0 border-0 shadow-lg hover:shadow-xl flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
-              disabled={product.is_available === false}
-            >
-              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
-          )}
+            )}
+          </div>
+          
+          {/* Кнопка "Подробнее" */}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setShowDetailModal(true)}
+            className="w-full text-xs sm:text-sm py-1 sm:py-2 border border-gray-300 hover:border-red-400 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+          >
+            <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+            Подробнее
+          </Button>
         </div>
       </CardContent>
     </Card>
+    
+    {/* Модальное окно с подробной информацией */}
+    {showDetailModal && (
+      <ProductDetailModal
+        product={product}
+        onClose={() => setShowDetailModal(false)}
+      />
+    )}
+    </>
   );
 };
