@@ -1207,7 +1207,7 @@ app.delete('/api/admin/clear-all-products', authenticateToken, requireAdmin, (re
 
 // Создание нового товара
 app.post('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
-  const { name, description, price, category, isPopular, isAvailable, is_available, image_url } = req.body;
+  const { name, description, price, category, isPopular, isAvailable, is_available, image_url, mobile_image_url } = req.body;
   
   
   
@@ -1225,7 +1225,7 @@ app.post('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
   db.run(`
     INSERT INTO products (name, description, price, image_url, mobile_image_url, category, is_popular, is_available)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `, [name, description, price, imageUrl, '', category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0], function(err) {
+  `, [name, description, price, imageUrl, mobile_image_url || '', category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0], function(err) {
     if (err) {
       console.error('Ошибка создания товара:', err);
       return res.status(500).json({ message: 'Ошибка создания товара' });
@@ -1244,7 +1244,9 @@ app.post('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
 // Обновление товара
 app.put('/api/admin/products/:id', authenticateToken, requireAdmin, (req, res) => {
   const { id } = req.params;
-  const { name, description, price, category, isPopular, isAvailable, is_available, image_url } = req.body;
+  const { name, description, price, category, isPopular, isAvailable, is_available, image_url, mobile_image_url } = req.body;
+  
+  console.log('🔄 UPDATE PRODUCT:', { id, name, mobile_image_url, image_url });
   
 
   
@@ -1266,7 +1268,7 @@ app.put('/api/admin/products/:id', authenticateToken, requireAdmin, (req, res) =
       UPDATE products 
       SET name = ?, description = ?, price = ?, image_url = ?, mobile_image_url = ?, category = ?, is_popular = ?, is_available = ?
       WHERE id = ?
-  `, [name, description, price, imageUrl, '', category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0, id], function(err) {
+  `, [name, description, price, imageUrl, mobile_image_url || '', category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0, id], function(err) {
       if (err) {
       console.error('Ошибка обновления товара:', err);
         return res.status(500).json({ message: 'Ошибка обновления товара' });
