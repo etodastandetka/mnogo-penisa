@@ -54,6 +54,21 @@ const upload = multer({
   }
 });
 
+// Отдельный multer для memoryStorage (для загрузки чеков)
+const uploadMemory = multer({ 
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Только изображения разрешены'));
+    }
+  }
+});
+
 // Middleware
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
@@ -473,8 +488,8 @@ app.get('/api/products', (req, res) => {
           processedImageUrl = product.image_url;
         }
       
-      // Если нет изображения или это Unsplash, оставляем null
-      if (!product.image_url || product.image_url === '' || product.image_url.includes('unsplash')) {
+      // Если нет изображения или это конкретно Unsplash, оставляем null
+      if (!product.image_url || product.image_url === '' || product.image_url.includes('unsplash.com')) {
         processedImageUrl = null;
       }
       
@@ -846,7 +861,7 @@ app.post('/api/upload-images', upload.array('images', 10), (req, res) => {
 });
 
 // Загрузка чека об оплате
-app.post('/api/orders/payment-proof', upload.single('file'), (req, res) => {
+app.post('/api/orders/payment-proof', uploadMemory.single('file'), (req, res) => {
   console.log('Загрузка фото чека:', { 
     file: req.file ? req.file.originalname : 'нет файла',
     body: req.body 
@@ -1188,8 +1203,8 @@ app.get('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
         processedImageUrl = product.image_url;
       }
       
-      // Если нет изображения, это Unsplash или старые placeholder, оставляем null
-      if (!product.image_url || product.image_url === '' || product.image_url.includes('/images/products/') || product.image_url.includes('unsplash')) {
+      // Если нет изображения, это конкретно Unsplash или старые placeholder, оставляем null
+      if (!product.image_url || product.image_url === '' || product.image_url.includes('/images/products/') || product.image_url.includes('unsplash.com')) {
         processedImageUrl = null;
       }
       
