@@ -227,13 +227,13 @@ export const ProfilePage: React.FC = () => {
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div>
-                              <p className="font-medium">Заказ #{order.order_number}</p>
+                              <p className="font-medium">Заказ #{order.orderNumber}</p>
                               <p className="text-sm text-gray-600">
-                                {new Date(order.created_at).toLocaleDateString('ru-RU')}
+                                {new Date(order.createdAt).toLocaleDateString('ru-RU')}
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="font-semibold">{order.total_amount} сом</p>
+                              <p className="font-semibold">{formatPrice(order.totalAmount)}</p>
                               <Badge variant={
                                 order.status === 'pending' ? 'secondary' :
                                 order.status === 'preparing' ? 'default' :
@@ -245,31 +245,75 @@ export const ProfilePage: React.FC = () => {
                                  order.status === 'ready' ? 'Готов' :
                                  order.status === 'delivered' ? 'Доставлен' : order.status}
                               </Badge>
-                              {order.paymentStatus && (
-                                <Badge variant="secondary" className="ml-1">
-                                  {order.paymentStatus}
+                              {order.paymentProof && (
+                                <Badge variant="primary" className="ml-1 bg-green-600">
+                                  Чек загружен
                                 </Badge>
                               )}
                             </div>
                           </div>
                           
                           <div className="text-sm text-gray-600 mb-3">
-                            <p>Способ оплаты: {order.payment_method}</p>
-                            {order.items_summary && (
-                              <p>Товары: {order.items_summary}</p>
+                            <p>Способ оплаты: {order.paymentMethod}</p>
+                            {order.deliveryAddress && (
+                              <p>Адрес: {order.deliveryAddress}</p>
                             )}
                           </div>
 
                           <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handlePayOrder(order)}
-                              disabled={order.status === 'delivered'}
-                            >
-                              <CreditCard className="h-4 w-4 mr-1" />
-                              Оплатить
-                            </Button>
+                            {!order.paymentProof && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handlePayOrder(order)}
+                                disabled={order.status === 'delivered'}
+                              >
+                                <CreditCard className="h-4 w-4 mr-1" />
+                                Оплатить
+                              </Button>
+                            )}
+                            {order.paymentProof && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  // Показать чек об оплате
+                                  const newWindow = window.open('', '_blank');
+                                  if (newWindow) {
+                                    newWindow.document.write(`
+                                      <html>
+                                        <head>
+                                          <title>Чек об оплате - Заказ ${order.orderNumber}</title>
+                                          <style>
+                                            body { margin: 0; padding: 20px; background: #f5f5f5; font-family: Arial, sans-serif; }
+                                            .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                                            h1 { color: #333; margin-bottom: 20px; }
+                                            img { max-width: 100%; height: auto; border-radius: 8px; }
+                                            .info { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; }
+                                            .info p { margin: 5px 0; color: #666; }
+                                          </style>
+                                        </head>
+                                        <body>
+                                          <div class="container">
+                                            <h1>Чек об оплате</h1>
+                                            <img src="${order.paymentProof}" alt="Чек об оплате" />
+                                            <div class="info">
+                                              <p><strong>Номер заказа:</strong> ${order.orderNumber}</p>
+                                              <p><strong>Клиент:</strong> ${order.customerName}</p>
+                                              <p><strong>Дата загрузки:</strong> ${order.paymentProofDate ? new Date(order.paymentProofDate).toLocaleString('ru-RU') : 'Не указана'}</p>
+                                            </div>
+                                          </div>
+                                        </body>
+                                      </html>
+                                    `);
+                                    newWindow.document.close();
+                                  }
+                                }}
+                              >
+                                <CreditCard className="h-4 w-4 mr-1" />
+                                Посмотреть чек
+                              </Button>
+                            )}
                           </div>
                         </div>
                       ))}

@@ -69,7 +69,9 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
         order_number: order.order_number,
         payment_proof: order.payment_proof,
         payment_proof_date: order.payment_proof_date,
-        hasPaymentProof: !!order.payment_proof
+        hasPaymentProof: !!order.payment_proof,
+        paymentProofLength: order.payment_proof ? order.payment_proof.length : 0,
+        paymentProofStart: order.payment_proof ? order.payment_proof.substring(0, 50) : 'none'
       });
     }
   }, [order]);
