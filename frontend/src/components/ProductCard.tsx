@@ -111,14 +111,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <>
     <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 h-full flex flex-col border border-gray-200 bg-white touch-manipulation">
-      <div className="relative overflow-hidden rounded-t-xl bg-gray-100 touch-manipulation h-32 sm:h-40 md:h-48">
+      <div className="relative overflow-hidden rounded-t-xl bg-gray-100 touch-manipulation h-40 sm:h-48 md:h-56">
         {imageUrl && !imageError ? (
           <>
             {/* Изображение */}
             <img
               src={imageUrl}
               alt={product.name}
-              className="w-full h-32 sm:h-40 md:h-48 object-contain group-hover:scale-110 transition-all duration-300"
+              className="w-full h-40 sm:h-48 md:h-56 object-contain group-hover:scale-110 transition-all duration-300"
               onLoad={handleImageLoad}
               onError={handleImageError}
               loading="lazy"
@@ -144,7 +144,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </>
         ) : (
           /* Нет изображения - показываем эмодзи */
-          <div className="w-full h-32 sm:h-40 md:h-48 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+          <div className="w-full h-40 sm:h-48 md:h-56 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
             <div className="text-center">
               <div className="text-4xl sm:text-5xl md:text-6xl mb-2 emoji-font">
                 {getCategoryEmoji(product.category)}
