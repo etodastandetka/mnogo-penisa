@@ -287,6 +287,13 @@ export const AdminOrdersPage: React.FC = () => {
   };
 
   const openOrderDetail = (order: AdminOrder) => {
+    console.log('🔍 Открываем детали заказа:', {
+      id: order.id,
+      orderNumber: order.orderNumber,
+      paymentProof: order.paymentProof,
+      paymentProofDate: order.paymentProofDate,
+      hasPaymentProof: !!order.paymentProof
+    });
     setSelectedOrder(order);
     setIsDetailModalOpen(true);
   };

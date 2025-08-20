@@ -1076,6 +1076,16 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
                     payment_proof_date: order.payment_proof_date,
                     items_count: items ? items.length : 0 
                   });
+                  
+                  // Отладка payment_proof
+                  if (order.payment_proof) {
+                    console.log('✅ Заказ с чеком об оплате:', {
+                      id: order.id,
+                      order_number: order.order_number,
+                      payment_proof_length: order.payment_proof.length,
+                      payment_proof_start: order.payment_proof.substring(0, 50)
+                    });
+                  }
         
             resolve({
               id: order.id,
@@ -1088,6 +1098,8 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
               paymentMethod: order.payment_method,
               paymentStatus: order.payment_proof ? 'paid' : 'pending',
               createdAt: order.created_at,
+              paymentProof: order.payment_proof,
+              paymentProofDate: order.payment_proof_date,
               items: items ? items.map((item: any) => ({
                 id: item.id,
                 productName: item.product_name || 'Неизвестный товар',

@@ -61,6 +61,19 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(order?.status || '');
 
+  // Отладка данных заказа
+  React.useEffect(() => {
+    if (order) {
+      console.log('🔍 OrderDetailModal получил данные:', {
+        id: order.id,
+        order_number: order.order_number,
+        payment_proof: order.payment_proof,
+        payment_proof_date: order.payment_proof_date,
+        hasPaymentProof: !!order.payment_proof
+      });
+    }
+  }, [order]);
+
   const handleStatusUpdate = async (newStatus: string) => {
     if (!order) return;
     
