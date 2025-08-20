@@ -97,7 +97,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <span className="text-3xl font-bold text-red-600">
                 {product.price} сом
               </span>
-              {product.is_popular && (
+              {product.isPopular && (
                 <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                   🔥 Популярный
                 </span>
@@ -128,17 +128,17 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-500">Статус:</span>
               <span className={`text-sm font-medium px-2.5 py-0.5 rounded-full ${
-                product.is_available 
+                product.isAvailable 
                   ? 'bg-green-100 text-green-800' 
                   : 'bg-red-100 text-red-800'
               }`}>
-                {product.is_available ? '✅ В наличии' : '❌ Нет в наличии'}
+                {product.isAvailable ? '✅ В наличии' : '❌ Нет в наличии'}
               </span>
             </div>
           </div>
 
           {/* Управление количеством и добавление в корзину */}
-          {product.is_available && (
+          {product.isAvailable && (
             <div className="border-t pt-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
