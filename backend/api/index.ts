@@ -496,7 +496,9 @@ app.get('/api/products', (req, res) => {
         return {
           ...product,
         image_url: processedImageUrl,
-        original_image_url: product.image_url // сохраняем оригинальный URL для отладки
+        original_image_url: product.image_url, // сохраняем оригинальный URL для отладки
+        isAvailable: product.is_available === 1, // преобразуем в boolean для фронтенда
+        isPopular: product.is_popular === 1 // преобразуем в boolean для фронтенда
       };
     });
     
@@ -1211,7 +1213,9 @@ app.get('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
       return {
         ...product,
         image_url: processedImageUrl,
-        original_image_url: product.image_url
+        original_image_url: product.image_url,
+        isAvailable: product.is_available === 1, // преобразуем в boolean для фронтенда
+        isPopular: product.is_popular === 1 // преобразуем в boolean для фронтенда
       };
     });
     
