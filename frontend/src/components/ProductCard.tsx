@@ -224,6 +224,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {product.image_url ? 'Has img' : 'No img'}
           </div>
         )}
+
+        {/* Временная отладочная информация для мобильных устройств */}
+        {window.innerWidth <= 768 && (
+          <div className="absolute top-0 left-0 bg-blue-500 text-white text-xs p-1 rounded-br max-w-[120px]">
+            <div>📱 Mobile</div>
+            <div className="text-[10px]">
+              {product.mobile_image_url ? 'Has mobile' : 'No mobile'}
+            </div>
+            <div className="text-[10px]">
+              {imageUrl ? 'Has img' : 'No img'}
+            </div>
+          </div>
+        )}
         
         {product.isPopular && (
           <div className="absolute top-1 left-1 sm:top-2 sm:left-2 md:top-3 md:left-3">
