@@ -1786,6 +1786,8 @@ app.get('/api/orders/user', authenticateToken, (req: any, res) => {
         o.total_amount,
         o.status,
         o.payment_method,
+        o.payment_proof,
+        o.payment_proof_date,
         o.created_at
       FROM orders o
       WHERE o.user_id = ?
@@ -1814,6 +1816,8 @@ app.get('/api/orders/user', authenticateToken, (req: any, res) => {
         totalAmount: order.total_amount,
         status: order.status,
         paymentMethod: order.payment_method,
+        paymentProof: order.payment_proof,
+        paymentProofDate: order.payment_proof_date,
         createdAt: order.created_at,
         items: [] // Пока оставляем пустым, можно добавить позже
       }));
