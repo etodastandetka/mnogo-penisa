@@ -110,9 +110,14 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
             margin-bottom: 5px;
           }
           .qr-code {
-
             text-align: center;
             margin: 10px 0;
+          }
+          .qr-code img {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            display: block;
           }
           @media print {
             body {
@@ -184,7 +189,8 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
            <div>Спасибо за заказ!</div>
            <div>Приятного аппетита!</div>
            <div class="qr-code">
-             [QR-код для проверки чека]image.png
+             <img src="/images/chai.png" alt="QR код для чаевых" style="width: 80px; height: 80px; margin: 0 auto; display: block;" />
+             <div style="font-size: 10px; margin-top: 5px;">QR code Для чеков</div>
            </div>
            <div>Чек действителен для предъявления в налоговые органы КР</div>
            <div>Фискальный документ №${order.orderNumber || order.id || 'N/A'}</div>

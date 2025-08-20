@@ -111,17 +111,7 @@ export const PaymentProofUpload: React.FC<PaymentProofUploadProps> = ({
 						Вы можете загрузить чек сейчас — он прикрепится к заказу при оформлении.
 					</p>
 
-					{/* QR-код для чаевых */}
-					<div className="bg-gray-50 rounded-lg p-4 text-center">
-						<div className="flex flex-col items-center space-y-2">
-							<img 
-								src="/images/chai.png" 
-								alt="QR код для чаевых" 
-								className="w-24 h-24 object-contain"
-							/>
-							<p className="text-sm font-medium text-gray-700">QR code Для чеков</p>
-						</div>
-					</div>
+
 
 					{/* Загрузка файла */}
 					<div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-red-400 transition-colors">
