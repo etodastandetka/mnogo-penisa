@@ -118,7 +118,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <img
               src={imageUrl}
               alt={product.name}
-              className="w-full h-24 sm:h-32 md:h-40 object-cover group-hover:scale-110 transition-all duration-300"
+              className="w-full h-24 sm:h-32 md:h-40 object-contain group-hover:scale-110 transition-all duration-300"
               onLoad={handleImageLoad}
               onError={handleImageError}
               loading="lazy"
