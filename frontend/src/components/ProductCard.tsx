@@ -62,19 +62,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     return null; // Нет изображения - покажем эмодзи
   };
 
-  // Функция для получения fallback изображения (если основное не загрузилось)
-  const getFallbackImageUrl = (): string | null => {
-    // Если мы на мобильном и мобильное изображение не загрузилось, пробуем основное
-    const isMobile = window.innerWidth <= 768;
-    
-    if (isMobile && product.mobile_image_url && (product.image_url || product.image)) {
-      console.log('🔄 Мобильное изображение не загрузилось, пробуем основное для', product.name);
-      return product.image_url || product.image || null;
-    }
-    
-    return null;
-  };
-
   const handleImageLoad = () => {
     console.log('✅ Изображение загружено для товара:', product.name);
     setImageError(false);
@@ -86,18 +73,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     console.error('❌ Ошибка загрузки изображения для товара:', product.name);
     console.error('❌ URL:', originalUrl);
     
-    // Проверяем, можем ли мы использовать fallback изображение
-    const fallbackUrl = getFallbackImageUrl();
-    
-    if (fallbackUrl && fallbackUrl !== originalUrl) {
-      console.log('🔄 Переключаемся на fallback изображение для', product.name, ':', fallbackUrl);
-      // Обновляем src изображения
-      e.currentTarget.src = fallbackUrl;
-      setImageError(false);
-      return;
-    }
-    
-    console.log('❌ Fallback изображение недоступно, показываем эмодзи для', product.name);
+    console.log('❌ Показываем эмодзи для', product.name);
     setImageError(true);
     // Показываем эмодзи fallback
   };
@@ -150,23 +126,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   React.useEffect(() => {
     const handleResize = () => {
       // Принудительно пересчитываем изображение при изменении размера окна
-      console.log('🔄 Размер окна изменился, пересчитываем изображения для', product.name);
       setImageError(false);
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  // Дополнительная отладка для мобильных устройств
-  React.useEffect(() => {
-    const isMobile = window.innerWidth <= 768;
-    console.log(`📱/💻 Устройство: ${isMobile ? 'Мобильное' : 'Десктоп'} для товара ${product.name}`, {
-      mobileImage: product.mobile_image_url,
-      mainImage: product.image_url || product.image,
-      selectedImage: imageUrl
-    });
-  }, [product, imageUrl]);
 
   // Сброс состояния при смене изображения
   React.useEffect(() => {
@@ -225,16 +190,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         )}
 
-        {/* Временная отладочная информация для мобильных устройств */}
+        {/* Отладочная информация для мобильных устройств */}
         {window.innerWidth <= 768 && (
-          <div className="absolute top-0 left-0 bg-blue-500 text-white text-xs p-1 rounded-br max-w-[120px]">
-            <div>📱 Mobile</div>
-            <div className="text-[10px]">
-              {product.mobile_image_url ? 'Has mobile' : 'No mobile'}
-            </div>
-            <div className="text-[10px]">
-              {imageUrl ? 'Has img' : 'No img'}
-            </div>
+          <div className="absolute top-0 left-0 bg-blue-500 text-white text-xs p-1 rounded-br">
+            {product.mobile_image_url ? '📱 Mobile' : '💻 Main'}
           </div>
         )}
         

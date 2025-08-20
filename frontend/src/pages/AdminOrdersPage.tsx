@@ -38,7 +38,8 @@ export const AdminOrdersPage: React.FC = () => {
     status: '',
     dateFrom: '',
     dateTo: '',
-    search: ''
+    search: '',
+    hasPaymentProof: ''
   });
 
   useEffect(() => {
@@ -282,7 +283,7 @@ export const AdminOrdersPage: React.FC = () => {
   };
 
   const handleClearFilters = () => {
-    setFilters({ status: '', dateFrom: '', dateTo: '', search: '' });
+    setFilters({ status: '', dateFrom: '', dateTo: '', search: '', hasPaymentProof: '' });
   };
 
   const openOrderDetail = (order: AdminOrder) => {
@@ -350,6 +351,11 @@ export const AdminOrdersPage: React.FC = () => {
     }
     if (filters.dateFrom && new Date(order.createdAt) < new Date(filters.dateFrom)) return false;
     if (filters.dateTo && new Date(order.createdAt) > new Date(filters.dateTo)) return false;
+    
+    // Фильтр по наличию чека об оплате
+    if (filters.hasPaymentProof === 'with' && !order.paymentProof) return false;
+    if (filters.hasPaymentProof === 'without' && order.paymentProof) return false;
+    
     return true;
   });
 
@@ -360,7 +366,15 @@ export const AdminOrdersPage: React.FC = () => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Заказы</h1>
-              <p className="text-gray-600 mt-2">Управление заказами клиентов</p>
+              <p className="text-gray-600 mt-2">
+                Управление заказами клиентов • 
+                <span className="text-green-600 font-medium ml-1">
+                  {orders.filter(o => o.paymentProof).length} с чеками
+                </span>
+                <span className="text-gray-500 ml-1">
+                  из {orders.length} заказов
+                </span>
+              </p>
             </div>
             <Button
               variant="outline"
@@ -388,6 +402,101 @@ export const AdminOrdersPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Фильтры */}
+        <Card className="border-0 shadow-soft mb-6">
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <Filter className="h-5 w-5 text-gray-500" />
+              <h3 className="text-lg font-semibold text-gray-900">Фильтры</h3>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Поиск
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Номер заказа, клиент..."
+                    value={filters.search}
+                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Статус
+                </label>
+                <select 
+                  value={filters.status}
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                >
+                  {statusOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Дата от
+                </label>
+                <input
+                  type="date"
+                  value={filters.dateFrom}
+                  onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Дата до
+                </label>
+                <input
+                  type="date"
+                  value={filters.dateTo}
+                  onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Чек об оплате
+                </label>
+                <select 
+                  value={filters.hasPaymentProof}
+                  onChange={(e) => handleFilterChange('hasPaymentProof', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                >
+                  <option value="">Все заказы</option>
+                  <option value="with">С чеком</option>
+                  <option value="without">Без чека</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-4">
+              <Button
+                variant="outline"
+                onClick={handleClearFilters}
+                className="text-gray-600 hover:bg-gray-50"
+              >
+                Очистить фильтры
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {loading ? (
           <div className="text-center py-8">
@@ -436,6 +545,20 @@ export const AdminOrdersPage: React.FC = () => {
                             <p className="text-sm text-gray-600">
                               <strong>Дата:</strong> {new Date(order.createdAt).toLocaleDateString('ru-RU')} {new Date(order.createdAt).toLocaleTimeString('ru-RU')}
                             </p>
+                            {/* Информация о чеке об оплате */}
+                            {order.paymentProof && (
+                              <div className="mt-2 flex items-center space-x-2">
+                                <Receipt className="w-4 h-4 text-green-600" />
+                                <span className="text-sm text-green-600 font-medium">
+                                  Чек об оплате прикреплен
+                                </span>
+                                {order.paymentProofDate && (
+                                  <span className="text-xs text-gray-500">
+                                    ({new Date(order.paymentProofDate).toLocaleDateString('ru-RU')})
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                         
@@ -515,6 +638,44 @@ export const AdminOrdersPage: React.FC = () => {
                           >
                             Печать
                           </Button>
+                          {/* Кнопка просмотра чека об оплате */}
+                          {order.paymentProof && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                if (order.paymentProof?.startsWith('data:image')) {
+                                  // Если это base64 изображение, открываем в новом окне
+                                  const newWindow = window.open();
+                                  if (newWindow) {
+                                    newWindow.document.write(`
+                                      <html>
+                                        <head><title>Чек об оплате - Заказ #${order.orderNumber}</title></head>
+                                        <body style="margin: 0; padding: 20px; background: #f5f5f5;">
+                                          <div style="max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                            <h2 style="color: #333; margin-bottom: 20px;">Чек об оплате - Заказ #${order.orderNumber}</h2>
+                                            <img src="${order.paymentProof}" style="max-width: 100%; height: auto; border-radius: 4px;" alt="Чек об оплате" />
+                                            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; color: #666;">
+                                              <p><strong>Клиент:</strong> ${order.customerName}</p>
+                                              <p><strong>Дата:</strong> ${order.paymentProofDate ? new Date(order.paymentProofDate).toLocaleDateString('ru-RU') : 'Не указана'}</p>
+                                            </div>
+                                          </div>
+                                        </body>
+                                      </html>
+                                    `);
+                                    newWindow.document.close();
+                                  }
+                                } else {
+                                  // Если это URL, открываем как есть
+                                  window.open(order.paymentProof, '_blank');
+                                }
+                              }}
+                              className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                            >
+                              <Receipt className="w-4 h-4 mr-1" />
+                              Чек
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
