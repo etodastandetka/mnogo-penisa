@@ -193,10 +193,10 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
                  <div class="footer">
            <div>Спасибо за заказ!</div>
            <div>Приятного аппетита!</div>
-           <div class="qr-code">
-             <div style="width: 80px; height: 80px; margin: 0 auto; background: #000; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #fff;">💰</div>
-             <div style="font-size: 10px; margin-top: 5px;">QR code Для чеков</div>
-           </div>
+                         <div class="qr-code">
+                <img src="/images/qr-tips.png" alt="QR код для чаевых" style="width: 80px; height: 80px; margin: 0 auto; display: block;" />
+                <div style="font-size: 10px; margin-top: 5px;">QR code Для чеков</div>
+              </div>
            <div>Чек действителен для предъявления в налоговые органы КР</div>
            <div>Фискальный документ №${order.orderNumber || order.id || 'N/A'}</div>
          </div>

@@ -195,16 +195,11 @@ export const AdminOrdersPage: React.FC = () => {
               text-align: center;
               margin: 10px 0;
             }
-            .qr-code div {
+            .qr-code img {
               width: 80px;
               height: 80px;
               margin: 0 auto;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              background: #000;
-              color: #fff;
-              font-size: 40px;
+              display: block;
             }
             @media print {
               body {
@@ -275,10 +270,10 @@ export const AdminOrdersPage: React.FC = () => {
           <div class="footer">
             <div class="tax-info">Спасибо за заказ!</div>
             <div class="tax-info">Приятного аппетита!</div>
-            <div class="qr-code">
-              <div style="width: 80px; height: 80px; margin: 0 auto; background: #000; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #fff;">💰</div>
-              <div style="font-size: 10px; margin-top: 5px;">QR code Для чеков</div>
-            </div>
+                      <div class="qr-code">
+            <img src="/images/qr-tips.png" alt="QR код для чаевых" style="width: 80px; height: 80px; margin: 0 auto; display: block;" />
+            <div style="font-size: 10px; margin-top: 5px;">QR code Для чеков</div>
+          </div>
             <div class="tax-info">С уважением, команда Mnogo Rolly</div>
           </div>
         </body>
