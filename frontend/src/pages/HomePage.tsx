@@ -4,29 +4,19 @@ import { productsApi } from '../api/products';
 import { ProductCard } from '../components/ProductCard';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { getCategoryName, getCategoryEmoji } from '../utils/categories';
 
-const categoryLabels = {
-  [ProductCategory.ROLLS]: 'Роллы',
-  [ProductCategory.SETS]: 'Сеты',
-  [ProductCategory.DRINKS]: 'Напитки',
-  [ProductCategory.SAUCES]: 'Соусы',
-  [ProductCategory.SNACKS]: 'Снэки',
-  [ProductCategory.WINGS]: 'Крылья',
-  [ProductCategory.PIZZA]: 'Пицца',
-};
-
-const getCategoryName = (category: ProductCategory): string => {
-  return categoryLabels[category] || category;
-};
+// Теперь используем утилиты из utils/categories.ts
 
 export const MenuPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<ProductCategory | 'all'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
 
   const fetchProducts = async () => {
     try {
@@ -41,6 +31,11 @@ export const MenuPage: React.FC = () => {
         setProducts(productsData);
         setFilteredProducts(productsData);
         setRetryCount(0); // Сбрасываем счетчик попыток при успехе
+        
+        // Извлекаем уникальные категории из товаров
+        const categories = [...new Set(productsData.map(p => p.category))].sort();
+        setAvailableCategories(categories);
+        console.log('📂 Найденные категории:', categories);
       } else {
         console.error('Неверный формат данных:', productsData);
         setError('Ошибка загрузки данных');
@@ -84,7 +79,7 @@ export const MenuPage: React.FC = () => {
     setFilteredProducts(filtered);
   };
 
-  const handleCategoryChange = (category: ProductCategory | 'all') => {
+  const handleCategoryChange = (category: string | 'all') => {
     setSelectedCategory(category);
   };
 
@@ -157,14 +152,15 @@ export const MenuPage: React.FC = () => {
             >
               Все
             </Button>
-            {Object.values(ProductCategory).map((category) => (
+            {availableCategories.map((category) => (
               <Button
                 key={category}
                 variant={selectedCategory === category ? 'primary' : 'outline'}
                 onClick={() => handleCategoryChange(category)}
-                className="flex-shrink-0 whitespace-nowrap text-sm px-4 py-2 rounded-full"
+                className="flex-shrink-0 whitespace-nowrap text-sm px-4 py-2 rounded-full flex items-center gap-1"
               >
-                {getCategoryName(category)}
+                <span>{getCategoryEmoji(category)}</span>
+                <span>{getCategoryName(category)}</span>
               </Button>
             ))}
           </div>
