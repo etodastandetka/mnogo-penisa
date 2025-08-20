@@ -22,14 +22,14 @@ def generate_tips_qr():
     qr.add_data('https://mnogo-rolly.online/tips')
     qr.make(fit=True)
     
-    # Создаем изображение
-    qr_image = qr.make_image(fill_color="black", back_color="white")
+    # Создаем изображение с инвертированными цветами (белый QR на черном фоне)
+    qr_image = qr.make_image(fill_color="white", back_color="black")
     
     # Изменяем размер
     qr_image = qr_image.resize((200, 200))
     
-    # Создаем новое изображение с белым фоном
-    final_image = Image.new('RGB', (300, 350), 'white')
+    # Создаем новое изображение с темным фоном
+    final_image = Image.new('RGB', (300, 350), '#1a1a1a')
     
     # Вставляем QR-код в центр
     qr_x = (300 - 200) // 2
@@ -51,19 +51,19 @@ def generate_tips_qr():
             # Fallback на стандартный шрифт
             font = ImageFont.load_default()
     
-    # Добавляем заголовок
+    # Добавляем заголовок (белый текст на темном фоне)
     title = "QR код для чаевых"
     title_bbox = draw.textbbox((0, 0), title, font=font)
     title_width = title_bbox[2] - title_bbox[0]
     title_x = (300 - title_width) // 2
-    draw.text((title_x, 20), title, fill="black", font=font)
+    draw.text((title_x, 20), title, fill="white", font=font)
     
-    # Добавляем подпись
+    # Добавляем подпись (белый текст на темном фоне)
     subtitle = "Отсканируйте для чаевых"
     subtitle_bbox = draw.textbbox((0, 0), subtitle, font=font)
     subtitle_width = subtitle_bbox[2] - subtitle_bbox[0]
     subtitle_x = (300 - subtitle_width) // 2
-    draw.text((subtitle_x, 270), subtitle, fill="black", font=font)
+    draw.text((subtitle_x, 270), subtitle, fill="white", font=font)
     
     # Сохраняем изображение
     output_path = "frontend/public/images/qr-tips.png"
@@ -72,6 +72,7 @@ def generate_tips_qr():
     
     print(f"✅ QR-код для чаевых сохранен в: {output_path}")
     print(f"📏 Размер: {final_image.size}")
+    print(f"🎨 Цвета: белый QR-код на темном фоне")
     
     return output_path
 

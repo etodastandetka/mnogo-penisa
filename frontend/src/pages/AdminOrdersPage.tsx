@@ -271,7 +271,7 @@ export const AdminOrdersPage: React.FC = () => {
             <div class="tax-info">Спасибо за заказ!</div>
             <div class="tax-info">Приятного аппетита!</div>
                       <div class="qr-code">
-            <img src="/images/qr-tips.png" alt="QR код для чаевых" style="width: 80px; height: 80px; margin: 0 auto; display: block;" />
+            <img src="https://mnogo-rolly.online/images/qr-tips.png" alt="QR код для чаевых" style="width: 80px; height: 80px; margin: 0 auto; display: block;" />
             <div style="font-size: 10px; margin-top: 5px;">QR code Для чеков</div>
           </div>
             <div class="tax-info">С уважением, команда Mnogo Rolly</div>
