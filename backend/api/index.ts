@@ -211,6 +211,7 @@ const initDatabase = () => {
       description TEXT,
       price REAL NOT NULL,
       image_url TEXT,
+      mobile_image_url TEXT,
       category TEXT,
       is_popular BOOLEAN DEFAULT 0,
       is_available BOOLEAN DEFAULT 1,
@@ -249,6 +250,15 @@ const initDatabase = () => {
         console.log('Column customer_address already exists or error:', err.message);
       } else {
         console.log('Column customer_address added successfully');
+      }
+    });
+
+    // Добавляем колонку mobile_image_url если её нет
+    db.run(`ALTER TABLE products ADD COLUMN mobile_image_url TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column name')) {
+        console.log('Column mobile_image_url already exists or error:', err.message);
+      } else {
+        console.log('Column mobile_image_url added successfully');
       }
     });
 
@@ -1213,9 +1223,9 @@ app.post('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
   const isPopularValue = isPopular !== undefined ? isPopular : false;
 
   db.run(`
-    INSERT INTO products (name, description, price, image_url, category, is_popular, is_available)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `, [name, description, price, imageUrl, category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0], function(err) {
+    INSERT INTO products (name, description, price, image_url, mobile_image_url, category, is_popular, is_available)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `, [name, description, price, imageUrl, '', category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0], function(err) {
     if (err) {
       console.error('Ошибка создания товара:', err);
       return res.status(500).json({ message: 'Ошибка создания товара' });
@@ -1254,9 +1264,9 @@ app.put('/api/admin/products/:id', authenticateToken, requireAdmin, (req, res) =
   // Обновляем товар
     db.run(`
       UPDATE products 
-      SET name = ?, description = ?, price = ?, image_url = ?, category = ?, is_popular = ?, is_available = ?
+      SET name = ?, description = ?, price = ?, image_url = ?, mobile_image_url = ?, category = ?, is_popular = ?, is_available = ?
       WHERE id = ?
-  `, [name, description, price, imageUrl, category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0, id], function(err) {
+  `, [name, description, price, imageUrl, '', category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0, id], function(err) {
       if (err) {
       console.error('Ошибка обновления товара:', err);
         return res.status(500).json({ message: 'Ошибка обновления товара' });

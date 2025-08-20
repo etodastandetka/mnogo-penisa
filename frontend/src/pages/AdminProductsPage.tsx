@@ -37,6 +37,7 @@ interface Product {
   price: number;
   category: string;
   image_url: string;
+  mobile_image_url?: string;
   is_available: boolean;
   created_at: string;
 }
@@ -57,6 +58,7 @@ export const AdminProductsPage: React.FC = () => {
     price: 0,
     category: '',
     image_url: '',
+    mobile_image_url: '',
     is_available: true
   });
   const [addForm, setAddForm] = useState({
@@ -65,6 +67,7 @@ export const AdminProductsPage: React.FC = () => {
     price: 0,
     category: '',
     image_url: '',
+    mobile_image_url: '',
     is_available: true
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -97,6 +100,7 @@ export const AdminProductsPage: React.FC = () => {
       price: 0,
       category: '',
       image_url: '',
+      mobile_image_url: '',
       is_available: true
     });
     setSelectedImage(null);
@@ -271,6 +275,7 @@ export const AdminProductsPage: React.FC = () => {
         price: 0,
         category: '',
         image_url: '',
+        mobile_image_url: '',
         is_available: true
       });
       setSelectedImage(null);
@@ -290,6 +295,7 @@ export const AdminProductsPage: React.FC = () => {
       price: 0,
       category: '',
       image_url: '',
+      mobile_image_url: '',
       is_available: true
     });
     setSelectedImage(null);
@@ -304,6 +310,7 @@ export const AdminProductsPage: React.FC = () => {
       price: product.price,
       category: product.category,
       image_url: product.image_url || '',
+      mobile_image_url: product.mobile_image_url || '',
       is_available: product.is_available
     });
     setShowEditModal(true);
@@ -375,6 +382,7 @@ export const AdminProductsPage: React.FC = () => {
       price: 0,
       category: '',
       image_url: '',
+      mobile_image_url: '',
       is_available: true
     });
     setSelectedImage(null);
@@ -588,6 +596,11 @@ export const AdminProductsPage: React.FC = () => {
                           <Badge className={product.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
                             {product.is_available ? 'В наличии' : 'Нет в наличии'}
                           </Badge>
+                          {product.mobile_image_url && (
+                            <Badge className="bg-purple-100 text-purple-800">
+                              📱 Мобильное фото
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -796,6 +809,36 @@ export const AdminProductsPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Ссылка на фото для мобильной версии */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ссылка на фото для мобильной версии
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Вставьте прямую ссылку на изображение для мобильных устройств
+                  </p>
+                  <input
+                    type="url"
+                    value={editForm.mobile_image_url}
+                    onChange={(e) => setEditForm({...editForm, mobile_image_url: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {editForm.mobile_image_url && (
+                    <div className="mt-3">
+                      <p className="text-sm text-gray-600 mb-2">Предварительный просмотр мобильного изображения:</p>
+                      <img
+                        src={editForm.mobile_image_url}
+                        alt="Мобильное изображение"
+                        className="w-24 h-24 object-cover rounded-lg border border-gray-300"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
                 {/* Статус */}
                 <div>
                   <label className="flex items-center">
@@ -979,6 +1022,36 @@ export const AdminProductsPage: React.FC = () => {
 
 
                   </div>
+                </div>
+
+                {/* Ссылка на фото для мобильной версии */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ссылка на фото для мобильной версии
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Вставьте прямую ссылку на изображение для мобильных устройств
+                  </p>
+                  <input
+                    type="url"
+                    value={addForm.mobile_image_url}
+                    onChange={(e) => setAddForm({...addForm, mobile_image_url: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {addForm.mobile_image_url && (
+                    <div className="mt-3">
+                      <p className="text-sm text-gray-600 mb-2">Предварительный просмотр мобильного изображения:</p>
+                      <img
+                        src={addForm.mobile_image_url}
+                        alt="Мобильное изображение"
+                        className="w-24 h-24 object-cover rounded-lg border border-gray-300"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Статус */}

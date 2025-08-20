@@ -33,6 +33,7 @@ export interface Product {
   image_url?: string;
   image?: string; // для совместимости
   original_image_url?: string; // Добавляем для отладки
+  mobile_image_url?: string; // Ссылка на фото для мобильной версии
   category: ProductCategory | string;
   ingredients?: string[];
   weight?: number;

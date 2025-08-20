@@ -21,10 +21,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const quantity = getItemQuantity(product.id.toString());
   const [imageError, setImageError] = useState(false);
 
-  // Функция для получения URL изображения 
-  const getImageUrl = (imageUrl: string): string | null => {
+  // Функция для получения URL изображения с учетом мобильной версии
+  const getImageUrl = (): string | null => {
+    // Проверяем, является ли устройство мобильным
+    const isMobile = window.innerWidth <= 768;
+    
+    // Приоритет: мобильное изображение для мобильных устройств, основное для десктопа
+    let imageUrl = '';
+    
+    if (isMobile && product.mobile_image_url) {
+      imageUrl = product.mobile_image_url;
+      console.log('📱 Используем мобильное изображение для', product.name, ':', imageUrl);
+    } else if (product.image_url || product.image) {
+      imageUrl = product.image_url || product.image || '';
+      console.log('💻 Используем основное изображение для', product.name, ':', imageUrl);
+    }
+    
     console.log('🖼️ getImageUrl для', product.name, ':', {
-      input: imageUrl,
+      isMobile,
+      mobileImage: product.mobile_image_url,
+      mainImage: product.image_url || product.image,
+      selectedImage: imageUrl,
       trimmed: imageUrl?.trim(),
       notNull: imageUrl !== 'null',
       hasValue: !!imageUrl
@@ -76,7 +93,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
   };
 
-  const imageUrl = getImageUrl(product.image_url || product.image || '');
+  const imageUrl = getImageUrl();
   
   // Функция для получения эмодзи по категории
   const getCategoryEmoji = (category: string) => {
@@ -97,11 +114,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     console.log(`📦 ТОВАР: ${product.name}`, {
       image_url: product.image_url,
       image: product.image,
+      mobile_image_url: product.mobile_image_url,
       original_image_url: product.original_image_url,
       processedImageUrl: imageUrl,
       category: product.category
     });
   }, [product, imageUrl]);
+
+  // Обработчик изменения размера окна для переключения изображений
+  React.useEffect(() => {
+    const handleResize = () => {
+      // Принудительно пересчитываем изображение при изменении размера окна
+      setImageError(false);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Сброс состояния при смене изображения
   React.useEffect(() => {
