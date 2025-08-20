@@ -3,6 +3,7 @@ import { X, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Product } from '../types';
 import { useCartStore } from '../store/cartStore';
+import { getCategoryName, getCategoryEmoji } from '../utils/categories';
 
 interface ProductDetailModalProps {
   product: Product;
@@ -119,8 +120,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             {/* Категория */}
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-500">Категория:</span>
-              <span className="bg-gray-100 text-gray-800 text-sm font-medium px-2.5 py-0.5 rounded-full capitalize">
-                {product.category}
+              <span className="bg-gray-100 text-gray-800 text-sm font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <span>{getCategoryEmoji(product.category)}</span>
+                <span>{getCategoryName(product.category)}</span>
               </span>
             </div>
 
