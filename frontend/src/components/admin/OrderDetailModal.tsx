@@ -310,34 +310,53 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
 
                   <div className="space-y-4">
                     <div className="text-center">
-                      {/* Показываем ссылку на чек */}
-                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm text-blue-700 mb-2">
-                          <strong>Ссылка на чек об оплате:</strong>
-                        </p>
-                        <a 
-                          href={order.payment_proof}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 underline break-all"
-                        >
-                          {order.payment_proof}
-                        </a>
-                        <p className="text-xs text-gray-500 mt-2">
-                          Если фото не отображается, используйте ссылку выше
-                        </p>
-                      </div>
-                      
-                      {/* Показываем фото чека, если загружается */}
+                      {/* Показываем фото чека */}
                       <div className="mt-4">
                         <img
                           src={order.payment_proof}
                           alt="Чек об оплате"
-                          className="w-full max-w-md h-auto rounded-lg border border-gray-200 mx-auto cursor-pointer hover:opacity-90 transition-opacity"
-                          onClick={() => window.open(order.payment_proof, '_blank')}
+                          className="w-full max-w-md h-auto rounded-lg border border-gray-200 mx-auto cursor-pointer hover:opacity-90 transition-opacity shadow-lg"
+                          onClick={() => {
+                            // Открываем фото в полном размере
+                            const newWindow = window.open('', '_blank');
+                            if (newWindow) {
+                              newWindow.document.write(`
+                                <html>
+                                  <head>
+                                    <title>Чек об оплате - Заказ ${order.order_number}</title>
+                                    <style>
+                                      body { margin: 0; padding: 20px; background: #f5f5f5; font-family: Arial, sans-serif; }
+                                      .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                                      h1 { color: #333; margin-bottom: 20px; }
+                                      img { max-width: 100%; height: auto; border-radius: 8px; }
+                                      .info { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; }
+                                      .info p { margin: 5px 0; color: #666; }
+                                    </style>
+                                  </head>
+                                  <body>
+                                    <div class="container">
+                                      <h1>Чек об оплате</h1>
+                                      <img src="${order.payment_proof}" alt="Чек об оплате" />
+                                      <div class="info">
+                                        <p><strong>Номер заказа:</strong> ${order.order_number}</p>
+                                        <p><strong>Клиент:</strong> ${order.customer_name}</p>
+                                        <p><strong>Дата загрузки:</strong> ${order.payment_proof_date ? new Date(order.payment_proof_date).toLocaleString('ru-RU') : 'Не указана'}</p>
+                                      </div>
+                                    </div>
+                                  </body>
+                                </html>
+                              `);
+                              newWindow.document.close();
+                            }
+                          }}
                           onError={(e) => {
                             const img = e.target as HTMLImageElement;
                             img.style.display = 'none';
+                            // Показываем сообщение об ошибке
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'text-red-500 text-sm mt-2';
+                            errorDiv.textContent = 'Ошибка загрузки изображения';
+                            img.parentNode?.appendChild(errorDiv);
                           }}
                         />
                         <p className="text-xs text-gray-500 mt-2">
@@ -345,8 +364,6 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                         </p>
                       </div>
                     </div>
-
-
                   </div>
                 </>
               ) : (

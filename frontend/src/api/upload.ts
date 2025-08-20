@@ -36,17 +36,14 @@ export const uploadFileToServer = async (
   }
 };
 
-export const uploadPaymentProof = async (file: File, orderId: string | number, orderNumber: string): Promise<UploadResponse> => {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('orderId', orderId.toString());
-  formData.append('orderNumber', orderNumber);
-
+export const uploadPaymentProof = async (file: File, orderId: string | number): Promise<UploadResponse> => {
   try {
-    const response = await client.post('/orders/payment-proof', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    // Конвертируем файл в base64
+    const base64 = await fileToBase64(file);
+    
+    const response = await client.post('/upload-payment-proof', {
+      imageBase64: base64,
+      orderId: orderId
     });
 
     const result = response.data;
@@ -54,12 +51,12 @@ export const uploadPaymentProof = async (file: File, orderId: string | number, o
     if (result.success) {
       return {
         success: true,
-        fileUrl: result.fileUrl
+        fileUrl: base64 // Возвращаем base64 как URL
       };
     } else {
       return {
         success: false,
-        error: result.error || 'Неизвестная ошибка загрузки'
+        error: result.message || 'Неизвестная ошибка загрузки'
       };
     }
   } catch (error) {
@@ -68,6 +65,16 @@ export const uploadPaymentProof = async (file: File, orderId: string | number, o
       error: error instanceof Error ? error.message : 'Ошибка загрузки файла'
     };
   }
+};
+
+// Функция для конвертации файла в base64
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+  });
 };
 
 export const updateOrderPaymentProof = async (

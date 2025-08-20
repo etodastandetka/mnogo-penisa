@@ -31,34 +31,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     
     if (isMobile && product.mobile_image_url) {
       imageUrl = product.mobile_image_url;
-      console.log('📱 Используем мобильное изображение для', product.name, ':', imageUrl);
     } else if (product.image_url || product.image) {
       imageUrl = product.image_url || product.image || '';
-      console.log('💻 Используем основное изображение для', product.name, ':', imageUrl);
     }
-    
-    console.log('🖼️ getImageUrl для', product.name, ':', {
-      isMobile,
-      mobileImage: product.mobile_image_url,
-      mainImage: product.image_url || product.image,
-      selectedImage: imageUrl,
-      trimmed: imageUrl?.trim(),
-      notNull: imageUrl !== 'null',
-      hasValue: !!imageUrl
-    });
     
     // Если есть изображение - используем его
     if (imageUrl && imageUrl.trim() && imageUrl !== 'null') {
-      console.log('✅ Изображение найдено для', product.name, ':', imageUrl);
-      
       // Простая проверка - если URL выглядит валидно, возвращаем как есть
-      // Убираем проблемные оптимизации которые могут ломать загрузку
       if (imageUrl.startsWith('http') || imageUrl.startsWith('/')) {
         return imageUrl;
       }
     }
     
-    console.log('❌ НЕТ изображения для товара:', product.name, 'input:', imageUrl);
     return null; // Нет изображения - покажем эмодзи
   };
 
@@ -68,12 +52,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const originalUrl = e.currentTarget.src;
-    
-    console.error('❌ Ошибка загрузки изображения для товара:', product.name);
-    console.error('❌ URL:', originalUrl);
-    
-    console.log('❌ Показываем эмодзи для', product.name);
     setImageError(true);
     // Показываем эмодзи fallback
   };
@@ -110,17 +88,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     return emojiMap[category] || '🍽️';
   };
   
-  // Дополнительное логирование для отладки
-  React.useEffect(() => {
-    console.log(`📦 ТОВАР: ${product.name}`, {
-      image_url: product.image_url,
-      image: product.image,
-      mobile_image_url: product.mobile_image_url,
-      original_image_url: product.original_image_url,
-      processedImageUrl: imageUrl,
-      category: product.category
-    });
-  }, [product, imageUrl]);
+
 
   // Обработчик изменения размера окна для переключения изображений
   React.useEffect(() => {
@@ -183,19 +151,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         )}
         
-        {/* Отладочная информация (только в development) */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="absolute top-0 right-0 bg-black/50 text-white text-xs p-1 rounded-bl">
-            {product.image_url ? 'Has img' : 'No img'}
-          </div>
-        )}
 
-        {/* Отладочная информация для мобильных устройств */}
-        {window.innerWidth <= 768 && (
-          <div className="absolute top-0 left-0 bg-blue-500 text-white text-xs p-1 rounded-br">
-            {product.mobile_image_url ? '📱 Mobile' : '💻 Main'}
-          </div>
-        )}
         
         {product.isPopular && (
           <div className="absolute top-1 left-1 sm:top-2 sm:left-2 md:top-3 md:left-3">
@@ -227,33 +183,33 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </span>
           
           {quantity > 0 ? (
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => handleUpdateQuantity(quantity - 1)}
-                className="w-7 h-7 sm:w-8 sm:h-8 p-0 border border-gray-300 flex items-center justify-center touch-manipulation active:scale-95 transition-transform"
+                className="w-8 h-8 sm:w-9 sm:h-9 p-0 border-2 border-gray-300 hover:border-red-400 hover:bg-red-50 flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
               >
-                <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
-              <span className="font-semibold min-w-[1.2rem] sm:min-w-[1.5rem] text-center text-sm sm:text-base">{quantity}</span>
+              <span className="font-bold min-w-[2rem] sm:min-w-[2.5rem] text-center text-sm sm:text-base text-gray-900 bg-gray-50 px-2 py-1 rounded-lg">{quantity}</span>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => handleUpdateQuantity(quantity + 1)}
-                className="w-7 h-7 sm:w-8 sm:h-8 p-0 border border-gray-300 flex items-center justify-center touch-manipulation active:scale-95 transition-transform"
+                className="w-8 h-8 sm:w-9 sm:h-9 p-0 border-2 border-gray-300 hover:border-green-400 hover:bg-green-50 flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
               >
-                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
             </div>
           ) : (
             <Button 
               size="sm"
               onClick={handleAddToCart}
-              className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white w-7 h-7 sm:w-8 sm:h-8 p-0 border border-red-600 flex items-center justify-center touch-manipulation active:scale-95 transition-all"
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 text-white w-8 h-8 sm:w-9 sm:h-9 p-0 border-0 shadow-lg hover:shadow-xl flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
               disabled={product.is_available === false}
             >
-              <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           )}
         </div>

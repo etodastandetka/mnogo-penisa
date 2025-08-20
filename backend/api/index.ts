@@ -1342,6 +1342,73 @@ app.post('/api/admin/upload-image', upload.single('image'), authenticateToken, r
   }
 });
 
+// Загрузка чека об оплате (base64)
+app.post('/api/upload-payment-proof', (req, res) => {
+  try {
+    console.log('💰 PAYMENT PROOF: Получен запрос на загрузку чека об оплате');
+    
+    const { imageBase64, orderId } = req.body;
+    
+    if (!imageBase64 || !orderId) {
+      console.log('❌ PAYMENT PROOF: Отсутствуют обязательные поля');
+      return res.status(400).json({ 
+        success: false,
+        message: "Отсутствуют обязательные поля: imageBase64, orderId" 
+      });
+    }
+
+    // Проверяем, что это валидный base64
+    if (!imageBase64.startsWith('data:image/')) {
+      console.log('❌ PAYMENT PROOF: Неверный формат base64');
+      return res.status(400).json({ 
+        success: false,
+        message: "Неверный формат изображения" 
+      });
+    }
+
+    console.log(`💰 PAYMENT PROOF: Обновляем заказ ${orderId} с чеком об оплате`);
+    
+    // Обновляем заказ в базе данных
+    db.run(`
+      UPDATE orders 
+      SET payment_proof = ?, payment_proof_date = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `, [imageBase64, orderId], function(err) {
+      if (err) {
+        console.error("❌ PAYMENT PROOF: Ошибка обновления базы данных:", err);
+        return res.status(500).json({ 
+          success: false,
+          message: "Ошибка сохранения чека об оплате" 
+        });
+      }
+      
+      if (this.changes === 0) {
+        console.log(`❌ PAYMENT PROOF: Заказ ${orderId} не найден`);
+        return res.status(404).json({ 
+          success: false,
+          message: "Заказ не найден" 
+        });
+      }
+      
+      console.log(`✅ PAYMENT PROOF: Чек об оплате успешно сохранен для заказа ${orderId}`);
+      
+      res.json({ 
+        success: true,
+        message: "Чек об оплате успешно загружен",
+        orderId: orderId,
+        paymentProofDate: new Date().toISOString()
+      });
+    });
+    
+  } catch (error) {
+    console.error("❌ PAYMENT PROOF: Ошибка при загрузке чека:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Ошибка при загрузке чека об оплате" 
+    });
+  }
+});
+
 // API для управления корзиной
 // Получение корзины пользователя
 app.get('/api/cart', authenticateToken, (req: any, res) => {

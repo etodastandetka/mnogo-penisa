@@ -65,7 +65,7 @@ export const PaymentQR: React.FC<PaymentQRProps> = ({
     setUploading(true);
     try {
       // Реальная загрузка файла на сервер
-      const result = await uploadPaymentProof(selectedImage, order.id, order.orderNumber || order.id);
+      const result = await uploadPaymentProof(selectedImage, order.id);
       
       if (result.success && result.fileUrl) {
         alert('Фото чека успешно загружено и привязано к заказу!');

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from './ui/Button';
 import { Upload, X, CheckCircle } from 'lucide-react';
+import { uploadPaymentProof } from '../api/upload';
 
 interface PaymentProofUploadProps {
 	orderId?: string; // необязательно
@@ -33,28 +34,29 @@ export const PaymentProofUpload: React.FC<PaymentProofUploadProps> = ({
 	};
 
 	const handleUpload = async () => {
-		if (!selectedFile) return;
+		if (!selectedFile || !orderId) return;
 
 		setUploading(true);
 		try {
-			// Конвертация в base64 и возврат наверх без запроса к серверу
-			const reader = new FileReader();
-			const base64Promise: Promise<string> = new Promise((resolve, reject) => {
-				reader.onload = () => resolve(reader.result as string);
-				reader.onerror = reject;
-			});
-			reader.readAsDataURL(selectedFile);
-			const base64Image = await base64Promise;
-
-			console.log('Чек сконвертирован в base64, длина:', base64Image.length, { orderId, orderNumber });
-			setUploaded(true);
-			onUploadComplete(base64Image);
-
-			setTimeout(() => {
-				onClose();
-			}, 1000);
+			console.log('💰 Загружаем чек об оплате для заказа:', orderId);
+			
+			// Загружаем чек на сервер
+			const result = await uploadPaymentProof(selectedFile, orderId);
+			
+			if (result.success && result.fileUrl) {
+				console.log('✅ Чек об оплате успешно загружен');
+				setUploaded(true);
+				onUploadComplete(result.fileUrl);
+				
+				setTimeout(() => {
+					onClose();
+				}, 1000);
+			} else {
+				console.error('❌ Ошибка загрузки чека:', result.error);
+				alert(`Ошибка загрузки: ${result.error}`);
+			}
 		} catch (error) {
-			console.error('Ошибка обработки файла чека:', error);
+			console.error('❌ Ошибка обработки файла чека:', error);
 			alert('Не удалось обработать файл. Попробуйте ещё раз.');
 		} finally {
 			setUploading(false);
