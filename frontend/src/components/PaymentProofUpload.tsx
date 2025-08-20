@@ -34,26 +34,42 @@ export const PaymentProofUpload: React.FC<PaymentProofUploadProps> = ({
 	};
 
 	const handleUpload = async () => {
-		if (!selectedFile || !orderId) return;
+		if (!selectedFile) return;
 
 		setUploading(true);
 		try {
-			console.log('💰 Загружаем чек об оплате для заказа:', orderId);
+			console.log('💰 Загружаем чек об оплате');
 			
-			// Загружаем чек на сервер
-			const result = await uploadPaymentProof(selectedFile, orderId);
-			
-			if (result.success && result.fileUrl) {
-				console.log('✅ Чек об оплате успешно загружен');
-				setUploaded(true);
-				onUploadComplete(result.fileUrl);
+			// Если orderId есть, загружаем на сервер, иначе просто возвращаем base64
+			if (orderId) {
+				const result = await uploadPaymentProof(selectedFile, orderId);
 				
-				setTimeout(() => {
-					onClose();
-				}, 1000);
+				if (result.success && result.fileUrl) {
+					console.log('✅ Чек об оплате успешно загружен на сервер');
+					setUploaded(true);
+					onUploadComplete(result.fileUrl);
+					
+					setTimeout(() => {
+						onClose();
+					}, 1000);
+				} else {
+					console.error('❌ Ошибка загрузки чека:', result.error);
+					alert(`Ошибка загрузки: ${result.error}`);
+				}
 			} else {
-				console.error('❌ Ошибка загрузки чека:', result.error);
-				alert(`Ошибка загрузки: ${result.error}`);
+				// Если orderId нет, конвертируем в base64 и возвращаем
+				const reader = new FileReader();
+				reader.onload = (e) => {
+					const base64 = e.target?.result as string;
+					console.log('✅ Чек об оплате конвертирован в base64');
+					setUploaded(true);
+					onUploadComplete(base64);
+					
+					setTimeout(() => {
+						onClose();
+					}, 1000);
+				};
+				reader.readAsDataURL(selectedFile);
 			}
 		} catch (error) {
 			console.error('❌ Ошибка обработки файла чека:', error);
