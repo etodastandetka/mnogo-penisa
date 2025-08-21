@@ -24,25 +24,25 @@ def generate_qr_base64():
     qr.add_data('https://mnogo-rolly.online/tips')
     qr.make(fit=True)
     
-    # Создаем изображение с высоким контрастом
-    qr_image = qr.make_image(fill_color="black", back_color="white")
+    # Создаем изображение с белым QR-кодом на темном фоне
+    qr_image = qr.make_image(fill_color="white", back_color="black")
     
     # Изменяем размер
     qr_image = qr_image.resize((160, 160))
     
-    # Создаем новое изображение с белым фоном и рамкой
-    final_image = Image.new('RGB', (200, 240), 'white')
+    # Создаем новое изображение с темным фоном и белой рамкой
+    final_image = Image.new('RGB', (200, 240), 'black')
     
-    # Добавляем черную рамку
+    # Добавляем белую рамку
     draw = ImageDraw.Draw(final_image)
-    draw.rectangle([0, 0, 199, 239], outline='black', width=2)
+    draw.rectangle([0, 0, 199, 239], outline='white', width=2)
     
     # Вставляем QR-код в центр
     qr_x = (200 - 160) // 2
     qr_y = 20
     final_image.paste(qr_image, (qr_x, qr_y))
     
-    # Добавляем текст
+    # Добавляем текст белым цветом
     try:
         font = ImageFont.truetype("arial.ttf", 16)
     except:
@@ -53,7 +53,7 @@ def generate_qr_base64():
     title_bbox = draw.textbbox((0, 0), title, font=font)
     title_width = title_bbox[2] - title_bbox[0]
     title_x = (200 - title_width) // 2
-    draw.text((title_x, 190), title, fill="black", font=font)
+    draw.text((title_x, 190), title, fill="white", font=font)
     
     # Конвертируем в base64
     buffer = BytesIO()
@@ -95,7 +95,7 @@ data:image/png;base64,{img_str}
     print(f"✅ QR-код сохранен в: {output_path}")
     print(f"✅ HTML файл с base64 создан: qr_base64_output.html")
     print(f"📏 Размер: {final_image.size}")
-    print(f"🎨 Цвета: черный QR-код на белом фоне с рамкой")
+    print(f"🎨 Цвета: БЕЛЫЙ QR-код на ЧЕРНОМ фоне с белой рамкой")
     
     return img_str
 

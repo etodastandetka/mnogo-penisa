@@ -228,9 +228,9 @@ export const LandingPage: React.FC = () => {
             {quickMenu.map((product) => (
               <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer" onClick={() => navigate('/menu')}>
                 <div className="relative overflow-hidden rounded-t-xl">
-                  {(product.image_url || product.image) ? (
+                  {(product.image_url || product.mobile_image_url || product.image) ? (
                     <img
-                      src={product.image_url || product.image}
+                      src={product.image_url || product.mobile_image_url || product.image}
                       alt={product.name}
                       className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
                       onError={(e) => {

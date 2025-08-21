@@ -493,6 +493,17 @@ app.get('/api/products', (req, res) => {
         processedImageUrl = null;
       }
       
+      // Если есть mobile_image_url, используем его как fallback
+      if (!processedImageUrl && product.mobile_image_url && product.mobile_image_url !== '' && !product.mobile_image_url.includes('unsplash.com')) {
+        if (product.mobile_image_url.startsWith('/uploads/')) {
+          processedImageUrl = `https://147.45.141.113:3444${product.mobile_image_url}`;
+        } else if (product.mobile_image_url.startsWith('data:image/')) {
+          processedImageUrl = product.mobile_image_url;
+        } else if (product.mobile_image_url.startsWith('http://') || product.mobile_image_url.startsWith('https://')) {
+          processedImageUrl = product.mobile_image_url;
+        }
+      }
+      
         return {
           ...product,
         image_url: processedImageUrl,
@@ -1208,6 +1219,17 @@ app.get('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
       // Если нет изображения, это конкретно Unsplash или старые placeholder, оставляем null
       if (!product.image_url || product.image_url === '' || product.image_url.includes('/images/products/') || product.image_url.includes('unsplash.com')) {
         processedImageUrl = null;
+      }
+      
+      // Если есть mobile_image_url, используем его как fallback
+      if (!processedImageUrl && product.mobile_image_url && product.mobile_image_url !== '' && !product.mobile_image_url.includes('unsplash.com')) {
+        if (product.mobile_image_url.startsWith('/uploads/')) {
+          processedImageUrl = `https://147.45.141.113:3444${product.mobile_image_url}`;
+        } else if (product.mobile_image_url.startsWith('data:image/')) {
+          processedImageUrl = product.mobile_image_url;
+        } else if (product.mobile_image_url.startsWith('http://') || product.mobile_image_url.startsWith('https://')) {
+          processedImageUrl = product.mobile_image_url;
+        }
       }
       
       return {

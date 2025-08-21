@@ -48,7 +48,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
     return '';
   };
 
-  const imageUrl = getImageUrl(product.image_url);
+  const imageUrl = getImageUrl(product.image_url || product.mobile_image_url);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

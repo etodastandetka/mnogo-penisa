@@ -23,24 +23,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [imageError, setImageError] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
-  // Функция для получения URL изображения с учетом мобильной версии
+  // Функция для получения URL изображения - показываем все доступные изображения
   const getImageUrl = (): string | null => {
-    // Проверяем, является ли устройство мобильным
-    const isMobile = window.innerWidth <= 768;
-    
-    // Приоритет: мобильное изображение для мобильных устройств, основное для десктопа
+    // Приоритет: основное изображение, затем мобильное как fallback
     let imageUrl = '';
     
-    if (isMobile && product.mobile_image_url) {
+    if (product.image_url && product.image_url !== 'null' && product.image_url !== '') {
+      imageUrl = product.image_url;
+    } else if (product.mobile_image_url && product.mobile_image_url !== 'null' && product.mobile_image_url !== '') {
       imageUrl = product.mobile_image_url;
-    } else if (product.image_url || product.image) {
-      imageUrl = product.image_url || product.image || '';
     }
     
     // Если есть изображение - используем его
     if (imageUrl && imageUrl.trim() && imageUrl !== 'null') {
-      // Простая проверка - если URL выглядит валидно, возвращаем как есть
-      if (imageUrl.startsWith('http') || imageUrl.startsWith('/')) {
+      // Проверяем все типы URL
+      if (imageUrl.startsWith('http') || imageUrl.startsWith('/') || imageUrl.startsWith('data:image/')) {
         return imageUrl;
       }
     }
@@ -92,16 +89,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   
 
 
-  // Обработчик изменения размера окна для переключения изображений
-  React.useEffect(() => {
-    const handleResize = () => {
-      // Принудительно пересчитываем изображение при изменении размера окна
-      setImageError(false);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // Убираем логику с resize - теперь все изображения показываются одинаково
 
   // Сброс состояния при смене изображения
   React.useEffect(() => {
