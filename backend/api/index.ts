@@ -1035,7 +1035,7 @@ app.get('/api/admin/orders/:id', authenticateToken, requireAdmin, (req, res) => 
   console.log('🔍 API: Request headers:', req.headers);
 
   // Получаем основную информацию о заказе
-  db.get('SELECT * FROM orders WHERE id = ?', [id], (err, order) => {
+  db.get('SELECT * FROM orders WHERE id = ?', [id], (err, order: any) => {
     if (err) {
       console.error('Database error getting order:', err);
       return res.status(500).json({ message: 'Ошибка получения заказа', error: err.message });
