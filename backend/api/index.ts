@@ -1157,7 +1157,9 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
 app.get('/api/admin/orders/:id', authenticateToken, requireAdmin, (req, res) => {
   const { id } = req.params;
 
-  console.log('Getting order details for ID:', id);
+  console.log('🔍 API: Getting order details for ID:', id);
+  console.log('🔍 API: Request params:', req.params);
+  console.log('🔍 API: Request headers:', req.headers);
 
   // Получаем основную информацию о заказе
   db.get('SELECT * FROM orders WHERE id = ?', [id], (err, order) => {

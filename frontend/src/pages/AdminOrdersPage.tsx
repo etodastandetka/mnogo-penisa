@@ -311,11 +311,13 @@ export const AdminOrdersPage: React.FC = () => {
       
       // Загружаем полные детали заказа через API
       const orderDetails = await getOrder(order.id);
+      console.log('✅ Детали заказа загружены:', orderDetails);
       setSelectedOrder(orderDetails);
       setIsDetailModalOpen(true);
     } catch (error) {
-      console.error('Ошибка загрузки деталей заказа:', error);
+      console.error('❌ Ошибка загрузки деталей заказа:', error);
       setError('Ошибка загрузки деталей заказа');
+      alert('Ошибка загрузки деталей заказа. Проверьте консоль для подробностей.');
     }
   };
 
