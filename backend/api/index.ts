@@ -1026,6 +1026,78 @@ app.post('/api/admin/orders/:orderNumber/payment-proof', upload.single('file'), 
   }
 });
 
+// Получить детали конкретного заказа (должен быть ПЕРЕД общим списком заказов)
+app.get('/api/admin/orders/:id', authenticateToken, requireAdmin, (req, res) => {
+  const { id } = req.params;
+
+  console.log('🔍 API: Getting order details for ID:', id);
+  console.log('🔍 API: Request params:', req.params);
+  console.log('🔍 API: Request headers:', req.headers);
+
+  // Получаем основную информацию о заказе
+  db.get('SELECT * FROM orders WHERE id = ?', [id], (err, order) => {
+    if (err) {
+      console.error('Database error getting order:', err);
+      return res.status(500).json({ message: 'Ошибка получения заказа', error: err.message });
+    }
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Заказ не найден' });
+    }
+
+    // Получаем товары заказа
+    db.all(`
+      SELECT 
+        oi.*,
+        p.name as product_name,
+        p.image_url as product_image
+      FROM order_items oi
+      LEFT JOIN products p ON oi.product_id = p.id
+      WHERE oi.order_id = ?
+    `, [id], (err, items) => {
+      if (err) {
+        console.error('Database error getting order items:', err);
+        return res.status(500).json({ message: 'Ошибка получения товаров заказа', error: err.message });
+      }
+
+      const orderDetail = {
+        id: order.id,
+        order_number: order.order_number,
+        customer_name: order.customer_name,
+        customer_phone: order.customer_phone,
+        customer_address: order.customer_address,
+        delivery_address: order.customer_address,
+        total_amount: order.total_amount,
+        status: order.status,
+        payment_method: order.payment_method,
+        payment_status: order.payment_proof ? 'paid' : 'pending',
+        created_at: order.created_at,
+        payment_proof: order.payment_proof,
+        payment_proof_date: order.payment_proof_date,
+        notes: order.notes,
+        items: items ? items.map((item: any) => ({
+          id: item.id,
+          product_name: item.product_name || 'Неизвестный товар',
+          quantity: item.quantity,
+          price: item.price,
+          total: item.price * item.quantity,
+          product_id: item.product_id
+        })) : []
+      };
+
+      console.log('Order details sent:', {
+        id: orderDetail.id,
+        order_number: orderDetail.order_number,
+        has_notes: !!orderDetail.notes,
+        notes_length: orderDetail.notes ? orderDetail.notes.length : 0,
+        items_count: orderDetail.items.length
+      });
+
+      res.json(orderDetail);
+    });
+  });
+});
+
 app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
   const { status, page = 1, limit = 50 } = req.query;
   const offset = (Number(page) - 1) * Number(limit);
@@ -1150,78 +1222,6 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
         console.error('Error processing orders:', error);
         res.status(500).json({ message: 'Ошибка обработки заказов' });
       });
-  });
-});
-
-// Получить детали конкретного заказа
-app.get('/api/admin/orders/:id', authenticateToken, requireAdmin, (req, res) => {
-  const { id } = req.params;
-
-  console.log('🔍 API: Getting order details for ID:', id);
-  console.log('🔍 API: Request params:', req.params);
-  console.log('🔍 API: Request headers:', req.headers);
-
-  // Получаем основную информацию о заказе
-  db.get('SELECT * FROM orders WHERE id = ?', [id], (err, order) => {
-    if (err) {
-      console.error('Database error getting order:', err);
-      return res.status(500).json({ message: 'Ошибка получения заказа', error: err.message });
-    }
-    
-    if (!order) {
-      return res.status(404).json({ message: 'Заказ не найден' });
-    }
-
-    // Получаем товары заказа
-    db.all(`
-      SELECT 
-        oi.*,
-        p.name as product_name,
-        p.image_url as product_image
-      FROM order_items oi
-      LEFT JOIN products p ON oi.product_id = p.id
-      WHERE oi.order_id = ?
-    `, [id], (err, items) => {
-      if (err) {
-        console.error('Database error getting order items:', err);
-        return res.status(500).json({ message: 'Ошибка получения товаров заказа', error: err.message });
-      }
-
-      const orderDetail = {
-        id: order.id,
-        order_number: order.order_number,
-        customer_name: order.customer_name,
-        customer_phone: order.customer_phone,
-        customer_address: order.customer_address,
-        delivery_address: order.customer_address,
-        total_amount: order.total_amount,
-        status: order.status,
-        payment_method: order.payment_method,
-        payment_status: order.payment_proof ? 'paid' : 'pending',
-        created_at: order.created_at,
-        payment_proof: order.payment_proof,
-        payment_proof_date: order.payment_proof_date,
-        notes: order.notes,
-        items: items ? items.map((item: any) => ({
-          id: item.id,
-          product_name: item.product_name || 'Неизвестный товар',
-          quantity: item.quantity,
-          price: item.price,
-          total: item.price * item.quantity,
-          product_id: item.product_id
-        })) : []
-      };
-
-      console.log('Order details sent:', {
-        id: orderDetail.id,
-        order_number: orderDetail.order_number,
-        has_notes: !!orderDetail.notes,
-        notes_length: orderDetail.notes ? orderDetail.notes.length : 0,
-        items_count: orderDetail.items.length
-      });
-
-      res.json(orderDetail);
-    });
   });
 });
 
