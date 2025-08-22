@@ -1153,6 +1153,76 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
   });
 });
 
+// Получить детали конкретного заказа
+app.get('/api/admin/orders/:id', authenticateToken, requireAdmin, (req, res) => {
+  const { id } = req.params;
+
+  console.log('Getting order details for ID:', id);
+
+  // Получаем основную информацию о заказе
+  db.get('SELECT * FROM orders WHERE id = ?', [id], (err, order) => {
+    if (err) {
+      console.error('Database error getting order:', err);
+      return res.status(500).json({ message: 'Ошибка получения заказа', error: err.message });
+    }
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Заказ не найден' });
+    }
+
+    // Получаем товары заказа
+    db.all(`
+      SELECT 
+        oi.*,
+        p.name as product_name,
+        p.image_url as product_image
+      FROM order_items oi
+      LEFT JOIN products p ON oi.product_id = p.id
+      WHERE oi.order_id = ?
+    `, [id], (err, items) => {
+      if (err) {
+        console.error('Database error getting order items:', err);
+        return res.status(500).json({ message: 'Ошибка получения товаров заказа', error: err.message });
+      }
+
+      const orderDetail = {
+        id: order.id,
+        order_number: order.order_number,
+        customer_name: order.customer_name,
+        customer_phone: order.customer_phone,
+        customer_address: order.customer_address,
+        delivery_address: order.customer_address,
+        total_amount: order.total_amount,
+        status: order.status,
+        payment_method: order.payment_method,
+        payment_status: order.payment_proof ? 'paid' : 'pending',
+        created_at: order.created_at,
+        payment_proof: order.payment_proof,
+        payment_proof_date: order.payment_proof_date,
+        notes: order.notes,
+        items: items ? items.map((item: any) => ({
+          id: item.id,
+          product_name: item.product_name || 'Неизвестный товар',
+          quantity: item.quantity,
+          price: item.price,
+          total: item.price * item.quantity,
+          product_id: item.product_id
+        })) : []
+      };
+
+      console.log('Order details sent:', {
+        id: orderDetail.id,
+        order_number: orderDetail.order_number,
+        has_notes: !!orderDetail.notes,
+        notes_length: orderDetail.notes ? orderDetail.notes.length : 0,
+        items_count: orderDetail.items.length
+      });
+
+      res.json(orderDetail);
+    });
+  });
+});
+
 app.patch('/api/admin/orders/:id/status', authenticateToken, requireAdmin, (req, res) => {
   const { id } = req.params;
   const { status } = req.body;

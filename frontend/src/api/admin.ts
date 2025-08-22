@@ -32,6 +32,32 @@ export interface AdminOrder {
   }>;
 }
 
+// Интерфейс для деталей заказа (отличается от AdminOrder)
+export interface OrderDetail {
+  id: number;
+  order_number: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_address?: string;
+  delivery_address?: string;
+  total_amount: number;
+  status: string;
+  payment_method: string;
+  payment_status?: string;
+  created_at: string;
+  payment_proof?: string;
+  payment_proof_date?: string;
+  notes?: string;
+  items: Array<{
+    id: number;
+    product_name: string;
+    quantity: number;
+    price: number;
+    total: number;
+    product_id?: number;
+  }>;
+}
+
 export interface OrderFilters {
   status?: string;
   dateFrom?: string;
@@ -59,7 +85,7 @@ export const getOrders = async (filters?: OrderFilters): Promise<AdminOrder[]> =
 };
 
 // Получить заказ по ID
-export const getOrder = async (id: number): Promise<AdminOrder> => {
+export const getOrder = async (id: number): Promise<OrderDetail> => {
   const response = await client.get(`/admin/orders/${id}`);
   return response.data;
 };

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '../ui/Button';
 import { Card, CardContent, CardHeader } from '../ui/Card';
 import { Badge } from '../ui/Badge';
-import { updateOrderStatus } from '../../api/admin';
+import { updateOrderStatus, OrderDetail } from '../../api/admin';
 
 import { 
   X, 
@@ -25,24 +25,6 @@ interface OrderItem {
   price: number;
   total: number;
   product_id?: number;
-}
-
-interface OrderDetail {
-  id: number;
-  order_number: string;
-  customer_name: string;
-  customer_phone: string;
-  customer_address?: string;
-  delivery_address?: string;
-  total_amount: number;
-  status: string;
-  payment_method: string;
-  payment_status?: string;
-  created_at: string;
-  items?: OrderItem[];
-  payment_proof?: string;
-  payment_proof_date?: string;
-  notes?: string;
 }
 
 interface OrderDetailModalProps {

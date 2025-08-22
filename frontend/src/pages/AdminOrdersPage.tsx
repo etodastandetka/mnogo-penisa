@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { OrderStatus } from '../types';
 import { formatPrice } from '../utils/format';
-import { getOrders, updateOrderStatus, AdminOrder } from '../api/admin';
+import { getOrders, updateOrderStatus, AdminOrder, getOrder, OrderDetail } from '../api/admin';
 
 
 export const AdminOrdersPage: React.FC = () => {
@@ -31,7 +31,7 @@ export const AdminOrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
   const [filters, setFilters] = useState({
@@ -288,16 +288,21 @@ export const AdminOrdersPage: React.FC = () => {
     setFilters({ status: '', dateFrom: '', dateTo: '', search: '', hasPaymentProof: '' });
   };
 
-  const openOrderDetail = (order: AdminOrder) => {
-    console.log('🔍 Открываем детали заказа:', {
-      id: order.id,
-      orderNumber: order.orderNumber,
-      paymentProof: order.paymentProof,
-      paymentProofDate: order.paymentProofDate,
-      hasPaymentProof: !!order.paymentProof
-    });
-    setSelectedOrder(order);
-    setIsDetailModalOpen(true);
+  const openOrderDetail = async (order: AdminOrder) => {
+    try {
+      console.log('🔍 Загружаем детали заказа:', {
+        id: order.id,
+        orderNumber: order.orderNumber
+      });
+      
+      // Загружаем полные детали заказа через API
+      const orderDetails = await getOrder(order.id);
+      setSelectedOrder(orderDetails);
+      setIsDetailModalOpen(true);
+    } catch (error) {
+      console.error('Ошибка загрузки деталей заказа:', error);
+      setError('Ошибка загрузки деталей заказа');
+    }
   };
 
   const closeOrderDetail = () => {
@@ -305,10 +310,15 @@ export const AdminOrdersPage: React.FC = () => {
     setSelectedOrder(null);
   };
 
-  const handleOrderUpdate = (updatedOrder: any) => {
+  const handleOrderUpdate = (updatedOrder: OrderDetail) => {
     setOrders(prevOrders => 
       prevOrders.map(order => 
-        order.id === updatedOrder.id ? { ...order, ...updatedOrder } : order
+        order.id === updatedOrder.id ? { 
+          ...order, 
+          status: updatedOrder.status,
+          paymentProof: updatedOrder.payment_proof,
+          paymentProofDate: updatedOrder.payment_proof_date
+        } : order
       )
     );
   };
@@ -698,29 +708,7 @@ export const AdminOrdersPage: React.FC = () => {
       </div>
       
       <OrderDetailModal
-        order={selectedOrder ? {
-          id: selectedOrder.id,
-          order_number: selectedOrder.orderNumber,
-          customer_name: selectedOrder.customerName,
-          customer_phone: selectedOrder.customerPhone,
-          delivery_address: selectedOrder.deliveryAddress,
-          total_amount: selectedOrder.totalAmount,
-          status: selectedOrder.status,
-          payment_method: selectedOrder.paymentMethod,
-          payment_status: selectedOrder.paymentStatus,
-          created_at: selectedOrder.createdAt,
-          items: selectedOrder.items?.map(item => ({
-            id: item.id,
-            product_name: item.productName,
-            quantity: item.quantity,
-            price: item.price,
-            total: item.totalPrice,
-            product_id: item.id
-          })),
-          payment_proof: selectedOrder.paymentProof,
-          payment_proof_date: selectedOrder.paymentProofDate,
-          notes: selectedOrder.notes
-        } : null}
+        order={selectedOrder}
         isOpen={isDetailModalOpen}
         onClose={closeOrderDetail}
         onOrderUpdate={handleOrderUpdate}
