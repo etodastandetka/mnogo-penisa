@@ -65,6 +65,20 @@ export const AdminOrdersPage: React.FC = () => {
     try {
       setLoading(true);
       const ordersData = await getOrders();
+      
+      // Отладочная информация о заказах с чеками
+      const ordersWithProof = ordersData.filter(order => order.paymentProof && order.paymentProof.trim() !== '');
+      console.log('📋 Загружено заказов:', ordersData.length);
+      console.log('💰 Заказов с чеками:', ordersWithProof.length);
+      if (ordersWithProof.length > 0) {
+        console.log('✅ Заказы с чеками:', ordersWithProof.map(order => ({
+          id: order.id,
+          orderNumber: order.orderNumber,
+          paymentProof: order.paymentProof?.substring(0, 50) + '...',
+          paymentProofDate: order.paymentProofDate
+        })));
+      }
+      
       setOrders(ordersData);
     } catch (error) {
       setError('Ошибка загрузки заказов');
@@ -565,7 +579,7 @@ export const AdminOrdersPage: React.FC = () => {
                               <strong>Дата:</strong> {new Date(order.createdAt).toLocaleDateString('ru-RU')} {new Date(order.createdAt).toLocaleTimeString('ru-RU')}
                             </p>
                             {/* Информация о чеке об оплате */}
-                            {order.paymentProof && (
+                            {order.paymentProof && order.paymentProof.trim() !== '' && order.paymentProof !== 'null' && (
                               <div className="mt-2 flex items-center space-x-2">
                                 <Receipt className="w-4 h-4 text-green-600" />
                                 <span className="text-sm text-green-600 font-medium">
@@ -658,11 +672,18 @@ export const AdminOrdersPage: React.FC = () => {
                             Печать
                           </Button>
                           {/* Кнопка просмотра чека об оплате */}
-                          {order.paymentProof && (
+                          {order.paymentProof && order.paymentProof.trim() !== '' && order.paymentProof !== 'null' && (
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => {
+                                console.log('Открываем чек для заказа:', {
+                                  orderId: order.id,
+                                  orderNumber: order.orderNumber,
+                                  paymentProof: order.paymentProof,
+                                  paymentProofType: order.paymentProof?.startsWith('data:image') ? 'base64' : 'url'
+                                });
+                                
                                 if (order.paymentProof?.startsWith('data:image')) {
                                   // Если это base64 изображение, открываем в новом окне
                                   const newWindow = window.open();
