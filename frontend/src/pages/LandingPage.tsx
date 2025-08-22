@@ -441,6 +441,11 @@ export const LandingPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">
                 Детские праздники
               </h3>
+              <div className="mb-3 text-center">
+                <Badge className="bg-green-100 text-green-800 border-green-200 text-xs font-medium">
+                  🎉 Скидка до 15%
+                </Badge>
+              </div>
               <p className="text-gray-600 text-sm leading-relaxed text-center mb-4">
                 Вкусные роллы и пицца для детских дней рождения, выпускных и других праздников
               </p>
@@ -464,6 +469,11 @@ export const LandingPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">
                 Корпоративы
               </h3>
+              <div className="mb-3 text-center">
+                <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-xs font-medium">
+                  🏢 Скидка до 15%
+                </Badge>
+              </div>
               <p className="text-gray-600 text-sm leading-relaxed text-center mb-4">
                 Питание для офисных мероприятий, встреч с клиентами и корпоративных обедов
               </p>
@@ -487,6 +497,11 @@ export const LandingPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">
                 Свадьбы и торжества
               </h3>
+              <div className="mb-3 text-center">
+                <Badge className="bg-purple-100 text-purple-800 border-purple-200 text-xs font-medium">
+                  💒 Скидка до 15%
+                </Badge>
+              </div>
               <p className="text-gray-600 text-sm leading-relaxed text-center mb-4">
                 Элегантные наборы роллов и пиццы для свадеб, юбилеев и других торжественных событий
               </p>
@@ -505,9 +520,14 @@ export const LandingPage: React.FC = () => {
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
                 Заказать питание для мероприятия
               </h3>
-              <p className="text-gray-600 max-w-2xl mx-auto">
+              <p className="text-gray-600 max-w-2xl mx-auto mb-4">
                 Свяжитесь с нами для обсуждения деталей, расчета стоимости и составления индивидуального меню
               </p>
+              <div className="flex justify-center mb-4">
+                <Badge className="bg-gradient-to-r from-green-500 to-blue-500 text-white border-0 text-sm font-bold px-4 py-2">
+                  🎉 Скидки до 15% на все мероприятия!
+                </Badge>
+              </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
