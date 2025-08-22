@@ -132,10 +132,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                       <Clock className="w-4 h-4" />
                       <span className="text-sm font-medium">Смена открыта</span>
                       <span className="text-xs text-green-600">
-                        {currentShift.total_orders} заказов
+                        {currentShift.total_orders || 0} заказов
                       </span>
                       <span className="text-xs text-green-600">
-                        {currentShift.total_revenue.toLocaleString()} сом
+                        {(currentShift.total_revenue || 0).toLocaleString()} сом
                       </span>
                     </div>
                     <button

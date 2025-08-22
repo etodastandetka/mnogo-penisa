@@ -233,19 +233,19 @@ export const AdminAnalyticsPage: React.FC = () => {
                         </div>
                         <div className="flex justify-between">
                           <span>Заказов:</span>
-                          <span className="font-medium">{currentShift.total_orders}</span>
+                          <span className="font-medium">{currentShift.total_orders || 0}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Выручка:</span>
-                          <span className="font-medium">{currentShift.total_revenue.toLocaleString()} сом</span>
+                          <span className="font-medium">{(currentShift.total_revenue || 0).toLocaleString()} сом</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Наличные:</span>
-                          <span>{currentShift.cash_revenue.toLocaleString()} сом</span>
+                          <span>{(currentShift.cash_revenue || 0).toLocaleString()} сом</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Карта:</span>
-                          <span>{currentShift.card_revenue.toLocaleString()} сом</span>
+                          <span>{(currentShift.card_revenue || 0).toLocaleString()} сом</span>
                         </div>
                       </div>
                       

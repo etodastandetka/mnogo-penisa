@@ -2217,7 +2217,11 @@ app.post('/api/admin/shifts/open', authenticateToken, requireAdmin, (req, res) =
         opened_at: new Date().toISOString(),
         opened_by: userId,
         status: 'open',
-        notes: notes || ''
+        notes: notes || '',
+        total_orders: 0,
+        total_revenue: 0,
+        cash_revenue: 0,
+        card_revenue: 0
       }
     });
   });
