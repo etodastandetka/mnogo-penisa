@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../../store/userStore';
 import { AdminNavigation } from './AdminNavigation';
-import { Menu, X, BarChart3 } from 'lucide-react';
-import { getTodayStats, TodayStats } from '../../api/stats';
+import { Menu, X, BarChart3, Play, Square, Clock } from 'lucide-react';
+import { getCurrentShift, openShift, closeShift, Shift } from '../../api/shifts';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -13,8 +13,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const { user, clearUser } = useUserStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [todayStats, setTodayStats] = useState<TodayStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(false);
+  const [currentShift, setCurrentShift] = useState<Shift | null>(null);
+  const [shiftLoading, setShiftLoading] = useState(false);
+  const [shiftError, setShiftError] = useState('');
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -29,22 +30,48 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     }, 100);
   };
 
-  // Функция для загрузки статистики за сегодня
-  const fetchTodayStats = async () => {
-    setStatsLoading(true);
+  // Функции для работы со сменами
+  const fetchCurrentShift = async () => {
+    setShiftLoading(true);
     try {
-      const response = await getTodayStats();
-      setTodayStats(response.stats);
+      const response = await getCurrentShift();
+      setCurrentShift(response.shift);
+      setShiftError('');
     } catch (error) {
-      console.error('Ошибка загрузки статистики за сегодня:', error);
+      console.error('Ошибка загрузки текущей смены:', error);
+      setShiftError('Ошибка загрузки смены');
     } finally {
-      setStatsLoading(false);
+      setShiftLoading(false);
     }
   };
 
-  // Загружаем статистику при монтировании компонента
+  const handleOpenShift = async () => {
+    try {
+      const response = await openShift('Новая смена');
+      setCurrentShift(response.shift);
+      setShiftError('');
+    } catch (error) {
+      setShiftError('Ошибка открытия смены');
+      console.error('Ошибка открытия смены:', error);
+    }
+  };
+
+  const handleCloseShift = async () => {
+    if (!currentShift) return;
+    
+    try {
+      await closeShift();
+      setCurrentShift(null);
+      setShiftError('');
+    } catch (error) {
+      setShiftError('Ошибка закрытия смены');
+      console.error('Ошибка закрытия смены:', error);
+    }
+  };
+
+  // Загружаем текущую смену при монтировании компонента
   useEffect(() => {
-    fetchTodayStats();
+    fetchCurrentShift();
   }, []);
 
   return (
@@ -92,45 +119,45 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             </div>
             
             <div className="flex items-center space-x-4">
-              {/* Статистика за сегодня */}
+              {/* Статус смены */}
               <div className="flex items-center space-x-3">
-                {statsLoading ? (
+                {shiftLoading ? (
                   <div className="flex items-center space-x-2 text-sm text-gray-500">
-                    <BarChart3 className="w-4 h-4 animate-pulse" />
+                    <Clock className="w-4 h-4 animate-pulse" />
                     <span>Загрузка...</span>
                   </div>
-                ) : todayStats ? (
+                ) : currentShift ? (
                   <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-lg">
-                      <BarChart3 className="w-4 h-4" />
-                      <span className="text-sm font-medium">Сегодня</span>
-                      <span className="text-xs text-blue-600">
-                        {todayStats.total_orders} заказов
+                    <div className="flex items-center space-x-2 px-3 py-1.5 bg-green-100 text-green-800 rounded-lg">
+                      <Clock className="w-4 h-4" />
+                      <span className="text-sm font-medium">Смена открыта</span>
+                      <span className="text-xs text-green-600">
+                        {currentShift.total_orders} заказов
                       </span>
-                      <span className="text-xs text-blue-600">
-                        {todayStats.total_revenue.toLocaleString()} сом
+                      <span className="text-xs text-green-600">
+                        {currentShift.total_revenue.toLocaleString()} сом
                       </span>
                     </div>
                     <button
-                      onClick={fetchTodayStats}
-                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-1"
+                      onClick={handleCloseShift}
+                      className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-1"
                     >
-                      <BarChart3 className="w-4 h-4" />
-                      <span>Обновить</span>
+                      <Square className="w-4 h-4" />
+                      <span>Закрыть</span>
                     </button>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 text-gray-800 rounded-lg">
-                      <BarChart3 className="w-4 h-4" />
-                      <span className="text-sm font-medium">Статистика недоступна</span>
+                    <div className="flex items-center space-x-2 px-3 py-1.5 bg-red-100 text-red-800 rounded-lg">
+                      <Clock className="w-4 h-4" />
+                      <span className="text-sm font-medium">Смена закрыта</span>
                     </div>
                     <button
-                      onClick={fetchTodayStats}
-                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-2"
+                      onClick={handleOpenShift}
+                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-2"
                     >
-                      <BarChart3 className="w-4 h-4" />
-                      <span>Загрузить</span>
+                      <Play className="w-4 h-4" />
+                      <span>Открыть</span>
                     </button>
                   </div>
                 )}

@@ -28,7 +28,7 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 import { getOrders } from '../api/admin';
-import { getTodayStats, TodayStats } from '../api/stats';
+import { getCurrentShift, openShift, closeShift, Shift } from '../api/shifts';
 
 interface AnalyticsData {
   totalOrders: number;
@@ -48,9 +48,10 @@ export const AdminAnalyticsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // Состояние для статистики за сегодня
-  const [todayStats, setTodayStats] = useState<TodayStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(false);
+  // Состояние для смен
+  const [currentShift, setCurrentShift] = useState<Shift | null>(null);
+  const [shiftLoading, setShiftLoading] = useState(false);
+  const [shiftError, setShiftError] = useState('');
 
   useEffect(() => {
     if (!user || !isAdmin) {
@@ -58,7 +59,7 @@ export const AdminAnalyticsPage: React.FC = () => {
       return;
     }
     fetchAnalytics();
-    fetchTodayStats();
+    fetchCurrentShift();
   }, [user, isAdmin, navigate]);
 
   const fetchAnalytics = async () => {
@@ -82,16 +83,42 @@ export const AdminAnalyticsPage: React.FC = () => {
     }
   };
 
-  // Функция для загрузки статистики за сегодня
-  const fetchTodayStats = async () => {
-    setStatsLoading(true);
+  // Функции для работы со сменами
+  const fetchCurrentShift = async () => {
+    setShiftLoading(true);
     try {
-      const response = await getTodayStats();
-      setTodayStats(response.stats);
+      const response = await getCurrentShift();
+      setCurrentShift(response.shift);
+      setShiftError('');
     } catch (error) {
-      console.error('Ошибка загрузки статистики за сегодня:', error);
+      console.error('Ошибка загрузки текущей смены:', error);
+      setShiftError('Ошибка загрузки смены');
     } finally {
-      setStatsLoading(false);
+      setShiftLoading(false);
+    }
+  };
+
+  const handleOpenShift = async () => {
+    try {
+      const response = await openShift('Новая смена');
+      setCurrentShift(response.shift);
+      setShiftError('');
+    } catch (error) {
+      setShiftError('Ошибка открытия смены');
+      console.error('Ошибка открытия смены:', error);
+    }
+  };
+
+  const handleCloseShift = async () => {
+    if (!currentShift) return;
+    
+    try {
+      await closeShift();
+      setCurrentShift(null);
+      setShiftError('');
+    } catch (error) {
+      setShiftError('Ошибка закрытия смены');
+      console.error('Ошибка закрытия смены:', error);
     }
   };
 
@@ -173,84 +200,94 @@ export const AdminAnalyticsPage: React.FC = () => {
             <CardContent>
 
               
+              {shiftError && (
+                <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-red-600 text-sm">{shiftError}</p>
+                </div>
+              )}
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Статистика за сегодня */}
+                {/* Текущая смена */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900">Статистика за сегодня</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Текущая смена</h3>
                   
-                  {statsLoading ? (
+                  {shiftLoading ? (
                     <div className="flex items-center justify-center p-8">
                       <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
                     </div>
-                  ) : todayStats ? (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  ) : currentShift ? (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-blue-800">
-                          {todayStats.date}
+                        <span className="text-sm font-medium text-green-800">
+                          {currentShift.shift_number}
                         </span>
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          Сегодня
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Открыта
                         </span>
                       </div>
                       
-                      <div className="space-y-2 text-sm text-blue-700">
+                      <div className="space-y-2 text-sm text-green-700">
                         <div className="flex justify-between">
-                          <span>Заказов:</span>
-                          <span className="font-medium">{todayStats.total_orders}</span>
+                          <span>Открыта:</span>
+                          <span>{new Date(currentShift.opened_at).toLocaleString('ru-RU')}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Общая выручка:</span>
-                          <span className="font-medium">{todayStats.total_revenue.toLocaleString()} сом</span>
+                          <span>Заказов:</span>
+                          <span className="font-medium">{currentShift.total_orders}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Выручка:</span>
+                          <span className="font-medium">{currentShift.total_revenue.toLocaleString()} сом</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Наличные:</span>
-                          <span>{todayStats.cash_revenue.toLocaleString()} сом</span>
+                          <span>{currentShift.cash_revenue.toLocaleString()} сом</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Карта:</span>
-                          <span>{todayStats.card_revenue.toLocaleString()} сом</span>
+                          <span>{currentShift.card_revenue.toLocaleString()} сом</span>
                         </div>
                       </div>
                       
                       <Button
-                        onClick={fetchTodayStats}
-                        className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
+                        onClick={handleCloseShift}
+                        className="w-full mt-4 bg-red-600 hover:bg-red-700"
                       >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Обновить статистику
+                        <Square className="w-4 h-4 mr-2" />
+                        Закрыть смену
                       </Button>
                     </div>
                   ) : (
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                      <p className="text-gray-600 mb-4">Статистика недоступна</p>
+                      <p className="text-gray-600 mb-4">Смена не открыта</p>
                       <Button
-                        onClick={fetchTodayStats}
-                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={handleOpenShift}
+                        className="bg-green-600 hover:bg-green-700"
                       >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Загрузить статистику
+                        <Play className="w-4 h-4 mr-2" />
+                        Открыть смену
                       </Button>
                     </div>
                   )}
                 </div>
 
-                {/* Информация */}
+                {/* Информация о смене */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900">Информация</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Информация о смене</h3>
                   
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                     <div className="space-y-3 text-sm text-gray-700">
                       <div className="flex items-center space-x-2">
-                        <BarChart3 className="w-4 h-4 text-blue-600" />
-                        <span>Статистика обновляется автоматически</span>
+                        <Clock className="w-4 h-4 text-blue-600" />
+                        <span>Смена отслеживает заказы с момента открытия</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4 text-green-600" />
-                        <span>Данные за текущий день</span>
+                        <span>Статистика обновляется в реальном времени</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RefreshCw className="w-4 h-4 text-orange-600" />
-                        <span>Нажмите "Обновить" для актуальных данных</span>
+                        <span>При закрытии смены фиксируется итоговая статистика</span>
                       </div>
                     </div>
                   </div>

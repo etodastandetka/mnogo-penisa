@@ -2139,46 +2139,155 @@ app.post('/api/upload-base64', (req, res) => {
   }
 });
 
-// ==================== ПРОСТОЙ API ДЛЯ СТАТИСТИКИ ЗА ДЕНЬ ====================
+// ==================== ПРОСТОЙ API ДЛЯ УПРАВЛЕНИЯ СМЕНАМИ ====================
 
-// Получить статистику заказов за сегодня
-app.get('/api/admin/stats/today', authenticateToken, requireAdmin, (req, res) => {
-  console.log('🔍 API: Получение статистики за сегодня');
+// Получить текущую смену
+app.get('/api/admin/shifts/current', authenticateToken, requireAdmin, (req, res) => {
+  console.log('🔍 API: Получение текущей смены');
   
-  // Получаем начало и конец сегодняшнего дня
-  const today = new Date();
-  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
-  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
-  
-  db.all(`
-    SELECT 
-      COUNT(*) as total_orders,
-      SUM(total_amount) as total_revenue,
-      SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as cash_revenue,
-      SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as card_revenue
-    FROM orders 
-    WHERE created_at >= ? AND created_at < ? AND status != 'cancelled'
-  `, [startOfDay, endOfDay], (err, stats) => {
+  db.get(`
+    SELECT s.*, u.username as opened_by_name
+    FROM shifts s
+    LEFT JOIN users u ON s.opened_by = u.id
+    WHERE s.status = 'open'
+    ORDER BY s.opened_at DESC
+    LIMIT 1
+  `, (err, shift: any) => {
     if (err) {
-      console.error('❌ Ошибка получения статистики за сегодня:', err);
-      return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
+      console.error('❌ Ошибка получения текущей смены:', err);
+      return res.status(500).json({ success: false, message: 'Ошибка получения смены' });
     }
     
-    const statsData = stats[0] || { total_orders: 0, total_revenue: 0, cash_revenue: 0, card_revenue: 0 };
+    if (!shift) {
+      return res.json({ success: true, shift: null });
+    }
+    
+          // Получаем статистику заказов для текущей смены
+      db.all(`
+        SELECT 
+          COUNT(*) as total_orders,
+          SUM(total_amount) as total_revenue,
+          SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as cash_revenue,
+          SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as card_revenue
+        FROM orders 
+        WHERE created_at >= ? AND status != 'cancelled'
+      `, [(shift as any).opened_at], (err, stats: any) => {
+        if (err) {
+          console.error('❌ Ошибка получения статистики смены:', err);
+          return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
+        }
+        
+        const statsData = (stats[0] as any) || { total_orders: 0, total_revenue: 0, cash_revenue: 0, card_revenue: 0 };
+      
+      res.json({
+        success: true,
+        shift: {
+          ...(shift as any),
+          ...statsData
+        }
+      });
+    });
+  });
+});
+
+// Открыть новую смену
+app.post('/api/admin/shifts/open', authenticateToken, requireAdmin, (req, res) => {
+  console.log('🔍 API: Открытие новой смены');
+  
+  const { notes } = req.body;
+  const shiftNumber = `SHIFT-${Date.now()}`;
+  const userId = (req as any).user.id;
+  
+  db.run(`
+    INSERT INTO shifts (shift_number, opened_by, status, notes)
+    VALUES (?, ?, 'open', ?)
+  `, [shiftNumber, userId, notes || ''], function(err) {
+    if (err) {
+      console.error('❌ Ошибка открытия смены:', err);
+      return res.status(500).json({ success: false, message: 'Ошибка открытия смены' });
+    }
+    
+    console.log('✅ Новая смена открыта с ID:', this.lastID);
     
     res.json({
       success: true,
-      stats: {
-        ...statsData,
-        date: today.toLocaleDateString('ru-RU'),
-        startOfDay,
-        endOfDay
+      shift: {
+        id: this.lastID,
+        shift_number: shiftNumber,
+        opened_at: new Date().toISOString(),
+        opened_by: userId,
+        status: 'open',
+        notes: notes || ''
       }
     });
   });
 });
 
-// ==================== КОНЕЦ ПРОСТОГО API ====================
+// Закрыть текущую смену
+app.post('/api/admin/shifts/close', authenticateToken, requireAdmin, (req, res) => {
+  console.log('🔍 API: Закрытие смены');
+  
+  const userId = (req as any).user.id;
+  
+  // Получаем текущую открытую смену
+  db.get('SELECT * FROM shifts WHERE status = "open" ORDER BY opened_at DESC LIMIT 1', (err, shift: any) => {
+    if (err) {
+      console.error('❌ Ошибка получения текущей смены:', err);
+      return res.status(500).json({ success: false, message: 'Ошибка получения смены' });
+    }
+    
+    if (!shift) {
+      return res.status(400).json({ success: false, message: 'Нет открытой смены для закрытия' });
+    }
+    
+          // Получаем финальную статистику
+      db.all(`
+        SELECT 
+          COUNT(*) as total_orders,
+          SUM(total_amount) as total_revenue,
+          SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as cash_revenue,
+          SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as card_revenue
+        FROM orders 
+        WHERE created_at >= ? AND status != 'cancelled'
+      `, [(shift as any).opened_at], (err, stats: any) => {
+        if (err) {
+          console.error('❌ Ошибка получения статистики смены:', err);
+          return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
+        }
+        
+        const statsData = (stats[0] as any) || { total_orders: 0, total_revenue: 0, cash_revenue: 0, card_revenue: 0 };
+      
+      // Закрываем смену
+      db.run(`
+        UPDATE shifts 
+        SET status = 'closed', closed_at = CURRENT_TIMESTAMP, closed_by = ?,
+            total_orders = ?, total_revenue = ?, cash_revenue = ?, card_revenue = ?
+        WHERE id = ?
+      `, [userId, statsData.total_orders, statsData.total_revenue, statsData.cash_revenue, statsData.card_revenue, (shift as any).id], (err) => {
+        if (err) {
+          console.error('❌ Ошибка закрытия смены:', err);
+          return res.status(500).json({ success: false, message: 'Ошибка закрытия смены' });
+        }
+        
+        console.log('✅ Смена закрыта:', shift.shift_number);
+        
+        res.json({
+          success: true,
+          message: 'Смена успешно закрыта',
+          shift: {
+            ...shift,
+            ...statsData,
+            status: 'closed',
+            closed_at: new Date().toISOString(),
+            closed_by: userId
+          }
+        });
+      });
+    });
+  });
+});
+
+// ==================== КОНЕЦ API ДЛЯ СМЕН ====================
 
 // Альтернативный endpoint для загрузки на CDN (если локальные файлы не работают)
 app.post('/api/upload-cdn', upload.single('image'), (req, res) => {
