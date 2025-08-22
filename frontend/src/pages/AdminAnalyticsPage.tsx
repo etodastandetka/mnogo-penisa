@@ -27,13 +27,7 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 import { getOrders } from '../api/admin';
-import { 
-  getCurrentShift, 
-  openShift, 
-  closeShift, 
-  getShiftsHistory,
-  Shift 
-} from '../api/shifts';
+import { getTodayStats, TodayStats } from '../api/stats';
 
 interface AnalyticsData {
   totalOrders: number;
@@ -53,11 +47,9 @@ export const AdminAnalyticsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // Состояние для смен
-  const [currentShift, setCurrentShift] = useState<Shift | null>(null);
-  const [shiftsHistory, setShiftsHistory] = useState<Shift[]>([]);
-  const [shiftLoading, setShiftLoading] = useState(false);
-  const [shiftError, setShiftError] = useState('');
+  // Состояние для статистики за сегодня
+  const [todayStats, setTodayStats] = useState<TodayStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
   useEffect(() => {
     if (!user || !isAdmin) {
@@ -65,8 +57,7 @@ export const AdminAnalyticsPage: React.FC = () => {
       return;
     }
     fetchAnalytics();
-    fetchCurrentShift();
-    fetchShiftsHistory();
+    fetchTodayStats();
   }, [user, isAdmin, navigate]);
 
   const fetchAnalytics = async () => {
@@ -90,53 +81,16 @@ export const AdminAnalyticsPage: React.FC = () => {
     }
   };
 
-  // Функции для работы со сменами
-  const fetchCurrentShift = async () => {
-    setShiftLoading(true);
-    setShiftError('');
-    
+  // Функция для загрузки статистики за сегодня
+  const fetchTodayStats = async () => {
+    setStatsLoading(true);
     try {
-      const response = await getCurrentShift();
-      setCurrentShift(response.shift);
+      const response = await getTodayStats();
+      setTodayStats(response.stats);
     } catch (error) {
-      setShiftError('Ошибка загрузки текущей смены');
-      console.error('Ошибка загрузки смены:', error);
+      console.error('Ошибка загрузки статистики за сегодня:', error);
     } finally {
-      setShiftLoading(false);
-    }
-  };
-
-  const fetchShiftsHistory = async () => {
-    try {
-      const response = await getShiftsHistory(20);
-      setShiftsHistory(response.shifts);
-    } catch (error) {
-      console.error('Ошибка загрузки истории смен:', error);
-    }
-  };
-
-  const handleOpenShift = async () => {
-    try {
-      const response = await openShift('Новая смена');
-      setCurrentShift(response.shift);
-      await fetchShiftsHistory();
-    } catch (error) {
-      setShiftError('Ошибка открытия смены');
-      console.error('Ошибка открытия смены:', error);
-    }
-  };
-
-  const handleCloseShift = async () => {
-    if (!currentShift) return;
-    
-    try {
-      const response = await closeShift();
-      setCurrentShift(null);
-      await fetchShiftsHistory();
-      await fetchAnalytics(); // Обновляем аналитику
-    } catch (error) {
-      setShiftError('Ошибка закрытия смены');
-      console.error('Ошибка закрытия смены:', error);
+      setStatsLoading(false);
     }
   };
 
@@ -216,11 +170,7 @@ export const AdminAnalyticsPage: React.FC = () => {
               </h2>
             </CardHeader>
             <CardContent>
-              {shiftError && (
-                <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-red-600 text-sm">{shiftError}</p>
-                </div>
-              )}
+
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Текущая смена */}
