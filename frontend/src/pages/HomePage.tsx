@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Product, ProductCategory } from '../types';
 import { productsApi } from '../api/products';
 import { ProductCard } from '../components/ProductCard';
+import { FixedCart } from '../components/FixedCart';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { getCategoryName, getCategoryEmoji } from '../utils/categories';
@@ -122,6 +123,7 @@ export const MenuPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-8">
+        {/* Заголовок и поиск */}
         <div className="mb-4 sm:mb-6 lg:mb-8">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Наше меню</h1>
           
@@ -143,6 +145,7 @@ export const MenuPage: React.FC = () => {
           />
         </div>
 
+        {/* Фильтры категорий */}
         <div className="mb-4 sm:mb-6 lg:mb-6">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <Button
@@ -166,19 +169,35 @@ export const MenuPage: React.FC = () => {
           </div>
         </div>
 
-        {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+        {/* Двухколоночный макет: меню + корзина */}
+        <div className="flex gap-6 lg:gap-8">
+          {/* Левая колонка - меню товаров */}
+          <div className="flex-1">
+            {filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 sm:py-12">
+                <p className="text-gray-500 text-sm sm:text-base lg:text-lg">
+                  {searchQuery ? 'Ничего не найдено по вашему запросу' : 'В данной категории пока нет блюд'}
+                </p>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="text-center py-8 sm:py-12">
-            <p className="text-gray-500 text-sm sm:text-base lg:text-lg">
-              {searchQuery ? 'Ничего не найдено по вашему запросу' : 'В данной категории пока нет блюд'}
-            </p>
+
+          {/* Правая колонка - фиксированная корзина */}
+          <div className="hidden lg:block">
+            <FixedCart />
           </div>
-        )}
+        </div>
+
+        {/* Мобильная корзина - показывается внизу на мобильных */}
+        <div className="lg:hidden mt-6">
+          <FixedCart />
+        </div>
       </div>
     </div>
   );
