@@ -23,22 +23,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [imageError, setImageError] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
-  // Функция для получения URL изображения с приоритетом мобильных фото на мобильных устройствах
+  // Функция для получения URL изображения - мобильные фото приоритет везде
   const getImageUrl = (): string | null => {
-    // Определяем, мобильное ли устройство
-    const isMobile = window.innerWidth <= 768;
-    
     let imageUrl = '';
     
-    if (isMobile && product.mobile_image_url && product.mobile_image_url !== 'null' && product.mobile_image_url !== '') {
-      // На мобильных устройствах приоритет мобильному фото
+    // Приоритет: мобильное фото везде, затем основное как fallback
+    if (product.mobile_image_url && product.mobile_image_url !== 'null' && product.mobile_image_url !== '') {
       imageUrl = product.mobile_image_url;
     } else if (product.image_url && product.image_url !== 'null' && product.image_url !== '') {
-      // На десктопе или если нет мобильного фото - основное фото
       imageUrl = product.image_url;
-    } else if (product.mobile_image_url && product.mobile_image_url !== 'null' && product.mobile_image_url !== '') {
-      // Fallback на мобильное фото, если основного нет
-      imageUrl = product.mobile_image_url;
     }
     
     // Если есть изображение - используем его
@@ -98,21 +91,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   // Убираем логику с resize - теперь все изображения показываются одинаково
 
-  // Сброс состояния при смене изображения и обновление при изменении размера окна
+  // Сброс состояния при смене изображения
   React.useEffect(() => {
     setImageError(false);
   }, [imageUrl]);
-
-  // Обработчик изменения размера окна для обновления изображений
-  React.useEffect(() => {
-    const handleResize = () => {
-      // Принудительно обновляем изображение при изменении размера
-      setImageError(false);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   return (
     <>
