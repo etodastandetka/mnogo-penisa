@@ -2162,22 +2162,22 @@ app.get('/api/admin/shifts/current', authenticateToken, requireAdmin, (req, res)
       return res.json({ success: true, shift: null });
     }
     
-          // Получаем статистику заказов для текущей смены
-      db.all(`
-        SELECT 
-          COUNT(*) as total_orders,
-          SUM(total_amount) as total_revenue,
-          SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as cash_revenue,
-          SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as card_revenue
-        FROM orders 
-        WHERE created_at >= ? AND status != 'cancelled'
-      `, [(shift as any).opened_at], (err, stats: any) => {
-        if (err) {
-          console.error('❌ Ошибка получения статистики смены:', err);
-          return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
-        }
-        
-        const statsData = (stats[0] as any) || { total_orders: 0, total_revenue: 0, cash_revenue: 0, card_revenue: 0 };
+    // Получаем статистику заказов для текущей смены
+    db.all(`
+      SELECT 
+        COUNT(*) as total_orders,
+        SUM(total_amount) as total_revenue,
+        SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as cash_revenue,
+        SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as card_revenue
+      FROM orders 
+      WHERE created_at >= ? AND status != 'cancelled'
+    `, [(shift as any).opened_at], (err, stats: any) => {
+      if (err) {
+        console.error('❌ Ошибка получения статистики смены:', err);
+        return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
+      }
+      
+      const statsData = (stats[0] as any) || { total_orders: 0, total_revenue: 0, cash_revenue: 0, card_revenue: 0 };
       
       res.json({
         success: true,
@@ -2240,22 +2240,22 @@ app.post('/api/admin/shifts/close', authenticateToken, requireAdmin, (req, res) 
       return res.status(400).json({ success: false, message: 'Нет открытой смены для закрытия' });
     }
     
-          // Получаем финальную статистику
-      db.all(`
-        SELECT 
-          COUNT(*) as total_orders,
-          SUM(total_amount) as total_revenue,
-          SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as cash_revenue,
-          SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as card_revenue
-        FROM orders 
-        WHERE created_at >= ? AND status != 'cancelled'
-      `, [(shift as any).opened_at], (err, stats: any) => {
-        if (err) {
-          console.error('❌ Ошибка получения статистики смены:', err);
-          return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
-        }
-        
-        const statsData = (stats[0] as any) || { total_orders: 0, total_revenue: 0, cash_revenue: 0, card_revenue: 0 };
+    // Получаем финальную статистику
+    db.all(`
+      SELECT 
+        COUNT(*) as total_orders,
+        SUM(total_amount) as total_revenue,
+        SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as cash_revenue,
+        SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as card_revenue
+      FROM orders 
+      WHERE created_at >= ? AND status != 'cancelled'
+    `, [(shift as any).opened_at], (err, stats: any) => {
+      if (err) {
+        console.error('❌ Ошибка получения статистики смены:', err);
+        return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
+      }
+      
+      const statsData = (stats[0] as any) || { total_orders: 0, total_revenue: 0, cash_revenue: 0, card_revenue: 0 };
       
       // Закрываем смену
       db.run(`
