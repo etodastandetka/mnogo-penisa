@@ -44,6 +44,11 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
             font-size: 10px;
             margin-bottom: 5px;
           }
+          .company-info-ip {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+          }
           .order-info {
             margin-bottom: 10px;
           }
@@ -109,23 +114,7 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
           .tax-info {
             margin-bottom: 5px;
           }
-          .qr-code {
-            text-align: center;
-            margin: 10px 0;
-          }
-          .qr-code div {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #000;
-            color: #fff;
-            font-size: 12px;
-            text-align: center;
-            line-height: 1.2;
-          }
+
           @media print {
             body {
               width: 80mm;
@@ -139,7 +128,7 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
                  <div class="header">
            <div class="company-name">MNOGO ROLLY</div>
            <div class="company-info">Доставка роллов и пиццы</div>
-           <div class="company-info">ИП: Султанкулов А.Б.</div>
+           <div class="company-info-ip">ИП: Султанкулов Адилет Б.</div>
            <div class="company-info">ИНН: 20504198701431</div>
            <div class="company-info">Адрес: г. Бишкек, ул. Ахунбаева, 182 Б</div>
            <div class="company-info">Тел: +996 (709) 611-043</div>
@@ -149,7 +138,7 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
         <div class="order-info">
           <div class="order-number">Заказ №${order.orderNumber || order.id || 'N/A'}</div>
           <div class="order-date">Дата: ${new Date(order.createdAt || new Date()).toLocaleDateString('ru-RU')}</div>
-          <div class="order-date">Время: ${new Date(order.createdAt || new Date()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
+          <div class="order-date">Время: ${new Date(order.createdAt || new Date()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bishkek' })}</div>
         </div>
 
         <div class="customer-info">
@@ -197,7 +186,6 @@ export const PrintReceipt: React.FC<PrintReceiptProps> = ({ order, onClose }) =>
            <div>Приятного аппетита!</div>
 
            <div>Чек действителен для предъявления в налоговые органы КР</div>
-           <div>Фискальный документ №${order.orderNumber || order.id || 'N/A'}</div>
          </div>
       </body>
       </html>
