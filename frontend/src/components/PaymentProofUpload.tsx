@@ -133,7 +133,7 @@ export const PaymentProofUpload: React.FC<PaymentProofUploadProps> = ({
 					{previewUrl && (
 						<div className="relative">
 							<img src={previewUrl} alt="Preview" className="w-full h-32 object-cover rounded-lg" />
-							<button onClick={removeFile} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
+							        <button onClick={removeFile} className="absolute top-2 right-2 bg-orange-500 text-white rounded-full p-1 hover:bg-orange-600">
 								<X className="w-4 h-4" />
 							</button>
 						</div>
@@ -142,7 +142,7 @@ export const PaymentProofUpload: React.FC<PaymentProofUploadProps> = ({
 					{/* Кнопки */}
 					<div className="flex space-x-3">
 						<Button onClick={onClose} variant="outline" className="flex-1">Отмена</Button>
-						<Button onClick={handleUpload} disabled={!selectedFile || uploading} className="flex-1 bg-red-600 hover:bg-red-700">
+						        <Button onClick={handleUpload} disabled={!selectedFile || uploading} className="flex-1 bg-orange-600 hover:bg-orange-700">
 							{uploading ? 'Обработка...' : 'Прикрепить'}
 						</Button>
 					</div>

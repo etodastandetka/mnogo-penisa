@@ -87,43 +87,43 @@ export const Navigation: React.FC = () => {
             <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
               <button
                 onClick={() => navigate('/')}
-                className={`relative text-sm lg:text-base font-medium transition-all duration-300 hover:text-red-600 ${
+                className={`relative text-sm lg:text-base font-medium transition-all duration-300 hover:text-orange-600 ${
                   isLandingPage 
-                    ? 'text-red-600' 
+                    ? 'text-orange-600' 
                     : 'text-gray-700'
                 }`}
               >
                 Главная
                 {isLandingPage && (
-                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-red-600 rounded-full"></div>
+                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-orange-600 rounded-full"></div>
                 )}
               </button>
               
               <button
                 onClick={() => navigate('/menu')}
-                className={`relative text-sm lg:text-base font-medium transition-all duration-300 hover:text-red-600 ${
+                className={`relative text-sm lg:text-base font-medium transition-all duration-300 hover:text-orange-600 ${
                   isMenuPage 
-                    ? 'text-red-600' 
+                    ? 'text-orange-600' 
                     : 'text-gray-700'
                 }`}
               >
                 Меню
                 {isMenuPage && (
-                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-red-600 rounded-full"></div>
+                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-orange-600 rounded-full"></div>
                 )}
               </button>
               
               <button
                 onClick={() => navigate('/contact')}
-                className={`relative text-sm lg:text-base font-medium transition-all duration-300 hover:text-red-600 ${
+                className={`relative text-sm lg:text-base font-medium transition-all duration-300 hover:text-orange-600 ${
                   isContactPage 
-                    ? 'text-red-600' 
+                    ? 'text-orange-600' 
                     : 'text-gray-700'
                 }`}
               >
                 Контакты
                 {isContactPage && (
-                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-red-600 rounded-full"></div>
+                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-orange-600 rounded-full"></div>
                 )}
               </button>
             </nav>
@@ -144,7 +144,7 @@ export const Navigation: React.FC = () => {
                     <Badge
                       variant="primary"
                       size="sm"
-                      className="absolute -top-1 -right-1 bg-red-500 text-white min-w-[16px] h-4 text-xs"
+                      className="absolute -top-1 -right-1 bg-orange-500 text-white min-w-[16px] h-4 text-xs"
                     >
                       {getItemCount()}
                     </Badge>
@@ -165,7 +165,7 @@ export const Navigation: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate('/profile')}
-                    className="text-gray-700 hover:text-red-600 hover:bg-red-50 p-2"
+                    className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 p-2"
                   >
                     <User className="w-4 h-4" />
                   </Button>
@@ -173,7 +173,7 @@ export const Navigation: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     onClick={handleLogout}
-                    className="text-gray-700 hover:text-red-600 hover:bg-red-50 p-2"
+                    className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 p-2"
                   >
                     <LogOut className="w-4 h-4" />
                   </Button>
@@ -183,7 +183,7 @@ export const Navigation: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => navigate('/auth')}
-                  className="hidden md:flex text-gray-700 hover:text-red-600 hover:bg-red-50 px-3 py-2"
+                  className="hidden md:flex text-gray-700 hover:text-orange-600 hover:bg-orange-50 px-3 py-2"
                 >
                   <User className="w-4 h-4 mr-1" />
                   <span className="text-sm">Войти</span>

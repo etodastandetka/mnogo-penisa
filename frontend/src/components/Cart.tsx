@@ -28,7 +28,7 @@ export const Cart: React.FC = () => {
           <p className="text-gray-600 mb-6">Добавьте товары из меню, чтобы оформить заказ</p>
           <Button 
             onClick={() => navigate('/menu')}
-            className="w-full bg-red-600 hover:bg-red-700 text-white"
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white"
           >
             Перейти к меню
           </Button>
@@ -43,7 +43,7 @@ export const Cart: React.FC = () => {
         <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-red-50 to-orange-50">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">Корзина</h2>
-            <Badge variant="primary" className="bg-red-600 text-white">
+            <Badge variant="primary" className="bg-orange-600 text-white">
               {getItemCount()} {getItemCount() === 1 ? 'товар' : 'товара'}
             </Badge>
           </div>

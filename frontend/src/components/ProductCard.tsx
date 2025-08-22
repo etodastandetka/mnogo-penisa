@@ -146,7 +146,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         
         {product.isPopular && (
           <div className="absolute top-1 left-1 sm:top-2 sm:left-2 md:top-3 md:left-3">
-            <Badge variant="primary" className="bg-red-500 text-white text-xs px-1 sm:px-2 py-0.5 sm:py-1">
+            <Badge variant="primary" className="bg-orange-500 text-white text-xs px-1 sm:px-2 py-0.5 sm:py-1">
               Популярное
             </Badge>
           </div>
@@ -170,7 +170,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         
         <div className="mt-auto pt-1 sm:pt-2 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm sm:text-base md:text-lg font-bold text-red-600">
+            <span className="text-sm sm:text-base md:text-lg font-bold text-orange-600">
               {formatPrice(product.price)}
             </span>
             
@@ -180,7 +180,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   size="sm"
                   variant="outline"
                   onClick={() => handleUpdateQuantity(quantity - 1)}
-                  className="w-8 h-8 sm:w-9 sm:h-9 p-0 border-2 border-gray-300 hover:border-red-400 hover:bg-red-50 flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
+                  className="w-8 h-8 sm:w-9 sm:h-9 p-0 border-2 border-gray-300 hover:border-orange-400 hover:bg-orange-50 flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
                 >
                   <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
@@ -189,7 +189,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   size="sm"
                   variant="outline"
                   onClick={() => handleUpdateQuantity(quantity + 1)}
-                  className="w-8 h-8 sm:w-9 sm:h-9 p-0 border-2 border-gray-300 hover:border-green-400 hover:bg-green-50 flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
+                  className="w-8 h-8 sm:w-9 sm:h-9 p-0 border-2 border-gray-300 hover:border-orange-400 hover:bg-orange-50 flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
                 >
                   <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
@@ -198,7 +198,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <Button 
                 size="sm"
                 onClick={handleAddToCart}
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 text-white w-8 h-8 sm:w-9 sm:h-9 p-0 border-0 shadow-lg hover:shadow-xl flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 active:from-orange-700 active:to-orange-800 text-white w-8 h-8 sm:w-9 sm:h-9 p-0 border-0 shadow-lg hover:shadow-xl flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
                 disabled={product.is_available === false}
               >
                 <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -211,7 +211,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             size="sm"
             variant="outline"
             onClick={() => setShowDetailModal(true)}
-            className="w-full text-xs sm:text-sm py-1 sm:py-2 border border-gray-300 hover:border-red-400 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+            className="w-full text-xs sm:text-sm py-1 sm:py-2 border border-gray-300 hover:border-orange-400 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200"
           >
             <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
             Подробнее

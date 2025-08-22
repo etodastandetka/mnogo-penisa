@@ -96,7 +96,7 @@ export const MenuPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
           <p className="text-gray-600 text-sm sm:text-base">Загружаем меню...</p>
         </div>
       </div>
@@ -107,7 +107,7 @@ export const MenuPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
-          <p className="text-red-600 mb-4 text-sm sm:text-base">{error}</p>
+          <p className="text-orange-600 mb-4 text-sm sm:text-base">{error}</p>
           <p className="text-gray-500 mb-4 text-xs sm:text-sm">
             Попыток: {retryCount}
           </p>
