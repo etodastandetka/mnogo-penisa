@@ -2152,7 +2152,7 @@ app.get('/api/admin/shifts/current', authenticateToken, requireAdmin, (req, res)
     WHERE s.status = 'open'
     ORDER BY s.opened_at DESC
     LIMIT 1
-  `, (err, shift) => {
+  `, (err, shift: any) => {
     if (err) {
       console.error('❌ Ошибка получения текущей смены:', err);
       return res.status(500).json({ success: false, message: 'Ошибка получения смены' });
@@ -2171,7 +2171,7 @@ app.get('/api/admin/shifts/current', authenticateToken, requireAdmin, (req, res)
         SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as card_revenue
       FROM orders 
       WHERE created_at >= ? AND status != 'cancelled'
-    `, [shift.opened_at], (err, stats) => {
+    `, [(shift as any).opened_at], (err, stats) => {
       if (err) {
         console.error('❌ Ошибка получения статистики смены:', err);
         return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
@@ -2182,7 +2182,7 @@ app.get('/api/admin/shifts/current', authenticateToken, requireAdmin, (req, res)
       res.json({
         success: true,
         shift: {
-          ...shift,
+          ...(shift as any),
           ...statsData
         }
       });
@@ -2230,7 +2230,7 @@ app.post('/api/admin/shifts/close', authenticateToken, requireAdmin, (req, res) 
   const userId = (req as any).user.id;
   
   // Получаем текущую открытую смену
-  db.get('SELECT * FROM shifts WHERE status = "open" ORDER BY opened_at DESC LIMIT 1', (err, shift) => {
+  db.get('SELECT * FROM shifts WHERE status = "open" ORDER BY opened_at DESC LIMIT 1', (err, shift: any) => {
     if (err) {
       console.error('❌ Ошибка получения текущей смены:', err);
       return res.status(500).json({ success: false, message: 'Ошибка получения смены' });
@@ -2249,7 +2249,7 @@ app.post('/api/admin/shifts/close', authenticateToken, requireAdmin, (req, res) 
         SUM(CASE WHEN payment_method = 'payment_method' THEN total_amount ELSE 0 END) as card_revenue
       FROM orders 
       WHERE created_at >= ? AND status != 'cancelled'
-    `, [shift.opened_at], (err, stats) => {
+    `, [(shift as any).opened_at], (err, stats) => {
       if (err) {
         console.error('❌ Ошибка получения статистики смены:', err);
         return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
@@ -2263,7 +2263,7 @@ app.post('/api/admin/shifts/close', authenticateToken, requireAdmin, (req, res) 
         SET status = 'closed', closed_at = CURRENT_TIMESTAMP, closed_by = ?,
             total_orders = ?, total_revenue = ?, cash_revenue = ?, card_revenue = ?
         WHERE id = ?
-      `, [userId, statsData.total_orders, statsData.total_revenue, statsData.cash_revenue, statsData.card_revenue, shift.id], (err) => {
+      `, [userId, statsData.total_orders, statsData.total_revenue, statsData.cash_revenue, statsData.card_revenue, (shift as any).id], (err) => {
         if (err) {
           console.error('❌ Ошибка закрытия смены:', err);
           return res.status(500).json({ success: false, message: 'Ошибка закрытия смены' });
@@ -2328,7 +2328,7 @@ app.get('/api/admin/shifts/:id', authenticateToken, requireAdmin, (req, res) => 
     LEFT JOIN users u1 ON s.opened_by = u1.id
     LEFT JOIN users u2 ON s.closed_by = u2.id
     WHERE s.id = ?
-  `, [id], (err, shift) => {
+  `, [id], (err, shift: any) => {
     if (err) {
       console.error('❌ Ошибка получения смены:', err);
       return res.status(500).json({ success: false, message: 'Ошибка получения смены' });
@@ -2344,7 +2344,7 @@ app.get('/api/admin/shifts/:id', authenticateToken, requireAdmin, (req, res) => 
       FROM orders 
       WHERE created_at >= ? AND created_at <= COALESCE(?, CURRENT_TIMESTAMP)
       ORDER BY created_at DESC
-    `, [shift.opened_at, shift.closed_at], (err, orders) => {
+    `, [(shift as any).opened_at, (shift as any).closed_at], (err, orders) => {
       if (err) {
         console.error('❌ Ошибка получения заказов смены:', err);
         return res.status(500).json({ success: false, message: 'Ошибка получения заказов' });
