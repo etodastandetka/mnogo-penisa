@@ -25,13 +25,15 @@ export const Navigation: React.FC = () => {
   // Проверяем, есть ли активные заказы для показа уведомления
   useEffect(() => {
     const checkActiveOrders = async () => {
-      // Проверяем гостевые заказы из localStorage
+      // Проверяем гостевые заказы из разных источников
       const guestOrdersFromStorage = JSON.parse(localStorage.getItem('guestOrders') || '[]');
+      const guestOrdersFromZustand = JSON.parse(localStorage.getItem('mnogo-rolly-guest-orders') || '{"state":{"orders":[]}}');
       
       console.log('🔍 Проверка заказов:', {
         user: !!user,
         guestOrdersFromStore: guestOrders.length,
-        guestOrdersFromStorage: guestOrdersFromStorage.length
+        guestOrdersFromStorage: guestOrdersFromStorage.length,
+        guestOrdersFromZustand: guestOrdersFromZustand.state?.orders?.length || 0
       });
       
       if (user) {
@@ -50,9 +52,15 @@ export const Navigation: React.FC = () => {
         }
       } else {
         // Для неавторизованных пользователей проверяем гостевые заказы
-        const allGuestOrders = [...guestOrders, ...guestOrdersFromStorage];
+        const zustandOrders = guestOrdersFromZustand.state?.orders || [];
+        const allGuestOrders = [...guestOrders, ...guestOrdersFromStorage, ...zustandOrders];
         
-        console.log('👤 Гостевые заказы:', allGuestOrders);
+        console.log('👤 Все гостевые заказы:', {
+          fromStore: guestOrders,
+          fromStorage: guestOrdersFromStorage,
+          fromZustand: zustandOrders,
+          combined: allGuestOrders
+        });
         
         if (allGuestOrders.length > 0) {
           // Берем самый последний заказ

@@ -28,8 +28,16 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
 
   useEffect(() => {
     const fetchLatestOrder = async () => {
-      // Проверяем локальные заказы гостей
-      const guestOrders = JSON.parse(localStorage.getItem('guestOrders') || '[]');
+      // Проверяем гостевые заказы из разных источников
+      const guestOrdersFromStorage = JSON.parse(localStorage.getItem('guestOrders') || '[]');
+      const guestOrdersFromZustand = JSON.parse(localStorage.getItem('mnogo-rolly-guest-orders') || '{"state":{"orders":[]}}');
+      const zustandOrders = guestOrdersFromZustand.state?.orders || [];
+      
+      console.log('🔍 OrderNotification: Поиск заказов:', {
+        user: !!user,
+        fromStorage: guestOrdersFromStorage.length,
+        fromZustand: zustandOrders.length
+      });
       
       if (user) {
         // Для авторизованных пользователей
@@ -44,12 +52,21 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
         } finally {
           setLoading(false);
         }
-      } else if (guestOrders.length > 0) {
-        // Для гостевых заказов
-        const latest = guestOrders[0];
-        setLatestOrder(latest);
-        setLoading(false);
       } else {
+        // Объединяем все гостевые заказы
+        const allGuestOrders = [...guestOrdersFromStorage, ...zustandOrders];
+        
+        if (allGuestOrders.length > 0) {
+          // Берем самый последний заказ
+          const latest = allGuestOrders.sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )[0];
+          
+          console.log('✅ OrderNotification: Найден гостевой заказ:', latest);
+          setLatestOrder(latest);
+        } else {
+          console.log('❌ OrderNotification: Нет гостевых заказов');
+        }
         setLoading(false);
       }
     };
