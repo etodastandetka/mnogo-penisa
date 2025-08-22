@@ -12,6 +12,7 @@ import { PaymentQR } from '../components/PaymentQR';
 import { PaymentProofUpload } from '../components/PaymentProofUpload';
 import { formatPrice } from '../utils/format';
 import { ordersApi } from '../api/orders';
+import { getCurrentShift } from '../api/shifts';
 
 
 export const CheckoutPage: React.FC = () => {
@@ -34,6 +35,12 @@ export const CheckoutPage: React.FC = () => {
   const [showPayment, setShowPayment] = useState(false);
   const [showProofUpload, setShowProofUpload] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // Состояние для статуса смены
+  const [shiftStatus, setShiftStatus] = useState<{ isOpen: boolean; loading: boolean }>({
+    isOpen: true,
+    loading: true
+  });
 
   useEffect(() => {
     if (user) {
@@ -46,6 +53,27 @@ export const CheckoutPage: React.FC = () => {
       }));
     }
   }, [user]);
+
+  // Проверяем статус смены при загрузке страницы
+  useEffect(() => {
+    const checkShiftStatus = async () => {
+      try {
+        const response = await getCurrentShift();
+        setShiftStatus({
+          isOpen: !!response.shift,
+          loading: false
+        });
+      } catch (error) {
+        console.error('Ошибка проверки статуса смены:', error);
+        setShiftStatus({
+          isOpen: true, // По умолчанию считаем смену открытой
+          loading: false
+        });
+      }
+    };
+
+    checkShiftStatus();
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setCustomerData(prev => ({
@@ -95,6 +123,26 @@ export const CheckoutPage: React.FC = () => {
     if (!customerData.name || !customerData.phone || !customerData.address) {
       alert('Пожалуйста, заполните все обязательные поля');
       return;
+    }
+
+    // Проверяем статус смены перед созданием заказа
+    try {
+      const shiftResponse = await getCurrentShift();
+      if (!shiftResponse.shift) {
+        // Определяем время открытия следующей смены
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(9, 0, 0, 0);
+        
+        const nextShiftTime = tomorrow.toLocaleDateString('ru-RU') + ' в ' + 
+          tomorrow.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        
+        alert(`К сожалению, сейчас мы не принимаем заказы. Смена закрыта.\n\nСледующая смена: ${nextShiftTime}\n\nПожалуйста, попробуйте оформить заказ позже.`);
+        return;
+      }
+    } catch (error) {
+      console.error('Ошибка проверки статуса смены:', error);
+      // Если не удалось проверить статус смены, продолжаем создание заказа
     }
 
     try {
@@ -230,6 +278,37 @@ export const CheckoutPage: React.FC = () => {
             <Card className="shadow-soft border-0">
               <CardContent className="p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Информация для доставки</h2>
+                
+                {/* Предупреждение о закрытой смене */}
+                {!shiftStatus.loading && !shiftStatus.isOpen && (
+                  <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-shrink-0">
+                        <svg className="w-5 h-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-sm font-medium text-orange-800">
+                          Внимание! Смена закрыта
+                        </h3>
+                        <div className="mt-1 text-sm text-orange-700">
+                          <p>Сейчас мы не принимаем заказы. Смена закрыта.</p>
+                          <p className="mt-1">
+                            Следующая смена: {(() => {
+                              const tomorrow = new Date();
+                              tomorrow.setDate(tomorrow.getDate() + 1);
+                              tomorrow.setHours(9, 0, 0, 0);
+                              return tomorrow.toLocaleDateString('ru-RU') + ' в ' + 
+                                tomorrow.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                            })()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="space-y-4">
                   <Input
                     label="Имя"
@@ -400,11 +479,18 @@ export const CheckoutPage: React.FC = () => {
                     !customerData.name || 
                     !customerData.phone || 
                     !customerData.address || 
-                    loading
+                    loading ||
+                    !shiftStatus.isOpen
                   }
-                  className="w-full mt-6 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white"
+                  className={`w-full mt-6 ${
+                    !shiftStatus.isOpen 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700'
+                  } text-white`}
                 >
-                  {loading ? 'Оформление...' : 'Оформить заказ'}
+                  {loading ? 'Оформление...' : 
+                   !shiftStatus.isOpen ? 'Смена закрыта' : 'Оформить заказ'
+                  }
                 </Button>
               </CardContent>
             </Card>

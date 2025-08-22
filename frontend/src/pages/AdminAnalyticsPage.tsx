@@ -8,7 +8,12 @@ import {
   TrendingUp, 
   ShoppingCart, 
   DollarSign,
-  RefreshCw
+  RefreshCw,
+  Clock,
+  Calendar,
+  Receipt,
+  Play,
+  Square
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -22,6 +27,13 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 import { getOrders } from '../api/admin';
+import { 
+  getCurrentShift, 
+  openShift, 
+  closeShift, 
+  getShiftsHistory,
+  Shift 
+} from '../api/shifts';
 
 interface AnalyticsData {
   totalOrders: number;
@@ -40,6 +52,12 @@ export const AdminAnalyticsPage: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Состояние для смен
+  const [currentShift, setCurrentShift] = useState<Shift | null>(null);
+  const [shiftsHistory, setShiftsHistory] = useState<Shift[]>([]);
+  const [shiftLoading, setShiftLoading] = useState(false);
+  const [shiftError, setShiftError] = useState('');
 
   useEffect(() => {
     if (!user || !isAdmin) {
@@ -47,6 +65,8 @@ export const AdminAnalyticsPage: React.FC = () => {
       return;
     }
     fetchAnalytics();
+    fetchCurrentShift();
+    fetchShiftsHistory();
   }, [user, isAdmin, navigate]);
 
   const fetchAnalytics = async () => {
@@ -67,6 +87,56 @@ export const AdminAnalyticsPage: React.FC = () => {
       setError('Ошибка загрузки данных');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Функции для работы со сменами
+  const fetchCurrentShift = async () => {
+    setShiftLoading(true);
+    setShiftError('');
+    
+    try {
+      const response = await getCurrentShift();
+      setCurrentShift(response.shift);
+    } catch (error) {
+      setShiftError('Ошибка загрузки текущей смены');
+      console.error('Ошибка загрузки смены:', error);
+    } finally {
+      setShiftLoading(false);
+    }
+  };
+
+  const fetchShiftsHistory = async () => {
+    try {
+      const response = await getShiftsHistory(20);
+      setShiftsHistory(response.shifts);
+    } catch (error) {
+      console.error('Ошибка загрузки истории смен:', error);
+    }
+  };
+
+  const handleOpenShift = async () => {
+    try {
+      const response = await openShift('Новая смена');
+      setCurrentShift(response.shift);
+      await fetchShiftsHistory();
+    } catch (error) {
+      setShiftError('Ошибка открытия смены');
+      console.error('Ошибка открытия смены:', error);
+    }
+  };
+
+  const handleCloseShift = async () => {
+    if (!currentShift) return;
+    
+    try {
+      const response = await closeShift();
+      setCurrentShift(null);
+      await fetchShiftsHistory();
+      await fetchAnalytics(); // Обновляем аналитику
+    } catch (error) {
+      setShiftError('Ошибка закрытия смены');
+      console.error('Ошибка закрытия смены:', error);
     }
   };
 
@@ -135,6 +205,143 @@ export const AdminAnalyticsPage: React.FC = () => {
             <p className="text-red-600">{error}</p>
           </div>
         )}
+
+        {/* Управление сменами */}
+        <div className="mb-8">
+          <Card className="border-0 shadow-soft">
+            <CardHeader>
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                <Clock className="w-5 h-5 mr-2 text-blue-600" />
+                Управление сменами
+              </h2>
+            </CardHeader>
+            <CardContent>
+              {shiftError && (
+                <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-red-600 text-sm">{shiftError}</p>
+                </div>
+              )}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Текущая смена */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900">Текущая смена</h3>
+                  
+                  {shiftLoading ? (
+                    <div className="flex items-center justify-center p-8">
+                      <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
+                    </div>
+                  ) : currentShift ? (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-green-800">
+                          {currentShift.shift_number}
+                        </span>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Открыта
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm text-green-700">
+                        <div className="flex justify-between">
+                          <span>Открыта:</span>
+                          <span>{new Date(currentShift.opened_at).toLocaleString('ru-RU')}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Заказов:</span>
+                          <span className="font-medium">{currentShift.total_orders}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Выручка:</span>
+                          <span className="font-medium">{currentShift.total_revenue.toLocaleString()} сом</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Наличные:</span>
+                          <span>{currentShift.cash_revenue.toLocaleString()} сом</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Карта:</span>
+                          <span>{currentShift.card_revenue.toLocaleString()} сом</span>
+                        </div>
+                      </div>
+                      
+                      <Button
+                        onClick={handleCloseShift}
+                        className="w-full mt-4 bg-red-600 hover:bg-red-700"
+                      >
+                        <Square className="w-4 h-4 mr-2" />
+                        Закрыть смену
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                      <p className="text-gray-600 mb-4">Смена не открыта</p>
+                      <Button
+                        onClick={handleOpenShift}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Play className="w-4 h-4 mr-2" />
+                        Открыть смену
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* История смен */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900">История смен</h3>
+                  
+                  <div className="max-h-64 overflow-y-auto space-y-2">
+                    {shiftsHistory.slice(0, 5).map((shift) => (
+                      <div
+                        key={shift.id}
+                        className={`p-3 rounded-lg border ${
+                          shift.status === 'open' 
+                            ? 'bg-blue-50 border-blue-200' 
+                            : 'bg-gray-50 border-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-900">
+                            {shift.shift_number}
+                          </span>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            shift.status === 'open' 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {shift.status === 'open' ? 'Открыта' : 'Закрыта'}
+                          </span>
+                        </div>
+                        
+                        <div className="text-xs text-gray-600 space-y-1">
+                          <div className="flex justify-between">
+                            <span>Заказов:</span>
+                            <span>{shift.total_orders}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Выручка:</span>
+                            <span>{shift.total_revenue.toLocaleString()} сом</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Дата:</span>
+                            <span>{new Date(shift.opened_at).toLocaleDateString('ru-RU')}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {shiftsHistory.length === 0 && (
+                    <p className="text-gray-500 text-sm text-center py-4">
+                      История смен пуста
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Основные метрики */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

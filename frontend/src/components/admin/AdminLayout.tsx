@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../../store/userStore';
 import { AdminNavigation } from './AdminNavigation';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Play, Square, Clock } from 'lucide-react';
+import { getCurrentShift, openShift, closeShift, Shift } from '../../api/shifts';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -12,6 +13,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const { user, clearUser } = useUserStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentShift, setCurrentShift] = useState<Shift | null>(null);
+  const [shiftLoading, setShiftLoading] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -25,6 +28,44 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       setSidebarOpen(false);
     }, 100);
   };
+
+  // Функции для работы со сменами
+  const fetchCurrentShift = async () => {
+    setShiftLoading(true);
+    try {
+      const response = await getCurrentShift();
+      setCurrentShift(response.shift);
+    } catch (error) {
+      console.error('Ошибка загрузки текущей смены:', error);
+    } finally {
+      setShiftLoading(false);
+    }
+  };
+
+  const handleOpenShift = async () => {
+    try {
+      const response = await openShift('Новая смена');
+      setCurrentShift(response.shift);
+    } catch (error) {
+      console.error('Ошибка открытия смены:', error);
+    }
+  };
+
+  const handleCloseShift = async () => {
+    if (!currentShift) return;
+    
+    try {
+      await closeShift();
+      setCurrentShift(null);
+    } catch (error) {
+      console.error('Ошибка закрытия смены:', error);
+    }
+  };
+
+  // Загружаем текущую смену при монтировании компонента
+  useEffect(() => {
+    fetchCurrentShift();
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -71,6 +112,47 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             </div>
             
             <div className="flex items-center space-x-4">
+              {/* Статус смены */}
+              <div className="flex items-center space-x-3">
+                {shiftLoading ? (
+                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                    <Clock className="w-4 h-4 animate-pulse" />
+                    <span>Загрузка...</span>
+                  </div>
+                ) : currentShift ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 px-3 py-1.5 bg-green-100 text-green-800 rounded-lg">
+                      <Clock className="w-4 h-4" />
+                      <span className="text-sm font-medium">Смена открыта</span>
+                      <span className="text-xs text-green-600">
+                        {currentShift.total_orders} заказов
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleCloseShift}
+                      className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-1"
+                    >
+                      <Square className="w-4 h-4" />
+                      <span>Закрыть</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 px-3 py-1.5 bg-red-100 text-red-800 rounded-lg">
+                      <Clock className="w-4 h-4" />
+                      <span className="text-sm font-medium">Смена закрыта</span>
+                    </div>
+                    <button
+                      onClick={handleOpenShift}
+                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-2"
+                    >
+                      <Play className="w-4 h-4" />
+                      <span>Открыть</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+              
               <div className="text-sm text-gray-700">
                 Добро пожаловать, <span className="font-medium text-indigo-600">{user?.name || 'Администратор'}</span>
               </div>
