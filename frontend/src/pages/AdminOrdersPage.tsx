@@ -578,20 +578,7 @@ export const AdminOrdersPage: React.FC = () => {
                             <p className="text-sm text-gray-600">
                               <strong>Дата:</strong> {new Date(order.createdAt).toLocaleDateString('ru-RU')} {new Date(order.createdAt).toLocaleTimeString('ru-RU')}
                             </p>
-                            {/* Информация о чеке об оплате */}
-                            {order.paymentProof && order.paymentProof.trim() !== '' && order.paymentProof !== 'null' && (
-                              <div className="mt-2 flex items-center space-x-2">
-                                <Receipt className="w-4 h-4 text-green-600" />
-                                <span className="text-sm text-green-600 font-medium">
-                                  Чек об оплате прикреплен
-                                </span>
-                                {order.paymentProofDate && (
-                                  <span className="text-xs text-gray-500">
-                                    ({new Date(order.paymentProofDate).toLocaleDateString('ru-RU')})
-                                  </span>
-                                )}
-                              </div>
-                            )}
+
                           </div>
                         </div>
                         
@@ -671,50 +658,23 @@ export const AdminOrdersPage: React.FC = () => {
                           >
                             Печать
                           </Button>
-                          {/* Кнопка просмотра чека об оплате */}
+                          {/* Ссылка на чек об оплате */}
                           {order.paymentProof && order.paymentProof.trim() !== '' && order.paymentProof !== 'null' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
+                            <a
+                              href={order.paymentProof}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-blue-600 hover:text-blue-800 underline"
                               onClick={() => {
                                 console.log('Открываем чек для заказа:', {
                                   orderId: order.id,
                                   orderNumber: order.orderNumber,
-                                  paymentProof: order.paymentProof,
-                                  paymentProofType: order.paymentProof?.startsWith('data:image') ? 'base64' : 'url'
+                                  paymentProof: order.paymentProof
                                 });
-                                
-                                if (order.paymentProof?.startsWith('data:image')) {
-                                  // Если это base64 изображение, открываем в новом окне
-                                  const newWindow = window.open();
-                                  if (newWindow) {
-                                    newWindow.document.write(`
-                                      <html>
-                                        <head><title>Чек об оплате - Заказ #${order.orderNumber}</title></head>
-                                        <body style="margin: 0; padding: 20px; background: #f5f5f5;">
-                                          <div style="max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                            <h2 style="color: #333; margin-bottom: 20px;">Чек об оплате - Заказ #${order.orderNumber}</h2>
-                                            <img src="${order.paymentProof}" style="max-width: 100%; height: auto; border-radius: 4px;" alt="Чек об оплате" />
-                                            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; color: #666;">
-                                              <p><strong>Клиент:</strong> ${order.customerName}</p>
-                                              <p><strong>Дата:</strong> ${order.paymentProofDate ? new Date(order.paymentProofDate).toLocaleDateString('ru-RU') : 'Не указана'}</p>
-                                            </div>
-                                          </div>
-                                        </body>
-                                      </html>
-                                    `);
-                                    newWindow.document.close();
-                                  }
-                                } else {
-                                  // Если это URL, открываем как есть
-                                  window.open(order.paymentProof, '_blank');
-                                }
                               }}
-                              className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
                             >
-                              <Receipt className="w-4 h-4 mr-1" />
-                              Чек
-                            </Button>
+                              Чек об оплате
+                            </a>
                           )}
                         </div>
                       </div>
