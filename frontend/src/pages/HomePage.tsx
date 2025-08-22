@@ -188,8 +188,8 @@ export const MenuPage: React.FC = () => {
             )}
           </div>
 
-          {/* Правая колонка - фиксированная корзина */}
-          <div className="hidden lg:block">
+          {/* Правая колонка - sticky корзина */}
+          <div className="hidden lg:block self-start">
             <FixedCart />
           </div>
         </div>

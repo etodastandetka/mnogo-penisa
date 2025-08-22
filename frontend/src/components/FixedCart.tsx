@@ -13,7 +13,7 @@ export const FixedCart: React.FC = () => {
 
   if (items.length === 0) {
     return (
-      <div className="w-full lg:w-80 h-fit lg:fixed lg:right-8 lg:top-24 lg:z-50">
+      <div className="w-full lg:w-80 h-fit lg:sticky lg:top-4">
         <Card className="border-0 shadow-none bg-transparent">
           <CardContent className="p-4 lg:p-6 text-center">
             <div className="w-12 h-12 lg:w-16 lg:h-16 mx-auto mb-3 lg:mb-4 bg-gray-100 rounded-full flex items-center justify-center">
@@ -28,7 +28,7 @@ export const FixedCart: React.FC = () => {
   }
 
   return (
-    <div className="w-full lg:w-80 h-fit lg:fixed lg:right-8 lg:top-24 lg:z-50">
+    <div className="w-full lg:w-80 h-fit lg:sticky lg:top-4">
       <Card className="border-0 shadow-none bg-transparent">
         <CardContent className="p-0">
           <div className="p-3 lg:p-4 border-b border-gray-200">
