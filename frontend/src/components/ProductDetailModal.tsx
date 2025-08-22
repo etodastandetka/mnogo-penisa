@@ -25,30 +25,28 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => Math.max(1, prev - 1));
 
-  const getImageUrl = (imageUrl: string | null | undefined): string => {
-    if (!imageUrl) {
-      return '';
+  const getImageUrl = (): string | null => {
+    let imageUrl = '';
+    
+    // Приоритет: мобильное фото везде, затем основное как fallback
+    if (product.mobile_image_url && product.mobile_image_url !== 'null' && product.mobile_image_url !== '') {
+      imageUrl = product.mobile_image_url;
+    } else if (product.image_url && product.image_url !== 'null' && product.image_url !== '') {
+      imageUrl = product.image_url;
     }
     
-    // Если это внешний URL, возвращаем как есть
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      return imageUrl;
+    // Если есть изображение - используем его
+    if (imageUrl && imageUrl.trim() && imageUrl !== 'null') {
+      // Проверяем все типы URL
+      if (imageUrl.startsWith('http') || imageUrl.startsWith('/') || imageUrl.startsWith('data:image/')) {
+        return imageUrl;
+      }
     }
     
-    // Если это локальный файл, добавляем базовый URL
-    if (imageUrl.startsWith('/uploads/')) {
-      return imageUrl; // Nginx отдаст файл
-    }
-    
-    // Если это base64, возвращаем как есть
-    if (imageUrl.startsWith('data:image/')) {
-      return imageUrl;
-    }
-    
-    return '';
+    return null; // Нет изображения - покажем эмодзи
   };
 
-  const imageUrl = getImageUrl(product.image_url || product.mobile_image_url);
+  const imageUrl = getImageUrl();
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -85,7 +83,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             {/* Fallback если нет изображения */}
             <div className={`w-full h-full flex items-center justify-center bg-gray-100 ${imageUrl ? 'hidden' : ''}`}>
               <div className="text-center text-gray-400">
-                <div className="text-4xl mb-2">📷</div>
+                <div className="text-6xl mb-2">{getCategoryEmoji(product.category)}</div>
                 <p className="text-sm">Нет фото</p>
               </div>
             </div>
