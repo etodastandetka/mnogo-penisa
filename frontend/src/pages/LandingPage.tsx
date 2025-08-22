@@ -132,11 +132,11 @@ export const LandingPage: React.FC = () => {
               </Button>
               <Button 
                 variant="outline"
-                onClick={() => window.location.href = 'tel:+996555123456'}
-                  className="bg-white/10 border-2 border-white/30 text-white hover:bg-white hover:text-red-600 font-bold text-base sm:text-lg px-6 sm:px-10 py-3 sm:py-5 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transform hover:scale-105 hover:-translate-y-1"
+                onClick={() => window.location.href = 'tel:+996709611043'}
+                  className="bg-white/10 border-2 border-white/30 text-white hover:bg-white hover:text-orange-600 font-bold text-base sm:text-lg px-6 sm:px-10 py-3 sm:py-5 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transform hover:scale-105 hover:-translate-y-1"
               >
-                <Phone className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
-                  <span className="hidden sm:inline">+996 555 123 456</span>
+                <Phone className="w-5 h-5 sm:w-6 sm:w-6 mr-2 sm:mr-3" />
+                  <span className="hidden sm:inline">+996 (709) 611-043</span>
                   <span className="sm:hidden">Позвонить</span>
               </Button>
               </div>
@@ -396,11 +396,11 @@ export const LandingPage: React.FC = () => {
             </Button>
             <Button 
               variant="outline"
-              onClick={() => window.location.href = 'tel:+996555123456'}
-              className="bg-white/10 border-2 border-white/40 text-white hover:bg-white hover:text-red-600 font-bold text-base sm:text-xl px-8 sm:px-12 py-4 sm:py-6 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.4)] transform hover:scale-110 hover:-translate-y-2"
+              onClick={() => window.location.href = 'tel:+996709611043'}
+              className="bg-white/10 border-2 border-white/40 text-white hover:bg-white hover:text-orange-600 font-bold text-base sm:text-xl px-8 sm:px-12 py-4 sm:py-6 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_25px_60px_rg-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.4)] transform hover:scale-110 hover:-translate-y-2"
             >
               <Phone className="w-5 h-5 sm:w-7 sm:h-7 mr-2 sm:mr-3" />
-              <span className="hidden sm:inline">+996 555 123 456</span>
+              <span className="hidden sm:inline">+996 (709) 611-043</span>
               <span className="sm:hidden">Позвонить</span>
             </Button>
           </div>
@@ -503,12 +503,12 @@ export const LandingPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                    <Phone className="w-5 h-5 text-red-600" />
+                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                    <Phone className="w-5 h-5 text-orange-600" />
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900 text-sm">Телефон для заказа</p>
-                    <p className="text-red-600 font-bold text-lg">+996 555 123 456</p>
+                    <p className="text-orange-600 font-bold text-lg">+996 (709) 611-043</p>
                   </div>
                 </div>
                 
@@ -523,8 +523,8 @@ export const LandingPage: React.FC = () => {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <Truck className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                    <Truck className="w-5 h-5 text-orange-600" />
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900 text-sm">Доставка</p>
@@ -536,7 +536,7 @@ export const LandingPage: React.FC = () => {
               <div className="text-center">
                 <Button 
                   onClick={() => navigate('/contact')}
-                  className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-semibold text-lg px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold text-lg px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                 >
                   <Phone className="w-5 h-5 mr-2" />
                   Заказать для мероприятия
@@ -560,15 +560,15 @@ export const LandingPage: React.FC = () => {
                 Лучшие роллы с доставкой по всему городу. Свежие ингредиенты и оригинальные рецепты.
               </p>
               <div className="flex space-x-4">
-                <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center">
                   <Phone className="w-5 h-5" />
                 </div>
-                <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <button 
                   onClick={() => window.open('https://www.instagram.com/mnogo_rolly', '_blank')}
-                  className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
+                  className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center hover:bg-orange-700 transition-colors"
                 >
                   <Instagram className="w-5 h-5" />
                 </button>
@@ -600,7 +600,7 @@ export const LandingPage: React.FC = () => {
               <div className="space-y-2 text-gray-400">
                 <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4" />
-                  <span>+996 555 123 456</span>
+                  <span>+996 (709) 611-043</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4" />

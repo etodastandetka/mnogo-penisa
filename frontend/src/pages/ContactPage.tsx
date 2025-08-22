@@ -16,14 +16,14 @@ export const ContactPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-red-500 via-orange-500 to-yellow-500 text-white overflow-hidden">
+      <div className="relative bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 text-white overflow-hidden">
         {/* Фоновые элементы как на главной */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-red-500/90 via-orange-500/90 to-yellow-500/90"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/90 via-orange-600/90 to-orange-700/90"></div>
           <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-10 left-10 w-32 h-32 bg-red-300 rounded-full blur-2xl animate-pulse"></div>
-            <div className="absolute top-20 right-20 w-24 h-24 bg-orange-300 rounded-full blur-xl animate-pulse" style={{animationDelay: '1s'}}></div>
-            <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-yellow-300 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
+            <div className="absolute top-10 left-10 w-32 h-32 bg-orange-300 rounded-full blur-2xl animate-pulse"></div>
+            <div className="absolute top-20 right-20 w-24 h-24 bg-orange-400 rounded-full blur-xl animate-pulse" style={{animationDelay: '1s'}}></div>
+            <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-orange-500 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
           </div>
           {/* Блики */}
           <div className="absolute top-0 left-0 w-full h-full">
@@ -68,9 +68,9 @@ export const ContactPage: React.FC = () => {
               <Card className="border-0 shadow-soft hover:shadow-medium transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Phone className="w-6 h-6 text-red-600" />
-                    </div>
+                                      <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-6 h-6 text-orange-600" />
+                  </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">Телефон</h3>
                       <p className="text-gray-600 mb-1">+996 (709) 611-043</p>
@@ -85,9 +85,9 @@ export const ContactPage: React.FC = () => {
               <Card className="border-0 shadow-soft hover:shadow-medium transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-6 h-6 text-green-600" />
-                    </div>
+                                      <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-6 h-6 text-orange-600" />
+                  </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">Адрес</h3>
                       <p className="text-gray-600 mb-1">ул. Ахунбаева, 182 Б</p>
@@ -100,9 +100,9 @@ export const ContactPage: React.FC = () => {
               <Card className="border-0 shadow-soft hover:shadow-medium transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Clock className="w-6 h-6 text-blue-600" />
-                    </div>
+                                      <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-6 h-6 text-orange-600" />
+                  </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">Время работы</h3>
                       <p className="text-gray-600 mb-1">Ежедневно: 10:00 - 23:00</p>
@@ -120,7 +120,7 @@ export const ContactPage: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-12 h-12 p-0 rounded-xl hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                  className="w-12 h-12 p-0 rounded-xl hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                   onClick={() => window.open('https://www.instagram.com/mnogo_rolly', '_blank')}
                 >
                   <Instagram className="w-5 h-5" />
@@ -135,7 +135,7 @@ export const ContactPage: React.FC = () => {
         {/* FAQ секция */}
         <div className="mt-16">
           <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4 bg-red-100 text-red-700 border-red-200">
+            <Badge variant="secondary" className="mb-4 bg-orange-100 text-orange-700 border-orange-200">
               ❓ Часто задаваемые вопросы
             </Badge>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Часто задаваемые вопросы</h2>
@@ -162,7 +162,7 @@ export const ContactPage: React.FC = () => {
                   Есть ли минимальная сумма заказа?
                 </h3>
                 <p className="text-gray-600">
-                  Минимальная сумма заказа составляет 500 рублей. При заказе на меньшую сумму взимается дополнительная плата за доставку.
+                  Минимальная сумма заказа составляет 5000 сом. При заказе на меньшую сумму взимается дополнительная плата за доставку.
                 </p>
               </CardContent>
             </Card>
@@ -173,7 +173,7 @@ export const ContactPage: React.FC = () => {
                   Какие способы оплаты вы принимаете?
                 </h3>
                 <p className="text-gray-600">
-                  Мы принимаем наличные, банковские карты и электронные платежи. Оплата производится при получении заказа.
+                  Мы принимаем онлайн оплату через банки и наличные. Заказ начнет готовиться как только деньги получим.
                 </p>
               </CardContent>
             </Card>
