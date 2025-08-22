@@ -442,7 +442,7 @@ export const LandingPage: React.FC = () => {
                 Детские праздники
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed text-center mb-4">
-                Вкусные роллы и суши для детских дней рождения, выпускных и других праздников
+                Вкусные роллы и пицца для детских дней рождения, выпускных и других праздников
               </p>
               <Button 
                 onClick={() => navigate('/contact')}
@@ -488,7 +488,7 @@ export const LandingPage: React.FC = () => {
                 Свадьбы и торжества
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed text-center mb-4">
-                Элегантные наборы суши и роллов для свадеб, юбилеев и других торжественных событий
+                Элегантные наборы роллов и пиццы для свадеб, юбилеев и других торжественных событий
               </p>
               <Button 
                 onClick={() => navigate('/contact')}
@@ -590,7 +590,7 @@ export const LandingPage: React.FC = () => {
               <ul className="space-y-2 text-gray-400">
                 <li><a href="/menu" className="hover:text-white transition-colors">Роллы</a></li>
                 <li><a href="/menu" className="hover:text-white transition-colors">Сеты</a></li>
-                <li><a href="/menu" className="hover:text-white transition-colors">Суши</a></li>
+                <li><a href="/menu" className="hover:text-white transition-colors">Роллы</a></li>
                 <li><a href="/menu" className="hover:text-white transition-colors">Напитки</a></li>
               </ul>
             </div>

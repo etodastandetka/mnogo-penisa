@@ -1,7 +1,7 @@
 import { Product, ProductCategory } from '../types';
 
 export const mockProducts: Product[] = [
-  // Суши и роллы
+  // Роллы и пицца
   {
     id: '1',
     name: 'Филадельфия',
@@ -43,7 +43,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: '5',
-    name: 'Суши с лососем',
+    name: 'Ролл с лососем',
     description: 'Свежий лосось, рис, нори',
     price: 120,
     image: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop',
@@ -56,7 +56,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: '6',
-    name: 'Суши с тунцом',
+    name: 'Ролл с тунцом',
     description: 'Свежий тунец, рис, нори',
     price: 140,
     image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=300&fit=crop',
@@ -84,7 +84,7 @@ export const mockProducts: Product[] = [
   {
     id: '4',
     name: 'Сет "Для двоих"',
-    description: 'Филадельфия, Калифорния, Дракон, 2 суши с лососем',
+    description: 'Филадельфия, Калифорния, Дракон, 2 ролла с лососем',
     price: 2200,
     image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=300&fit=crop',
     category: ProductCategory.SETS,
@@ -97,7 +97,7 @@ export const mockProducts: Product[] = [
   {
     id: '10',
     name: 'Сет "Семейный"',
-    description: 'Филадельфия, Калифорния, Дракон, Спайси ролл, 4 суши с лососем',
+    description: 'Филадельфия, Калифорния, Дракон, Спайси ролл, 4 ролла с лососем',
     price: 3200,
     image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=300&fit=crop',
     category: ProductCategory.SETS,

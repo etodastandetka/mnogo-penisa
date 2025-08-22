@@ -213,7 +213,7 @@ export const AdminOrdersPage: React.FC = () => {
         <body>
           <div class="header">
             <div class="company-name">MNOGO ROLLY</div>
-            <div class="company-info">Доставка суши и роллов</div>
+            <div class="company-info">Доставка роллов и пиццы</div>
             <div class="company-info">ИП: Султанкулов А.Б.</div>
             <div class="company-info">ИНН: 20504198701431</div>
             <div class="company-info">Адрес: г. Бишкек, ул. Ахунбаева, 182 Б</div>
