@@ -219,11 +219,11 @@ export const ProfilePage: React.FC = () => {
                       </Button>
                     </div>
                   ) : (
-                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
                       {orders.map((order) => (
                         <div 
                           key={order.id} 
-                          className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                          className="border rounded-lg p-3 hover:bg-gray-50 transition-colors"
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div>
@@ -253,7 +253,7 @@ export const ProfilePage: React.FC = () => {
                             </div>
                           </div>
                           
-                          <div className="text-sm text-gray-600 mb-3">
+                          <div className="text-sm text-gray-600 mb-2">
                             <p>Способ оплаты: {order.paymentMethod}</p>
                             {order.deliveryAddress && (
                               <p>Адрес: {order.deliveryAddress}</p>

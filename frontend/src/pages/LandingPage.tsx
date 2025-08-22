@@ -90,13 +90,23 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-red-500 via-orange-500 to-yellow-500 text-white overflow-hidden">
+      <section className="relative bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 text-white overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-red-500/90 via-orange-500/90 to-yellow-500/90"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/90 via-orange-600/90 to-orange-700/90"></div>
           <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-10 left-10 w-32 h-32 bg-red-300 rounded-full blur-2xl animate-pulse"></div>
-            <div className="absolute top-20 right-20 w-24 h-24 bg-orange-300 rounded-full blur-xl animate-pulse" style={{animationDelay: '1s'}}></div>
-            <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-yellow-300 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
+            <div className="absolute top-10 left-10 w-32 h-32 bg-orange-300 rounded-full blur-2xl animate-pulse"></div>
+            <div className="absolute top-20 right-20 w-24 h-24 bg-orange-400 rounded-full blur-xl animate-pulse" style={{animationDelay: '1s'}}></div>
+            <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-orange-500 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
+          </div>
+          
+          {/* Дополнительные блики */}
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-1/4 right-1/4 w-6 h-6 bg-white/40 rounded-full opacity-50 animate-pulse" style={{animationDelay: '0.5s'}}></div>
+            <div className="absolute bottom-1/3 right-1/3 w-5 h-5 bg-white/30 rounded-full opacity-60 animate-pulse" style={{animationDelay: '1.5s'}}></div>
+            <div className="absolute top-1/2 left-1/4 w-3 h-3 bg-white/50 rounded-full opacity-70 animate-ping" style={{animationDelay: '0.8s'}}></div>
+            <div className="absolute top-3/4 right-1/2 w-4 h-4 bg-white/40 rounded-full opacity-60 animate-pulse" style={{animationDelay: '2.5s'}}></div>
+            <div className="absolute top-1/6 left-1/2 w-4 h-4 bg-white/30 rounded-full opacity-50 animate-ping" style={{animationDelay: '1.2s'}}></div>
+            <div className="absolute bottom-1/4 left-1/3 w-5 h-5 bg-white/40 rounded-full opacity-60 animate-pulse" style={{animationDelay: '0.3s'}}></div>
           </div>
         </div>
 
@@ -125,7 +135,7 @@ export const LandingPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
               <Button 
                 onClick={() => navigate('/menu')}
-                  className="bg-white text-red-600 hover:bg-gray-100 font-bold text-base sm:text-lg px-6 sm:px-10 py-3 sm:py-5 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 border-2 border-white/20"
+                  className="bg-white text-orange-600 hover:bg-gray-100 font-bold text-base sm:text-lg px-6 sm:px-10 py-3 sm:py-5 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 border-2 border-white/20"
               >
                 <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                 Заказать сейчас
@@ -136,7 +146,7 @@ export const LandingPage: React.FC = () => {
                   className="bg-white/10 border-2 border-white/30 text-white hover:bg-white hover:text-orange-600 font-bold text-base sm:text-lg px-6 sm:px-10 py-3 sm:py-5 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transform hover:scale-105 hover:-translate-y-1"
               >
                 <Phone className="w-5 h-5 sm:w-6 sm:w-6 mr-2 sm:mr-3" />
-                  <span className="hidden sm:inline">+996 (709) 611-043</span>
+                  <span className="hidden sm:inline">Связаться с нами</span>
                   <span className="sm:hidden">Позвонить</span>
               </Button>
               </div>
@@ -368,14 +378,14 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-16 bg-gradient-to-br from-red-500 via-orange-500 to-yellow-500 text-white overflow-hidden">
+      <section className="relative py-16 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 text-white overflow-hidden">
         {/* Фоновые элементы */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-red-500/90 via-orange-500/90 to-yellow-500/90"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/90 via-orange-600/90 to-orange-700/90"></div>
           <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-10 left-10 w-32 h-32 bg-red-300 rounded-full blur-2xl animate-pulse"></div>
-            <div className="absolute top-20 right-20 w-24 h-24 bg-orange-300 rounded-full blur-xl animate-pulse" style={{animationDelay: '1s'}}></div>
-            <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-yellow-300 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
+            <div className="absolute top-10 left-10 w-32 h-32 bg-orange-300 rounded-full blur-2xl animate-pulse"></div>
+            <div className="absolute top-20 right-20 w-24 h-24 bg-orange-400 rounded-full blur-xl animate-pulse" style={{animationDelay: '1s'}}></div>
+            <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-orange-500 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
           </div>
         </div>
         
@@ -389,7 +399,7 @@ export const LandingPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
             <Button 
               onClick={() => navigate('/menu')}
-              className="bg-white text-red-600 hover:bg-gray-100 font-bold text-base sm:text-xl px-8 sm:px-12 py-4 sm:py-6 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.4)] transition-all duration-300 transform hover:scale-110 hover:-translate-y-2 border-2 border-white/20"
+              className="bg-white text-orange-600 hover:bg-gray-100 font-bold text-base sm:text-xl px-8 sm:px-12 py-4 sm:py-6 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.4)] transition-all duration-300 transform hover:scale-110 hover:-translate-y-2 border-2 border-white/20"
             >
               <ShoppingCart className="w-5 h-5 sm:w-7 sm:h-7 mr-2 sm:mr-3" />
               Заказать сейчас
@@ -400,7 +410,7 @@ export const LandingPage: React.FC = () => {
               className="bg-white/10 border-2 border-white/40 text-white hover:bg-white hover:text-orange-600 font-bold text-base sm:text-xl px-8 sm:px-12 py-4 sm:py-6 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_25px_60px_rg-2xl hover:shadow-[0_25px_60px_rgba(0,0,0,0.4)] transform hover:scale-110 hover:-translate-y-2"
             >
               <Phone className="w-5 h-5 sm:w-7 sm:h-7 mr-2 sm:mr-3" />
-              <span className="hidden sm:inline">+996 (709) 611-043</span>
+              <span className="hidden sm:inline">Связаться с нами</span>
               <span className="sm:hidden">Позвонить</span>
             </Button>
           </div>
@@ -436,7 +446,7 @@ export const LandingPage: React.FC = () => {
               </p>
               <Button 
                 onClick={() => navigate('/contact')}
-                className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-medium py-2 rounded-lg transition-all duration-300"
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium py-2 rounded-lg transition-all duration-300"
               >
                 <Phone className="w-4 h-4 mr-2" />
                 Связаться с нами
