@@ -28,6 +28,12 @@ export const Navigation: React.FC = () => {
       // Проверяем гостевые заказы из localStorage
       const guestOrdersFromStorage = JSON.parse(localStorage.getItem('guestOrders') || '[]');
       
+      console.log('🔍 Проверка заказов:', {
+        user: !!user,
+        guestOrdersFromStore: guestOrders.length,
+        guestOrdersFromStorage: guestOrdersFromStorage.length
+      });
+      
       if (user) {
         try {
           const orders = await ordersApi.getUserOrders();
@@ -36,19 +42,31 @@ export const Navigation: React.FC = () => {
           if (orders.length > 0) {
             const latestOrder = orders[0];
             const hasActiveOrder = latestOrder.status !== 'delivered' && latestOrder.status !== 'cancelled';
+            console.log('✅ Авторизованный пользователь, активный заказ:', hasActiveOrder);
             setShowOrderNotification(hasActiveOrder);
           }
         } catch (error) {
           console.error('Ошибка получения заказов:', error);
         }
-      } else if (guestOrdersFromStorage.length > 0) {
-        const latestOrder = guestOrdersFromStorage[0];
-        const hasActiveOrder = latestOrder.status !== 'delivered' && latestOrder.status !== 'cancelled';
-        setShowOrderNotification(hasActiveOrder);
-      } else if (guestOrders.length > 0) {
-        const latestOrder = guestOrders[0];
-        const hasActiveOrder = latestOrder.status !== 'delivered' && latestOrder.status !== 'cancelled';
-        setShowOrderNotification(hasActiveOrder);
+      } else {
+        // Для неавторизованных пользователей проверяем гостевые заказы
+        const allGuestOrders = [...guestOrders, ...guestOrdersFromStorage];
+        
+        console.log('👤 Гостевые заказы:', allGuestOrders);
+        
+        if (allGuestOrders.length > 0) {
+          // Берем самый последний заказ
+          const latestOrder = allGuestOrders.sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )[0];
+          
+          const hasActiveOrder = latestOrder.status !== 'delivered' && latestOrder.status !== 'cancelled';
+          console.log('✅ Гостевой заказ, активный:', hasActiveOrder, latestOrder);
+          setShowOrderNotification(hasActiveOrder);
+        } else {
+          console.log('❌ Нет гостевых заказов');
+          setShowOrderNotification(false);
+        }
       }
     };
 

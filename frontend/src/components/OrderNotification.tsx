@@ -170,7 +170,7 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
         </div>
         <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
           <button
-            onClick={() => navigate('/profile')}
+            onClick={() => user ? navigate('/profile') : navigate('/')}
             className="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium transition-colors px-1 sm:px-2 py-1"
           >
             <span className="hidden sm:inline">Подробнее</span>
