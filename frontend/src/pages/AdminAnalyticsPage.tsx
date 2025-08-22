@@ -13,7 +13,8 @@ import {
   Calendar,
   Receipt,
   Play,
-  Square
+  Square,
+  BarChart3
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -173,120 +174,86 @@ export const AdminAnalyticsPage: React.FC = () => {
 
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Текущая смена */}
+                {/* Статистика за сегодня */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900">Текущая смена</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Статистика за сегодня</h3>
                   
-                  {shiftLoading ? (
+                  {statsLoading ? (
                     <div className="flex items-center justify-center p-8">
                       <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
                     </div>
-                  ) : currentShift ? (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  ) : todayStats ? (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-green-800">
-                          {currentShift.shift_number}
+                        <span className="text-sm font-medium text-blue-800">
+                          {todayStats.date}
                         </span>
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Открыта
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Сегодня
                         </span>
                       </div>
                       
-                      <div className="space-y-2 text-sm text-green-700">
-                        <div className="flex justify-between">
-                          <span>Открыта:</span>
-                          <span>{new Date(currentShift.opened_at).toLocaleString('ru-RU')}</span>
-                        </div>
+                      <div className="space-y-2 text-sm text-blue-700">
                         <div className="flex justify-between">
                           <span>Заказов:</span>
-                          <span className="font-medium">{currentShift.total_orders}</span>
+                          <span className="font-medium">{todayStats.total_orders}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Выручка:</span>
-                          <span className="font-medium">{currentShift.total_revenue.toLocaleString()} сом</span>
+                          <span>Общая выручка:</span>
+                          <span className="font-medium">{todayStats.total_revenue.toLocaleString()} сом</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Наличные:</span>
-                          <span>{currentShift.cash_revenue.toLocaleString()} сом</span>
+                          <span>{todayStats.cash_revenue.toLocaleString()} сом</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Карта:</span>
-                          <span>{currentShift.card_revenue.toLocaleString()} сом</span>
+                          <span>{todayStats.card_revenue.toLocaleString()} сом</span>
                         </div>
                       </div>
                       
                       <Button
-                        onClick={handleCloseShift}
-                        className="w-full mt-4 bg-red-600 hover:bg-red-700"
+                        onClick={fetchTodayStats}
+                        className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
                       >
-                        <Square className="w-4 h-4 mr-2" />
-                        Закрыть смену
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Обновить статистику
                       </Button>
                     </div>
                   ) : (
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                      <p className="text-gray-600 mb-4">Смена не открыта</p>
+                      <p className="text-gray-600 mb-4">Статистика недоступна</p>
                       <Button
-                        onClick={handleOpenShift}
-                        className="bg-green-600 hover:bg-green-700"
+                        onClick={fetchTodayStats}
+                        className="bg-blue-600 hover:bg-blue-700"
                       >
-                        <Play className="w-4 h-4 mr-2" />
-                        Открыть смену
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Загрузить статистику
                       </Button>
                     </div>
                   )}
                 </div>
 
-                {/* История смен */}
+                {/* Информация */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900">История смен</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Информация</h3>
                   
-                  <div className="max-h-64 overflow-y-auto space-y-2">
-                    {shiftsHistory.slice(0, 5).map((shift) => (
-                      <div
-                        key={shift.id}
-                        className={`p-3 rounded-lg border ${
-                          shift.status === 'open' 
-                            ? 'bg-blue-50 border-blue-200' 
-                            : 'bg-gray-50 border-gray-200'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-900">
-                            {shift.shift_number}
-                          </span>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            shift.status === 'open' 
-                              ? 'bg-blue-100 text-blue-800' 
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {shift.status === 'open' ? 'Открыта' : 'Закрыта'}
-                          </span>
-                        </div>
-                        
-                        <div className="text-xs text-gray-600 space-y-1">
-                          <div className="flex justify-between">
-                            <span>Заказов:</span>
-                            <span>{shift.total_orders}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Выручка:</span>
-                            <span>{shift.total_revenue.toLocaleString()} сом</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Дата:</span>
-                            <span>{new Date(shift.opened_at).toLocaleDateString('ru-RU')}</span>
-                          </div>
-                        </div>
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div className="space-y-3 text-sm text-gray-700">
+                      <div className="flex items-center space-x-2">
+                        <BarChart3 className="w-4 h-4 text-blue-600" />
+                        <span>Статистика обновляется автоматически</span>
                       </div>
-                    ))}
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="w-4 h-4 text-green-600" />
+                        <span>Данные за текущий день</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RefreshCw className="w-4 h-4 text-orange-600" />
+                        <span>Нажмите "Обновить" для актуальных данных</span>
+                      </div>
+                    </div>
                   </div>
-                  
-                  {shiftsHistory.length === 0 && (
-                    <p className="text-gray-500 text-sm text-center py-4">
-                      История смен пуста
-                    </p>
-                  )}
                 </div>
               </div>
             </CardContent>
