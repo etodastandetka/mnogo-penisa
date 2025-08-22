@@ -14,7 +14,7 @@ export const FixedCart: React.FC = () => {
   if (items.length === 0) {
     return (
       <div className="w-full lg:w-80 h-fit lg:fixed lg:right-8 lg:top-24 lg:z-50">
-        <Card className="border-0 shadow-xl bg-white/95 backdrop-blur-sm rounded-xl">
+        <Card className="border-0 shadow-none bg-transparent">
           <CardContent className="p-4 lg:p-6 text-center">
             <div className="w-12 h-12 lg:w-16 lg:h-16 mx-auto mb-3 lg:mb-4 bg-gray-100 rounded-full flex items-center justify-center">
               <ShoppingCart className="w-6 h-6 lg:w-8 lg:h-8 text-gray-400" />
@@ -29,9 +29,9 @@ export const FixedCart: React.FC = () => {
 
   return (
     <div className="w-full lg:w-80 h-fit lg:fixed lg:right-8 lg:top-24 lg:z-50">
-      <Card className="border-0 shadow-xl bg-white/95 backdrop-blur-sm rounded-xl">
+      <Card className="border-0 shadow-none bg-transparent">
         <CardContent className="p-0">
-          <div className="p-3 lg:p-4 border-b border-gray-100 bg-gradient-to-r from-orange-50 to-red-50">
+          <div className="p-3 lg:p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-base lg:text-lg font-semibold text-gray-900">Корзина</h2>
               <Badge variant="primary" className="bg-orange-600 text-white text-xs">
@@ -42,7 +42,7 @@ export const FixedCart: React.FC = () => {
 
           <div className="max-h-64 lg:max-h-96 overflow-y-auto">
             {items.map((item) => (
-              <div key={item.product.id} className="p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
+                             <div key={item.product.id} className="p-3 border-b border-gray-200 last:border-b-0">
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0">
                     <img
@@ -95,7 +95,7 @@ export const FixedCart: React.FC = () => {
           </div>
         </CardContent>
 
-        <CardFooter className="flex flex-col gap-2 lg:gap-3 bg-gradient-to-r from-orange-50 to-red-50 p-3 lg:p-4">
+        <CardFooter className="flex flex-col gap-2 lg:gap-3 p-3 lg:p-4">
           <div className="flex items-center justify-between w-full">
             <span className="text-base lg:text-lg font-semibold text-gray-900">Итого:</span>
             <span className="text-xl lg:text-2xl font-bold text-orange-600">
