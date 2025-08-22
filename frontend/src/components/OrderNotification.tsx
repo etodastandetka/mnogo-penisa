@@ -28,20 +28,28 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
 
   useEffect(() => {
     const fetchLatestOrder = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const orders = await ordersApi.getUserOrders();
-        if (orders && orders.length > 0) {
-          const latest = orders[0];
-          setLatestOrder(latest);
+      // Проверяем локальные заказы гостей
+      const guestOrders = JSON.parse(localStorage.getItem('guestOrders') || '[]');
+      
+      if (user) {
+        // Для авторизованных пользователей
+        try {
+          const orders = await ordersApi.getUserOrders();
+          if (orders && orders.length > 0) {
+            const latest = orders[0];
+            setLatestOrder(latest);
+          }
+        } catch (error) {
+          console.error('Ошибка получения заказов:', error);
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error('Ошибка получения заказов:', error);
-      } finally {
+      } else if (guestOrders.length > 0) {
+        // Для гостевых заказов
+        const latest = guestOrders[0];
+        setLatestOrder(latest);
+        setLoading(false);
+      } else {
         setLoading(false);
       }
     };
@@ -130,25 +138,25 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between p-3 sm:p-4">
-        <div className="flex items-center space-x-3 flex-1 min-w-0">
+    <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm safe-area-inset-top">
+      <div className="flex items-center justify-between p-3 sm:p-4 max-w-full">
+        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
           <div className="flex-shrink-0">
-            <Package className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
+            <Package className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-red-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2 mb-1">
+            <div className="flex items-center space-x-1 sm:space-x-2 mb-1">
               <span className="text-xs sm:text-sm font-medium text-gray-900 truncate">
                 Заказ #{latestOrder.orderNumber}
               </span>
-              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(latestOrder.status)}`}>
-                <span className="mr-1">{getStatusIcon(latestOrder.status)}</span>
+              <span className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium border ${getStatusColor(latestOrder.status)}`}>
+                <span className="mr-0.5 sm:mr-1">{getStatusIcon(latestOrder.status)}</span>
                 <span className="hidden sm:inline">{getStatusText(latestOrder.status)}</span>
                 <span className="sm:hidden">{getStatusText(latestOrder.status).split(' ')[0]}</span>
               </span>
             </div>
             <div className="flex items-center space-x-1 text-xs sm:text-sm text-gray-600">
-              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
               <span className="truncate">
                 {new Date(latestOrder.createdAt).toLocaleDateString('ru-RU', {
                   day: '2-digit',
@@ -160,17 +168,17 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
             </div>
           </div>
         </div>
-        <div className="flex items-center space-x-2 flex-shrink-0">
+        <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
           <button
             onClick={() => navigate('/profile')}
-            className="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium transition-colors"
+            className="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium transition-colors px-1 sm:px-2 py-1"
           >
             <span className="hidden sm:inline">Подробнее</span>
             <span className="sm:hidden">→</span>
           </button>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1"
           >
             <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>

@@ -25,6 +25,9 @@ export const Navigation: React.FC = () => {
   // Проверяем, есть ли активные заказы для показа уведомления
   useEffect(() => {
     const checkActiveOrders = async () => {
+      // Проверяем гостевые заказы из localStorage
+      const guestOrdersFromStorage = JSON.parse(localStorage.getItem('guestOrders') || '[]');
+      
       if (user) {
         try {
           const orders = await ordersApi.getUserOrders();
@@ -38,6 +41,10 @@ export const Navigation: React.FC = () => {
         } catch (error) {
           console.error('Ошибка получения заказов:', error);
         }
+      } else if (guestOrdersFromStorage.length > 0) {
+        const latestOrder = guestOrdersFromStorage[0];
+        const hasActiveOrder = latestOrder.status !== 'delivered' && latestOrder.status !== 'cancelled';
+        setShowOrderNotification(hasActiveOrder);
       } else if (guestOrders.length > 0) {
         const latestOrder = guestOrders[0];
         const hasActiveOrder = latestOrder.status !== 'delivered' && latestOrder.status !== 'cancelled';
