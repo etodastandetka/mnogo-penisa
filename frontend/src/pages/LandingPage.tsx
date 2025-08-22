@@ -443,7 +443,7 @@ export const LandingPage: React.FC = () => {
               </h3>
               <div className="mb-3 text-center">
                 <Badge className="bg-green-100 text-green-800 border-green-200 text-xs font-medium">
-                  🎉 Скидка до 15%
+                  🎉 Скидка 10%
                 </Badge>
               </div>
               <p className="text-gray-600 text-sm leading-relaxed text-center mb-4">
@@ -471,7 +471,7 @@ export const LandingPage: React.FC = () => {
               </h3>
               <div className="mb-3 text-center">
                 <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-xs font-medium">
-                  🏢 Скидка до 15%
+                  🏢 Скидка 12%
                 </Badge>
               </div>
               <p className="text-gray-600 text-sm leading-relaxed text-center mb-4">
@@ -499,7 +499,7 @@ export const LandingPage: React.FC = () => {
               </h3>
               <div className="mb-3 text-center">
                 <Badge className="bg-purple-100 text-purple-800 border-purple-200 text-xs font-medium">
-                  💒 Скидка до 15%
+                  💒 Скидка 15%
                 </Badge>
               </div>
               <p className="text-gray-600 text-sm leading-relaxed text-center mb-4">
@@ -525,7 +525,7 @@ export const LandingPage: React.FC = () => {
               </p>
               <div className="flex justify-center mb-4">
                 <Badge className="bg-gradient-to-r from-green-500 to-blue-500 text-white border-0 text-sm font-bold px-4 py-2">
-                  🎉 Скидки до 15% на все мероприятия!
+                  🎉 Скидки 10-15% на все мероприятия!
                 </Badge>
               </div>
             </div>
