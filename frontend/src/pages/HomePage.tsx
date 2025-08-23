@@ -6,6 +6,7 @@ import { FixedCart } from '../components/FixedCart';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { getCategoryName, getCategoryEmoji } from '../utils/categories';
+import { ErrorFixButton } from '../components/ErrorFixButton';
 
 // Теперь используем утилиты из utils/categories.ts
 
@@ -230,6 +231,17 @@ export const MenuPage: React.FC = () => {
           <FixedCart />
         </div>
       </div>
+
+      {/* Кнопка исправления ошибок */}
+      <ErrorFixButton 
+        onFix={() => {
+          setError(null);
+          setLoading(true);
+          fetchProducts();
+        }}
+        isLoading={loading}
+        error={error}
+      />
     </div>
   );
 };

@@ -11,6 +11,7 @@ import {
   ShoppingCart, Clock, MapPin, Phone, Star, Truck, Shield, Heart,
   ArrowRight, ChefHat, Utensils, Sparkles, Zap, Award, Instagram
 } from 'lucide-react';
+import { ErrorFixButton } from '../components/ErrorFixButton';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -741,6 +742,20 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* Кнопка исправления ошибок */}
+      <ErrorFixButton 
+        onFix={() => {
+          setError(null);
+          setLoading(true);
+          // Перезагружаем данные
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        }}
+        isLoading={loading}
+        error={error}
+      />
     </div>
   );
 };
