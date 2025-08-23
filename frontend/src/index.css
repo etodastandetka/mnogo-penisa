@@ -418,3 +418,933 @@
 .card-float {
   animation: card-float 3s ease-in-out infinite;
 }
+
+/* Мобильные стили для улучшения UX */
+@media (max-width: 768px) {
+  /* Улучшенные карточки товаров */
+  .product-card {
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  }
+  
+  /* Улучшенная сетка товаров */
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  /* Улучшенный hero section */
+  .hero-section {
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    font-weight: 800;
+  }
+  
+  .hero-description {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    color: #4B5563;
+  }
+  
+  /* Улучшенные кнопки */
+  .btn-primary {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(237, 117, 22, 0.3);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(237, 117, 22, 0.4);
+  }
+  
+  /* Улучшенные фильтры категорий */
+  .category-filters {
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .category-filter-btn {
+    white-space: nowrap;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .category-filter-btn.active {
+    background: linear-gradient(135deg, #ed7516, #f1943d);
+    color: white;
+    box-shadow: 0 4px 15px rgba(237, 117, 22, 0.3);
+  }
+  
+  /* Улучшенный поиск */
+  .search-input {
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    border: 2px solid #E5E7EB;
+    transition: all 0.2s ease;
+  }
+  
+  .search-input:focus {
+    border-color: #ed7516;
+    box-shadow: 0 0 0 3px rgba(237, 117, 22, 0.1);
+  }
+  
+  /* Улучшенные изображения */
+  .product-image {
+    border-radius: 12px 12px 0 0;
+    transition: transform 0.3s ease;
+  }
+  
+  .product-image:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Улучшенные цены */
+  .product-price {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ed7516;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  
+  /* Улучшенные описания */
+  .product-description {
+    line-height: 1.6;
+    color: #6B7280;
+    margin: 0.75rem 0;
+  }
+  
+  /* Улучшенные бейджи категорий */
+  .category-badge {
+    background: linear-gradient(135deg, #F3F4F6, #E5E7EB);
+    color: #374151;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid #D1D5DB;
+  }
+  
+  /* Анимации для мобильных */
+  .fade-in {
+    animation: fadeIn 0.5s ease-in;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Улучшенная навигация */
+  .mobile-nav {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.95);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+  
+  /* Улучшенные отступы */
+  .mobile-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Улучшенные тени */
+  .mobile-shadow {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+}
+
+/* Дополнительные стили для очень маленьких экранов */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-description {
+    font-size: 1.1rem;
+  }
+  
+  .btn-primary {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .product-grid {
+    padding: 0.75rem;
+  }
+}
+
+/* Улучшенные стили для планшетов */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+  
+  .hero-title {
+    font-size: 3.5rem;
+  }
+  
+  .hero-description {
+    font-size: 1.3rem;
+  }
+}
+
+/* Плавные переходы для всех элементов */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Улучшенный скроллбар для мобильных */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #ed7516;
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #d65a0c;
+  }
+}
+
+/* Безопасные отступы для мобильных устройств */
+.safe-area-inset-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-inset-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-inset-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  
+  body {
+    @apply bg-white text-gray-900;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    overflow-x: hidden;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Улучшенные заголовки */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-gray-900;
+    line-height: 1.2;
+  }
+
+  /* Улучшенные параграфы */
+  p {
+    @apply text-gray-700;
+    line-height: 1.6;
+  }
+
+  /* Улучшенные ссылки */
+  a {
+    @apply text-orange-600 hover:text-orange-700;
+    transition: color 0.2s ease;
+  }
+
+  /* Улучшенные кнопки */
+  button {
+    @apply font-medium;
+    transition: all 0.2s ease;
+  }
+
+  /* Улучшенные изображения */
+  img {
+    @apply max-w-full h-auto;
+  }
+
+  /* Улучшенные формы */
+  input, textarea, select {
+    @apply border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-200;
+    transition: all 0.2s ease;
+  }
+
+  /* Улучшенные фокусы */
+  *:focus {
+    @apply outline-none;
+  }
+
+  /* Улучшенные выделения */
+  ::selection {
+    @apply bg-orange-200 text-orange-900;
+  }
+}
+
+/* Компоненты */
+@layer components {
+  /* Карточка товара */
+  .product-card {
+    @apply bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg;
+    transition: all 0.3s ease;
+  }
+
+  .product-card:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Кнопка */
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium;
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary {
+    @apply bg-orange-600 text-white hover:bg-orange-700;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+  }
+
+  .btn-outline {
+    @apply border-2 border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white;
+  }
+
+  /* Бейдж */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .badge-primary {
+    @apply bg-orange-100 text-orange-800;
+  }
+
+  .badge-secondary {
+    @apply bg-gray-100 text-gray-800;
+  }
+
+  /* Карточка */
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200;
+  }
+
+  .card-content {
+    @apply px-6 py-4;
+  }
+
+  .card-footer {
+    @apply px-6 py-4 border-t border-gray-200 bg-gray-50;
+  }
+
+  /* Форма */
+  .form-group {
+    @apply mb-4;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+  }
+
+  .form-input {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-200 focus:border-orange-500;
+    transition: all 0.2s ease;
+  }
+
+  .form-input:focus {
+    @apply outline-none;
+  }
+
+  /* Алерт */
+  .alert {
+    @apply p-4 rounded-lg border;
+  }
+
+  .alert-success {
+    @apply bg-green-50 border-green-200 text-green-800;
+  }
+
+  .alert-error {
+    @apply bg-red-50 border-red-200 text-red-800;
+  }
+
+  .alert-warning {
+    @apply bg-yellow-50 border-yellow-200 text-yellow-800;
+  }
+
+  .alert-info {
+    @apply bg-blue-50 border-blue-200 text-blue-800;
+  }
+
+  /* Модальное окно */
+  .modal {
+    @apply fixed inset-0 z-50 overflow-y-auto;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 transition-opacity;
+  }
+
+  .modal-content {
+    @apply relative bg-white rounded-lg mx-auto my-8 max-w-lg;
+  }
+
+  .modal-header {
+    @apply flex items-center justify-between p-6 border-b border-gray-200;
+  }
+
+  .modal-body {
+    @apply p-6;
+  }
+
+  .modal-footer {
+    @apply flex items-center justify-end space-x-3 p-6 border-t border-gray-200;
+  }
+
+  /* Навигация */
+  .nav {
+    @apply flex items-center space-x-8;
+  }
+
+  .nav-link {
+    @apply text-gray-600 hover:text-gray-900 transition-colors;
+  }
+
+  .nav-link.active {
+    @apply text-orange-600 font-medium;
+  }
+
+  /* Сайдбар */
+  .sidebar {
+    @apply fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200;
+  }
+
+  .sidebar-header {
+    @apply p-6 border-b border-gray-200;
+  }
+
+  .sidebar-content {
+    @apply p-6;
+  }
+
+  .sidebar-nav {
+    @apply space-y-2;
+  }
+
+  .sidebar-nav-link {
+    @apply flex items-center px-3 py-2 text-gray-600 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors;
+  }
+
+  .sidebar-nav-link.active {
+    @apply bg-orange-100 text-orange-700;
+  }
+
+  /* Таблица */
+  .table {
+    @apply w-full border-collapse;
+  }
+
+  .table th {
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200;
+  }
+
+  .table td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200;
+  }
+
+  .table tbody tr:hover {
+    @apply bg-gray-50;
+  }
+
+  /* Пагинация */
+  .pagination {
+    @apply flex items-center space-x-2;
+  }
+
+  .pagination-item {
+    @apply px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700;
+  }
+
+  .pagination-item.active {
+    @apply bg-orange-600 text-white border-orange-600;
+  }
+
+  .pagination-item.disabled {
+    @apply text-gray-400 cursor-not-allowed hover:bg-white hover:text-gray-400;
+  }
+
+  /* Загрузка */
+  .loading {
+    @apply flex items-center justify-center p-8;
+  }
+
+  .loading-spinner {
+    @apply animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600;
+  }
+
+  .loading-text {
+    @apply ml-3 text-gray-600;
+  }
+
+  /* Пустое состояние */
+  .empty-state {
+    @apply text-center py-12;
+  }
+
+  .empty-state-icon {
+    @apply text-gray-400 text-6xl mb-4;
+  }
+
+  .empty-state-title {
+    @apply text-xl font-semibold text-gray-600 mb-2;
+  }
+
+  .empty-state-description {
+    @apply text-gray-500;
+  }
+
+  /* Уведомления */
+  .notification {
+    @apply fixed top-4 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border border-gray-200;
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .notification-header {
+    @apply flex items-center justify-between p-4 border-b border-gray-200;
+  }
+
+  .notification-content {
+    @apply p-4;
+  }
+
+  .notification-footer {
+    @apply flex items-center justify-end space-x-2 p-4 border-t border-gray-200;
+  }
+
+  /* Тултип */
+  .tooltip {
+    @apply absolute z-10 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg;
+  }
+
+  .tooltip::after {
+    content: '';
+    @apply absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900;
+  }
+
+  /* Прогресс бар */
+  .progress {
+    @apply w-full bg-gray-200 rounded-full h-2;
+  }
+
+  .progress-bar {
+    @apply bg-orange-600 h-2 rounded-full transition-all duration-300;
+  }
+
+  /* Слайдер */
+  .slider {
+    @apply relative w-full;
+  }
+
+  .slider-track {
+    @apply relative w-full h-2 bg-gray-200 rounded-full;
+  }
+
+  .slider-thumb {
+    @apply absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-orange-600 rounded-full cursor-pointer;
+  }
+
+  /* Переключатель */
+  .toggle {
+    @apply relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition-colors;
+  }
+
+  .toggle.checked {
+    @apply bg-orange-600;
+  }
+
+  .toggle-thumb {
+    @apply inline-block h-4 w-4 transform rounded-full bg-white transition-transform;
+  }
+
+  .toggle.checked .toggle-thumb {
+    @apply translate-x-6;
+  }
+
+  /* Аккордеон */
+  .accordion {
+    @apply border border-gray-200 rounded-lg;
+  }
+
+  .accordion-item {
+    @apply border-b border-gray-200 last:border-b-0;
+  }
+
+  .accordion-header {
+    @apply flex items-center justify-between w-full p-4 text-left font-medium text-gray-900 hover:bg-gray-50;
+  }
+
+  .accordion-content {
+    @apply p-4 bg-gray-50;
+  }
+
+  /* Табы */
+  .tabs {
+    @apply border-b border-gray-200;
+  }
+
+  .tab-list {
+    @apply flex space-x-8;
+  }
+
+  .tab {
+    @apply py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300;
+  }
+
+  .tab.active {
+    @apply border-orange-500 text-orange-600;
+  }
+
+  .tab-panel {
+    @apply py-4;
+  }
+
+  /* Дропдаун */
+  .dropdown {
+    @apply relative inline-block;
+  }
+
+  .dropdown-menu {
+    @apply absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50;
+  }
+
+  .dropdown-item {
+    @apply block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100;
+  }
+
+  /* Бредкрамб */
+  .breadcrumb {
+    @apply flex items-center space-x-2 text-sm text-gray-500;
+  }
+
+  .breadcrumb-item {
+    @apply hover:text-gray-700;
+  }
+
+  .breadcrumb-separator {
+    @apply text-gray-400;
+  }
+
+  /* Статистика */
+  .stat {
+    @apply text-center;
+  }
+
+  .stat-value {
+    @apply text-3xl font-bold text-gray-900;
+  }
+
+  .stat-label {
+    @apply text-sm text-gray-500;
+  }
+
+  /* Аватар */
+  .avatar {
+    @apply inline-block h-10 w-10 rounded-full bg-gray-300;
+  }
+
+  .avatar-sm {
+    @apply h-8 w-8;
+  }
+
+  .avatar-lg {
+    @apply h-12 w-12;
+  }
+
+  .avatar-xl {
+    @apply h-16 w-16;
+  }
+
+  /* Рейтинг */
+  .rating {
+    @apply flex items-center space-x-1;
+  }
+
+  .rating-star {
+    @apply text-yellow-400;
+  }
+
+  .rating-star.empty {
+    @apply text-gray-300;
+  }
+
+  /* Тег */
+  .tag {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .tag-primary {
+    @apply bg-orange-100 text-orange-800;
+  }
+
+  .tag-secondary {
+    @apply bg-gray-100 text-gray-800;
+  }
+
+  .tag-success {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .tag-warning {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  .tag-error {
+    @apply bg-red-100 text-red-800;
+  }
+
+  /* Разделитель */
+  .divider {
+    @apply border-t border-gray-200 my-4;
+  }
+
+  .divider-vertical {
+    @apply border-l border-gray-200 mx-4;
+  }
+
+  /* Скелетон */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  .skeleton-text {
+    @apply h-4 bg-gray-200 rounded;
+  }
+
+  .skeleton-avatar {
+    @apply h-10 w-10 bg-gray-200 rounded-full;
+  }
+
+  .skeleton-button {
+    @apply h-10 w-20 bg-gray-200 rounded;
+  }
+
+  /* Анимации */
+  .fade-in {
+    animation: fadeIn 0.5s ease-in;
+  }
+
+  .fade-out {
+    animation: fadeOut 0.5s ease-out;
+  }
+
+  .slide-in-up {
+    animation: slideInUp 0.3s ease-out;
+  }
+
+  .slide-in-down {
+    animation: slideInDown 0.3s ease-out;
+  }
+
+  .slide-in-left {
+    animation: slideInLeft 0.3s ease-out;
+  }
+
+  .slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes slideInUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInDown {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Утилиты */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  }
+
+  .truncate {
+    @apply overflow-hidden text-ellipsis whitespace-nowrap;
+  }
+
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Градиенты */
+  .gradient-primary {
+    background: linear-gradient(135deg, #ed7516, #f1943d);
+  }
+
+  .gradient-secondary {
+    background: linear-gradient(135deg, #6B7280, #9CA3AF);
+  }
+
+  .gradient-success {
+    background: linear-gradient(135deg, #10B981, #34D399);
+  }
+
+  .gradient-warning {
+    background: linear-gradient(135deg, #F59E0B, #FBBF24);
+  }
+
+  .gradient-error {
+    background: linear-gradient(135deg, #EF4444, #F87171);
+  }
+
+  /* Тени */
+  .shadow-soft {
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .shadow-medium {
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .shadow-strong {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Скругления */
+  .rounded-soft {
+    border-radius: 8px;
+  }
+
+  .rounded-medium {
+    border-radius: 12px;
+  }
+
+  .rounded-strong {
+    border-radius: 16px;
+  }
+
+  /* Границы */
+  .border-soft {
+    border-width: 1px;
+  }
+
+  .border-medium {
+    border-width: 2px;
+  }
+
+  .border-strong {
+    border-width: 3px;
+  }
+}
