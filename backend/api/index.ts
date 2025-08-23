@@ -2145,46 +2145,60 @@ app.post('/api/upload-base64', (req, res) => {
 app.get('/api/admin/shifts/current', authenticateToken, requireAdmin, (req, res) => {
   console.log('🔍 API: Получение текущей смены');
   
-  db.get(`
-    SELECT s.*, u.username as opened_by_name
-    FROM shifts s
-    LEFT JOIN users u ON s.opened_by = u.id
-    WHERE s.status = 'open'
-    ORDER BY s.opened_at DESC
-    LIMIT 1
-  `, (err, shift: any) => {
+  // Сначала проверяем, существует ли таблица shifts
+  db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='shifts'", (err, tableExists) => {
     if (err) {
-      console.error('❌ Ошибка получения текущей смены:', err);
-      return res.status(500).json({ success: false, message: 'Ошибка получения смены' });
+      console.error('❌ Ошибка проверки таблицы shifts:', err);
+      return res.status(500).json({ success: false, message: 'Ошибка проверки таблицы смен' });
     }
     
-    if (!shift) {
+    if (!tableExists) {
+      console.log('⚠️ Таблица shifts не существует, возвращаем null');
       return res.json({ success: true, shift: null });
     }
     
-    // Получаем статистику заказов для текущей смены
-    db.all(`
-      SELECT 
-        COUNT(*) as total_orders,
-        SUM(total_amount) as total_revenue,
-        SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as cash_revenue,
-        SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as card_revenue
-      FROM orders 
-      WHERE created_at >= ? AND status != 'cancelled'
-    `, [(shift as any).opened_at], (err, stats: any) => {
+    // Таблица существует, получаем текущую смену
+    db.get(`
+      SELECT s.*, u.username as opened_by_name
+      FROM shifts s
+      LEFT JOIN users u ON s.opened_by = u.id
+      WHERE s.status = 'open'
+      ORDER BY s.opened_at DESC
+      LIMIT 1
+    `, (err, shift: any) => {
       if (err) {
-        console.error('❌ Ошибка получения статистики смены:', err);
-        return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
+        console.error('❌ Ошибка получения текущей смены:', err);
+        return res.status(500).json({ success: false, message: 'Ошибка получения смены' });
       }
       
-      const statsData = (stats[0] as any) || { total_orders: 0, total_revenue: 0, cash_revenue: 0, card_revenue: 0 };
+      if (!shift) {
+        return res.json({ success: true, shift: null });
+      }
       
-      res.json({
-        success: true,
-        shift: {
-          ...(shift as any),
-          ...statsData
+      // Получаем статистику заказов для текущей смены
+      db.all(`
+        SELECT 
+          COUNT(*) as total_orders,
+          SUM(total_amount) as total_revenue,
+          SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as cash_revenue,
+          SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as card_revenue
+        FROM orders 
+        WHERE created_at >= ? AND status != 'cancelled'
+      `, [(shift as any).opened_at], (err, stats: any) => {
+        if (err) {
+          console.error('❌ Ошибка получения статистики смены:', err);
+          return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
         }
+        
+        const statsData = (stats[0] as any) || { total_orders: 0, total_revenue: 0, cash_revenue: 0, card_revenue: 0 };
+        
+        res.json({
+          success: true,
+          shift: {
+            ...(shift as any),
+            ...statsData
+          }
+        });
       });
     });
   });
@@ -2198,32 +2212,77 @@ app.post('/api/admin/shifts/open', authenticateToken, requireAdmin, (req, res) =
   const shiftNumber = `SHIFT-${Date.now()}`;
   const userId = (req as any).user.id;
   
-  db.run(`
-    INSERT INTO shifts (shift_number, opened_by, status, notes)
-    VALUES (?, ?, 'open', ?)
-  `, [shiftNumber, userId, notes || ''], function(err) {
+  // Сначала проверяем, существует ли таблица shifts
+  db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='shifts'", (err, tableExists) => {
     if (err) {
-      console.error('❌ Ошибка открытия смены:', err);
-      return res.status(500).json({ success: false, message: 'Ошибка открытия смены' });
+      console.error('❌ Ошибка проверки таблицы shifts:', err);
+      return res.status(500).json({ success: false, message: 'Ошибка проверки таблицы смен' });
     }
     
-    console.log('✅ Новая смена открыта с ID:', this.lastID);
+    if (!tableExists) {
+      console.log('⚠️ Таблица shifts не существует, создаем её...');
+      
+      // Создаем таблицу shifts
+      const createShiftsTable = `
+        CREATE TABLE IF NOT EXISTS shifts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          shift_number TEXT UNIQUE NOT NULL,
+          opened_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          closed_at DATETIME,
+          opened_by INTEGER NOT NULL,
+          closed_by INTEGER,
+          total_orders INTEGER DEFAULT 0,
+          total_revenue REAL DEFAULT 0,
+          cash_revenue REAL DEFAULT 0,
+          card_revenue REAL DEFAULT 0,
+          status TEXT DEFAULT 'open' CHECK(status IN ('open', 'closed')),
+          notes TEXT,
+          FOREIGN KEY (opened_by) REFERENCES users(id),
+          FOREIGN KEY (closed_by) REFERENCES users(id)
+        )`;
+      
+      db.run(createShiftsTable, (err) => {
+        if (err) {
+          console.error('❌ Ошибка создания таблицы shifts:', err);
+          return res.status(500).json({ success: false, message: 'Ошибка создания таблицы смен' });
+        }
+        
+        console.log('✅ Таблица shifts создана, продолжаем открытие смены...');
+        insertShift();
+      });
+    } else {
+      insertShift();
+    }
     
-    res.json({
-      success: true,
-      shift: {
-        id: this.lastID,
-        shift_number: shiftNumber,
-        opened_at: new Date().toISOString(),
-        opened_by: userId,
-        status: 'open',
-        notes: notes || '',
-        total_orders: 0,
-        total_revenue: 0,
-        cash_revenue: 0,
-        card_revenue: 0
-      }
-    });
+    function insertShift() {
+      db.run(`
+        INSERT INTO shifts (shift_number, opened_by, status, notes)
+        VALUES (?, ?, 'open', ?)
+      `, [shiftNumber, userId, notes || ''], function(err) {
+        if (err) {
+          console.error('❌ Ошибка открытия смены:', err);
+          return res.status(500).json({ success: false, message: 'Ошибка открытия смены' });
+        }
+        
+        console.log('✅ Новая смена открыта с ID:', this.lastID);
+        
+        res.json({
+          success: true,
+          shift: {
+            id: this.lastID,
+            shift_number: shiftNumber,
+            opened_at: new Date().toISOString(),
+            opened_by: userId,
+            status: 'open',
+            notes: notes || '',
+            total_orders: 0,
+            total_revenue: 0,
+            cash_revenue: 0,
+            card_revenue: 0
+          }
+        });
+      });
+    }
   });
 });
 
@@ -2233,58 +2292,70 @@ app.post('/api/admin/shifts/close', authenticateToken, requireAdmin, (req, res) 
   
   const userId = (req as any).user.id;
   
-  // Получаем текущую открытую смену
-  db.get('SELECT * FROM shifts WHERE status = "open" ORDER BY opened_at DESC LIMIT 1', (err, shift: any) => {
+  // Сначала проверяем, существует ли таблица shifts
+  db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='shifts'", (err, tableExists) => {
     if (err) {
-      console.error('❌ Ошибка получения текущей смены:', err);
-      return res.status(500).json({ success: false, message: 'Ошибка получения смены' });
+      console.error('❌ Ошибка проверки таблицы shifts:', err);
+      return res.status(500).json({ success: false, message: 'Ошибка проверки таблицы смен' });
     }
     
-    if (!shift) {
-      return res.status(400).json({ success: false, message: 'Нет открытой смены для закрытия' });
+    if (!tableExists) {
+      return res.status(400).json({ success: false, message: 'Таблица смен не существует' });
     }
     
-    // Получаем финальную статистику
-    db.all(`
-      SELECT 
-        COUNT(*) as total_orders,
-        SUM(total_amount) as total_revenue,
-        SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as cash_revenue,
-        SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as card_revenue
-      FROM orders 
-      WHERE created_at >= ? AND status != 'cancelled'
-    `, [(shift as any).opened_at], (err, stats: any) => {
+    // Получаем текущую открытую смену
+    db.get('SELECT * FROM shifts WHERE status = "open" ORDER BY opened_at DESC LIMIT 1', (err, shift: any) => {
       if (err) {
-        console.error('❌ Ошибка получения статистики смены:', err);
-        return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
+        console.error('❌ Ошибка получения текущей смены:', err);
+        return res.status(500).json({ success: false, message: 'Ошибка получения смены' });
       }
       
-      const statsData = (stats[0] as any) || { total_orders: 0, total_revenue: 0, cash_revenue: 0, card_revenue: 0 };
+      if (!shift) {
+        return res.status(400).json({ success: false, message: 'Нет открытой смены для закрытия' });
+      }
       
-      // Закрываем смену
-      db.run(`
-        UPDATE shifts 
-        SET status = 'closed', closed_at = CURRENT_TIMESTAMP, closed_by = ?,
-            total_orders = ?, total_revenue = ?, cash_revenue = ?, card_revenue = ?
-        WHERE id = ?
-      `, [userId, statsData.total_orders, statsData.total_revenue, statsData.cash_revenue, statsData.card_revenue, (shift as any).id], (err) => {
+      // Получаем финальную статистику
+      db.all(`
+        SELECT 
+          COUNT(*) as total_orders,
+          SUM(total_amount) as total_revenue,
+          SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as cash_revenue,
+          SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as card_revenue
+        FROM orders 
+        WHERE created_at >= ? AND status != 'cancelled'
+      `, [(shift as any).opened_at], (err, stats: any) => {
         if (err) {
-          console.error('❌ Ошибка закрытия смены:', err);
-          return res.status(500).json({ success: false, message: 'Ошибка закрытия смены' });
+          console.error('❌ Ошибка получения статистики смены:', err);
+          return res.status(500).json({ success: false, message: 'Ошибка получения статистики' });
         }
         
-        console.log('✅ Смена закрыта:', shift.shift_number);
+        const statsData = (stats[0] as any) || { total_orders: 0, total_revenue: 0, cash_revenue: 0, card_revenue: 0 };
         
-        res.json({
-          success: true,
-          message: 'Смена успешно закрыта',
-          shift: {
-            ...shift,
-            ...statsData,
-            status: 'closed',
-            closed_at: new Date().toISOString(),
-            closed_by: userId
+        // Закрываем смену
+        db.run(`
+          UPDATE shifts 
+          SET status = 'closed', closed_at = CURRENT_TIMESTAMP, closed_by = ?,
+              total_orders = ?, total_revenue = ?, cash_revenue = ?, card_revenue = ?
+          WHERE id = ?
+        `, [userId, statsData.total_orders, statsData.total_revenue, statsData.cash_revenue, statsData.card_revenue, (shift as any).id], (err) => {
+          if (err) {
+            console.error('❌ Ошибка закрытия смены:', err);
+            return res.status(500).json({ success: false, message: 'Ошибка закрытия смены' });
           }
+          
+          console.log('✅ Смена закрыта:', shift.shift_number);
+          
+          res.json({
+            success: true,
+            message: 'Смена успешно закрыта',
+            shift: {
+              ...shift,
+              ...statsData,
+              status: 'closed',
+              closed_at: new Date().toISOString(),
+              closed_by: userId
+            }
+          });
         });
       });
     });
