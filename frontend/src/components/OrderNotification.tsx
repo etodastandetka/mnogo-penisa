@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Package, Clock } from 'lucide-react';
 import { useUserStore } from '../store/userStore';
-import { ordersApi } from '../api/orders';
+import { getUserOrders } from '../api/orders';
 
 interface OrderNotificationProps {
   onClose: () => void;
@@ -42,7 +42,7 @@ export const OrderNotification: React.FC<OrderNotificationProps> = ({ onClose })
       if (user) {
         // Для авторизованных пользователей
         try {
-          const orders = await ordersApi.getUserOrders();
+          const orders = await getUserOrders();
           if (orders && orders.length > 0) {
             const latest = orders[0];
             setLatestOrder(latest);

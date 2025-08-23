@@ -12,7 +12,7 @@ import {
 import { useUserStore } from '../store/userStore';
 import { formatPrice } from '../utils/format';
 import { PaymentQR } from '../components/PaymentQR';
-import { ordersApi } from '../api/orders';
+import { getUserOrders } from '../api/orders';
 import { client } from '../api/client';
 
 
@@ -50,7 +50,7 @@ export const ProfilePage: React.FC = () => {
     const fetchOrders = async () => {
       if (user) {
         try {
-          const data = await ordersApi.getUserOrders();
+          const data = await getUserOrders();
           setOrders(data);
         } catch (error) {
           // Игнорируем ошибку

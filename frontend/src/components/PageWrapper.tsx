@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUserStore } from '../store/userStore';
-import { ordersApi } from '../api/orders';
+import { getUserOrders } from '../api/orders';
 
 interface PageWrapperProps {
   children: React.ReactNode;
@@ -14,7 +14,7 @@ export const PageWrapper: React.FC<PageWrapperProps> = ({ children }) => {
     const checkActiveOrders = async () => {
       if (user) {
         try {
-          const orders = await ordersApi.getUserOrders();
+          const orders = await getUserOrders();
           if (orders.length > 0) {
             const latestOrder = orders[0];
             const active = latestOrder.status !== 'delivered' && latestOrder.status !== 'cancelled';
