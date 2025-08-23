@@ -42,37 +42,18 @@ export const LandingPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const loadProducts = async (retryCount = 0) => {
+    const loadProducts = async () => {
       try {
         setError(null);
-        console.log(`🔄 Попытка загрузки товаров #${retryCount + 1}...`);
+        console.log('🔄 Загружаем товары...');
         const productsData = await productsApi.getAll();
         setProducts(productsData);
-        console.log(`✅ Товары успешно загружены: ${productsData.length}`);
+        console.log(`✅ Товары загружены: ${productsData.length}`);
       } catch (error: any) {
         console.error('❌ Ошибка загрузки продуктов:', error);
-        
-        // Если это первая попытка и ошибка сети, пробуем еще раз
-        if (retryCount < 2 && (!error.response && error.request)) {
-          console.log(`🔄 Повторная попытка через 2 секунды... (${retryCount + 1}/2)`);
-          setTimeout(() => loadProducts(retryCount + 1), 2000);
-          return;
-        }
-        
-        // Специальная обработка для iPhone Safari
-        const isIPhone = /iPhone|iPad|iPod/.test(navigator.userAgent);
-        const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-        
-        if (isIPhone && isSafari && retryCount < 3) {
-          console.log(`🍎 iPhone Safari - дополнительная попытка через 3 секунды... (${retryCount + 1}/3)`);
-          setTimeout(() => loadProducts(retryCount + 1), 3000);
-          return;
-        }
-        
-        // Если все попытки исчерпаны, показываем ошибку
         setError(error.message || 'Ошибка загрузки данных');
         
-        // Fallback: используем базовые данные вместо пустого массива
+        // Fallback: используем базовые данные
         console.log('🔄 Используем fallback данные...');
         setProducts(fallbackProducts);
       } finally {
@@ -80,10 +61,10 @@ export const LandingPage: React.FC = () => {
       }
     };
     
-    // Добавляем задержку для стабильности на мобильных
+    // Простая задержка для стабильности
     const timer = setTimeout(() => {
       loadProducts();
-    }, 200); // Увеличиваем задержку для iPhone
+    }, 100);
     
     return () => clearTimeout(timer);
   }, []);

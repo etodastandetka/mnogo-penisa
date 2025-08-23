@@ -1,25 +1,9 @@
 import axios from 'axios';
 
-// Улучшенное определение мобильного устройства
-const getBaseURL = () => {
-  // Проверяем несколько способов определения мобильного устройства
-  const isMobile = 
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-    (navigator.maxTouchPoints && navigator.maxTouchPoints > 2) ||
-    window.innerWidth < 768;
-  
-  if (isMobile) {
-    // Для мобильных устройств сначала пробуем HTTPS, потом HTTP как fallback
-    return 'https://45.144.221.227:3444/api';
-  } else {
-    // Для десктопа используем HTTPS
-    return 'https://45.144.221.227:3444/api';
-  }
-};
-
+// API клиент для работы на одном сервере (фронтенд + бэкенд)
 export const client = axios.create({
-  baseURL: getBaseURL(),
-  timeout: 30000, // Увеличиваем timeout для iPhone
+  baseURL: 'http://localhost:3001/api',
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -33,10 +17,6 @@ client.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
-    // Добавляем заголовки для лучшей совместимости с iPhone
-    config.headers['Accept'] = 'application/json';
-    config.headers['Cache-Control'] = 'no-cache';
 
     return config;
   },
@@ -59,13 +39,6 @@ client.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/';
-    }
-    
-    // Если это ошибка сети на мобильном, пробуем HTTP как fallback
-    if (!error.response && error.request && error.code !== 'ECONNABORTED') {
-      console.log('🔄 Пробуем HTTP fallback для мобильного устройства...');
-      // Меняем baseURL на HTTP для следующего запроса
-      client.defaults.baseURL = 'http://45.144.221.227:3001/api';
     }
     
     return Promise.reject(error);
