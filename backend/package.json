@@ -7,6 +7,10 @@
     "build": "tsc",
     "start": "node start-server.js",
     "dev": "node start-dev.js",
+    "local": "NODE_ENV=development ts-node api/index.ts",
+    "local:win": "set NODE_ENV=development && ts-node api/index.ts",
+    "local:https": "NODE_ENV=development USE_HTTPS=true ts-node api/index.ts",
+    "local:https:win": "set NODE_ENV=development && set USE_HTTPS=true && ts-node api/index.ts",
     "server": "node start-server.js",
     "seed": "ts-node src/seed.ts",
     "vercel-build": "tsc --skipLibCheck"

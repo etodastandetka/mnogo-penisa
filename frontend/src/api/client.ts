@@ -1,8 +1,31 @@
 import axios from 'axios';
 
-// Простой API клиент для работы с сервером
+// Умный API клиент для работы с сервером
+const getBaseURL = () => {
+  // Если мы в браузере и на localhost, используем локальный backend
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    // Проверяем, работает ли HTTPS на localhost
+    return window.location.protocol === 'https:' 
+      ? 'https://localhost:3001/api'
+      : 'http://localhost:3001/api';
+  }
+  
+  // Если мы в браузере и на 127.0.0.1, используем локальный backend
+  if (typeof window !== 'undefined' && window.location.hostname === '127.0.0.1') {
+    return window.location.protocol === 'https:' 
+      ? 'https://127.0.0.1:3001/api'
+      : 'http://127.0.0.1:3001/api';
+  }
+  
+  // Для продакшена используем HTTPS
+  return 'https://147.45.141.113:3001/api';
+};
+
+const baseURL = getBaseURL();
+console.log('🌐 API Base URL:', baseURL);
+
 export const client = axios.create({
-  baseURL: 'https://147.45.141.113:3444/api',
+  baseURL: baseURL,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',

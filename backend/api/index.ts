@@ -2032,8 +2032,15 @@ export default app;
 // Функция для создания HTTPS сервера
 const createHttpsServer = () => {
   try {
-    const certPath = path.join(__dirname, '../certs/certificate.pem');
-    const keyPath = path.join(__dirname, '../certs/private-key.pem');
+    // Сначала пробуем найти сертификаты в папке certs
+    let certPath = path.join(__dirname, '../certs/certificate.pem');
+    let keyPath = path.join(__dirname, '../certs/private-key.pem');
+    
+    // Если в папке certs нет, пробуем системные сертификаты
+    if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+      certPath = '/etc/letsencrypt/live/mnogo-rolly.online/fullchain.pem';
+      keyPath = '/etc/letsencrypt/live/mnogo-rolly.online/privkey.pem';
+    }
     
     if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
       const options = {
@@ -2053,21 +2060,35 @@ const createHttpsServer = () => {
   }
 };
 
-// Запускаем HTTPS сервер на порту 3444 для работы с nginx
-const HTTPS_PORT = 3444; // HTTPS порт для nginx прокси
+// Запускаем сервер для локальной разработки
+const PORT = process.env.PORT || 3000; // Порт для локальной разработки
+const HTTPS_PORT = process.env.HTTPS_PORT || 3444; // HTTPS порт
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const USE_HTTPS = process.env.USE_HTTPS === 'true'; // Принудительно использовать HTTPS
 
-// Запускаем HTTPS сервер
+// Проверяем, есть ли SSL сертификаты
 const httpsServer = createHttpsServer();
 
-if (httpsServer) {
-  httpsServer.listen(Number(HTTPS_PORT), '0.0.0.0', () => {
-    console.log('🔒 HTTPS Server started on port:', HTTPS_PORT);
-    console.log('🌐 URL: https://127.0.0.1:' + HTTPS_PORT);
-    console.log('🌐 nginx будет проксировать на этот порт');
+if (httpsServer && (NODE_ENV === 'production' || USE_HTTPS)) {
+  // Если есть SSL сертификаты и продакшн режим или принудительно HTTPS
+  const port = NODE_ENV === 'production' ? HTTPS_PORT : PORT;
+  httpsServer.listen(Number(port), '0.0.0.0', () => {
+    console.log('🔒 HTTPS Server started on port:', port);
+    console.log('🌐 URL: https://127.0.0.1:' + port);
+    console.log('🌐 Локальная сеть: https://[YOUR_IP]:' + port);
+    if (NODE_ENV === 'production') {
+      console.log('🌐 nginx будет проксировать на этот порт');
+    }
+    console.log('🔧 Режим:', NODE_ENV);
   });
 } else {
-  console.log('❌ Не удалось запустить HTTPS сервер');
-  console.log('❌ Проверьте SSL сертификаты в папке certs/');
+  // Если нет SSL сертификатов или режим разработки, запускаем HTTP сервер
+  app.listen(Number(PORT), '0.0.0.0', () => {
+    console.log('🚀 HTTP Server started on port:', PORT);
+    console.log('🌐 URL: http://127.0.0.1:' + PORT);
+    console.log('🌐 Локальная разработка: http://localhost:' + PORT);
+    console.log('🔧 Режим:', NODE_ENV);
+  });
 }
 
 
@@ -2419,13 +2440,13 @@ app.post('/api/upload-cdn', upload.single('image'), (req, res) => {
   }
 });
 
-// Запускаем простой HTTP сервер на порту 3001 (как было раньше)
-const HTTP_PORT = 3001; // HTTP порт для быстрой работы
+// Запускаем HTTP сервер на порту 3001
+const HTTP_PORT = 3001; // HTTP порт для nginx прокси
 
 // Запускаем HTTP сервер напрямую
 console.log('🔄 Запускаем HTTP сервер на порту:', HTTP_PORT);
 app.listen(HTTP_PORT, '0.0.0.0', () => {
   console.log('🌐 HTTP Server started on port:', HTTP_PORT);
   console.log('🌐 URL: http://127.0.0.1:' + HTTP_PORT);
-  console.log('🌐 Быстрая работа без HTTPS сложностей');
+  console.log('🌐 Готов для nginx прокси');
 });
