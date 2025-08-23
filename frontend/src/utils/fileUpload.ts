@@ -22,37 +22,25 @@ export const uploadFile = async (
     }
 
     const result = await response.json();
-    
-    if (result.success) {
-      return {
-        success: true,
-        fileUrl: result.fileUrl
-      };
-    } else {
-      return {
-        success: false,
-        error: result.error || 'Неизвестная ошибка загрузки'
-      };
-    }
+    return result;
   } catch (error) {
+    console.error('❌ Ошибка загрузки файла:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Ошибка загрузки файла'
+      error: error instanceof Error ? error.message : 'Неизвестная ошибка'
     };
   }
 };
 
 export const uploadPaymentProof = async (file: File, orderId: string | number, orderNumber: string): Promise<UploadResponse> => {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('orderId', orderId.toString());
-  formData.append('orderNumber', orderNumber);
-
-  // Определяем URL в зависимости от устройства
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const baseURL = isMobile ? 'https://147.45.141.113:3001/api' : 'https://147.45.141.113:3001/api';
-
   try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('orderId', orderId.toString());
+    formData.append('orderNumber', orderNumber);
+
+    // Используем относительный URL
+    const baseURL = '/api';
     const response = await fetch(`${baseURL}/orders/payment-proof`, {
       method: 'POST',
       body: formData,
@@ -63,22 +51,12 @@ export const uploadPaymentProof = async (file: File, orderId: string | number, o
     }
 
     const result = await response.json();
-    
-    if (result.success) {
-      return {
-        success: true,
-        fileUrl: result.fileUrl
-      };
-    } else {
-      return {
-        success: false,
-        error: result.error || 'Неизвестная ошибка загрузки'
-      };
-    }
+    return result;
   } catch (error) {
+    console.error('❌ Ошибка загрузки подтверждения оплаты:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Ошибка загрузки файла'
+      error: error instanceof Error ? error.message : 'Неизвестная ошибка'
     };
   }
 };

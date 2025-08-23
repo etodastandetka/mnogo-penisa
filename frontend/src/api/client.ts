@@ -2,38 +2,20 @@ import axios from 'axios';
 
 // Умный API клиент для работы с сервером
 const getBaseURL = () => {
-  // Если мы в браузере и на localhost, используем локальный backend
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    // Проверяем, работает ли HTTPS на localhost
-    return window.location.protocol === 'https:' 
-      ? 'https://localhost:3001/api'
-      : 'http://localhost:3001/api';
-  }
-  
-  // Если мы в браузере и на 127.0.0.1, используем локальный backend
-  if (typeof window !== 'undefined' && window.location.hostname === '127.0.0.1') {
-    return window.location.protocol === 'https:' 
-      ? 'https://127.0.0.1:3001/api'
-      : 'http://127.0.0.1:3001/api';
-  }
-  
-  // Для продакшена используем HTTPS (backend работает на HTTPS)
-  return 'https://147.45.141.113:3001/api';
+  // Для production всегда использовать относительные URL
+  return '/api';
 };
 
-const baseURL = getBaseURL();
-console.log('🌐 API Base URL:', baseURL);
-
-export const client = axios.create({
-  baseURL: baseURL,
-  timeout: 15000,
+const apiClient = axios.create({
+  baseURL: getBaseURL(),
+  timeout: 15000, // Увеличиваем таймаут для мобильных устройств
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
 // Интерцептор для запросов
-client.interceptors.request.use(
+apiClient.interceptors.request.use(
   (config) => {
     // Добавляем токен если есть
     const token = localStorage.getItem('token');
@@ -50,21 +32,29 @@ client.interceptors.request.use(
 );
 
 // Интерцептор для обработки ошибок
-client.interceptors.response.use(
+apiClient.interceptors.response.use(
   (response) => {
     console.log('✅ API Response:', response.config.url, response.status);
     return response;
   },
   (error) => {
-    console.log('🚨 API Error:', error.config?.url, error.response?.status, error.response?.data);
+    console.error('🚨 API Error:', error.config?.url, error.message, error.code);
     
-    // Если получаем 401, перенаправляем на главную страницу
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/';
+    // Улучшенная обработка ошибок для мобильных устройств
+    if (error.code === 'ERR_NETWORK') {
+      console.error('🌐 Ошибка сети - возможно проблемы с соединением');
+    } else if (error.code === 'ECONNABORTED') {
+      console.error('⏰ Таймаут запроса');
+    } else if (error.response?.status >= 500) {
+      console.error('🖥️ Ошибка сервера:', error.response.status);
+    } else if (error.response?.status >= 400) {
+      console.error('📱 Ошибка клиента:', error.response.status);
     }
     
     return Promise.reject(error);
   }
 );
+
+export { apiClient as client };
+export default apiClient;
 

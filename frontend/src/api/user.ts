@@ -1,13 +1,22 @@
+import { apiClient } from './client';
 import { User } from '../types';
-import { client } from './client';
 
 export const getUserInfo = async (): Promise<User> => {
-  const response = await client.get('/user/me');
-  return response.data;
+  try {
+    const response = await apiClient.get('/user/me');
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Ошибка получения информации о пользователе:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка получения профиля');
+  }
 };
 
-// Получить заказы пользователя
 export const getUserOrders = async () => {
-  const response = await client.get('/orders/user');
-  return response.data;
+  try {
+    const response = await apiClient.get('/orders/user');
+    return response.data || [];
+  } catch (error: any) {
+    console.error('❌ Ошибка получения заказов пользователя:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка получения заказов');
+  }
 };

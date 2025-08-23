@@ -5,7 +5,7 @@ import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { formatPrice } from '../utils/format';
 import { useUserStore } from '../store/userStore';
-import { productsApi } from '../api/products';
+import { getAllProducts } from '../api/products';
 import { Product } from '../types';
 import { 
   ShoppingCart, Clock, MapPin, Phone, Star, Truck, Shield, Heart,
@@ -20,34 +20,27 @@ export const LandingPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getAllProducts();
+      setProducts(data);
+    } catch (err: any) {
+      console.error('❌ Ошибка загрузки товаров:', err);
+      setError(err.message || 'Ошибка загрузки товаров');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setError(null);
-        console.log('🔄 Загружаем товары...');
-        
-        const productsData = await productsApi.getAll();
-        setProducts(productsData);
-        console.log(`✅ Товары загружены: ${productsData.length}`);
-      } catch (error: any) {
-        console.error('❌ Ошибка загрузки продуктов:', error);
-        setError(error.message || 'Ошибка загрузки данных');
-        
-        // Fallback: используем базовые данные
-        console.log('🔄 Используем fallback данные...');
-        setProducts(fallbackProducts);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    // Простая задержка для стабильности
-    const timer = setTimeout(() => {
-      loadProducts();
-    }, 100);
-    
-    return () => clearTimeout(timer);
+    loadProducts();
   }, []);
+
+  const handleRetry = () => {
+    loadProducts();
+  };
 
   // Fallback данные для случаев, когда API недоступен
   const fallbackProducts: Product[] = [
@@ -142,7 +135,6 @@ export const LandingPage: React.FC = () => {
 
   const randomReviews = allReviews.slice(0, 3);
 
-  // Показываем загрузку пока данные не загружены
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 flex items-center justify-center">
@@ -154,7 +146,6 @@ export const LandingPage: React.FC = () => {
     );
   }
 
-  // Показываем ошибку если что-то пошло не так
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 flex items-center justify-center">

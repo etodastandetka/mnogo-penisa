@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Product, ProductCategory } from '../types';
-import { productsApi } from '../api/products';
 import { ProductCard } from '../components/ProductCard';
+import { ErrorFixButton } from '../components/ErrorFixButton';
+import { getAllProducts } from '../api/products';
+import { Product } from '../types';
 import { FixedCart } from '../components/FixedCart';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { getCategoryName, getCategoryEmoji } from '../utils/categories';
-import { ErrorFixButton } from '../components/ErrorFixButton';
 
 // Теперь используем утилиты из utils/categories.ts
 
 export const MenuPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | 'all'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,24 +23,24 @@ export const MenuPage: React.FC = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      setError('');
+      setError(null);
       
       console.log('🔄 Загружаем товары...');
-      const productsData = await productsApi.getAll();
+      const data = await getAllProducts();
       
-      if (productsData && productsData.length > 0) {
-        console.log(`✅ Загружено товаров: ${productsData.length}`);
-        setProducts(productsData);
-        setFilteredProducts(productsData);
+      if (data && data.length > 0) {
+        console.log(`✅ Загружено товаров: ${data.length}`);
+        setProducts(data);
+        setFilteredProducts(data);
       } else {
         console.log('⚠️ Товары не найдены');
         setProducts([]);
         setFilteredProducts([]);
         setError('Товары не найдены');
       }
-    } catch (error: any) {
-      console.error('❌ Ошибка загрузки товаров:', error);
-      setError('Не удалось загрузить товары. Попробуйте обновить страницу.');
+    } catch (err: any) {
+      console.error('❌ Ошибка загрузки товаров:', err);
+      setError(err.message || 'Ошибка загрузки товаров');
       setProducts([]);
       setFilteredProducts([]);
     } finally {

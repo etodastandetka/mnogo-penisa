@@ -1,5 +1,10 @@
-import { client } from './client';
-import { UploadResponse } from '../utils/fileUpload';
+import { apiClient } from './client';
+
+export interface UploadResponse {
+  success: boolean;
+  fileUrl?: string;
+  error?: string;
+}
 
 export const uploadFileToServer = async (
   file: File, 
@@ -9,34 +14,23 @@ export const uploadFileToServer = async (
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await client.post(endpoint, formData, {
+    const response = await apiClient.post(endpoint, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
 
-    const result = response.data;
-    
-    if (result.success) {
-      return {
-        success: true,
-        fileUrl: result.fileUrl
-      };
-    } else {
-      return {
-        success: false,
-        error: result.error || 'Неизвестная ошибка загрузки'
-      };
-    }
-  } catch (error) {
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Ошибка загрузки файла:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Ошибка загрузки файла'
+      error: error.response?.data?.message || 'Ошибка загрузки файла'
     };
   }
 };
 
-// Функция для конвертации файла в base64
+// Конвертируем файл в base64 для fallback
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -51,15 +45,15 @@ export const updateOrderPaymentProof = async (
   fileUrl: string
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    const response = await client.patch(`/admin/orders/${orderId}/payment-proof`, {
-      payment_proof: fileUrl
+    const response = await apiClient.post(`/orders/${orderId}/payment-proof`, {
+      paymentProof: fileUrl
     });
-
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
+    console.error('❌ Ошибка обновления подтверждения оплаты:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Ошибка обновления'
+      error: error.response?.data?.message || 'Ошибка обновления подтверждения'
     };
   }
 };

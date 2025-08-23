@@ -1,4 +1,4 @@
-import { client } from './client';
+import { apiClient } from './client';
 
 export interface Shift {
   id: number;
@@ -17,20 +17,32 @@ export interface Shift {
   closed_by_name?: string;
 }
 
-// Получить текущую смену
 export const getCurrentShift = async (): Promise<{ success: boolean; shift: Shift | null }> => {
-  const response = await client.get('/admin/shifts/current');
-  return response.data;
+  try {
+    const response = await apiClient.get('/shifts/current');
+    return { success: true, shift: response.data };
+  } catch (error: any) {
+    console.error('❌ Ошибка получения текущей смены:', error);
+    return { success: false, shift: null };
+  }
 };
 
-// Открыть новую смену
 export const openShift = async (notes?: string): Promise<{ success: boolean; shift: Shift }> => {
-  const response = await client.post('/admin/shifts/open', { notes });
-  return response.data;
+  try {
+    const response = await apiClient.post('/shifts/open', { notes });
+    return { success: true, shift: response.data };
+  } catch (error: any) {
+    console.error('❌ Ошибка открытия смены:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка открытия смены');
+  }
 };
 
-// Закрыть текущую смену
 export const closeShift = async (): Promise<{ success: boolean; message: string; shift: Shift }> => {
-  const response = await client.post('/admin/shifts/close');
-  return response.data;
+  try {
+    const response = await apiClient.post('/shifts/close');
+    return { success: true, message: 'Смена закрыта', shift: response.data };
+  } catch (error: any) {
+    console.error('❌ Ошибка закрытия смены:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка закрытия смены');
+  }
 };

@@ -1,4 +1,4 @@
-import { client } from './client';
+import { apiClient } from './client';
 
 export interface TodayStats {
   total_orders: number;
@@ -10,8 +10,12 @@ export interface TodayStats {
   endOfDay: string;
 }
 
-// Получить статистику заказов за сегодня
 export const getTodayStats = async (): Promise<{ success: boolean; stats: TodayStats }> => {
-  const response = await client.get('/admin/stats/today');
-  return response.data;
+  try {
+    const response = await apiClient.get('/stats/today');
+    return { success: true, stats: response.data };
+  } catch (error: any) {
+    console.error('❌ Ошибка получения статистики за день:', error);
+    return { success: false, stats: response.data };
+  }
 };

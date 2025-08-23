@@ -1,5 +1,4 @@
-import { client } from './client';
-import { User } from '../types';
+import { apiClient } from './client';
 
 export interface AdminStats {
   totalOrders: number;
@@ -32,7 +31,6 @@ export interface AdminOrder {
   }>;
 }
 
-// Интерфейс для деталей заказа (отличается от AdminOrder)
 export interface OrderDetail {
   id: number;
   order_number: string;
@@ -65,71 +63,104 @@ export interface OrderFilters {
   search?: string;
 }
 
-// Получить статистику для дашборда
 export const getStats = async (): Promise<AdminStats> => {
-  const response = await client.get('/admin/stats');
-  return response.data;
+  try {
+    const response = await apiClient.get('/admin/stats');
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Ошибка получения статистики:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка получения статистики');
+  }
 };
 
-// Получить все заказы с фильтрами
 export const getOrders = async (filters?: OrderFilters): Promise<AdminOrder[]> => {
-  const params = new URLSearchParams();
-  if (filters?.status) params.append('status', filters.status);
-  if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom);
-  if (filters?.dateTo) params.append('dateTo', filters.dateTo);
-  if (filters?.search) params.append('search', filters.search);
-
-  const url = `/admin/orders?${params.toString()}`;
-  const response = await client.get(url);
-  return response.data;
+  try {
+    const response = await apiClient.get('/admin/orders', { params: filters });
+    return response.data || [];
+  } catch (error: any) {
+    console.error('❌ Ошибка получения заказов:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка получения заказов');
+  }
 };
 
-// Получить заказ по ID
 export const getOrder = async (id: number): Promise<OrderDetail> => {
-  const response = await client.get(`/admin/orders/${id}`);
-  return response.data;
+  try {
+    const response = await apiClient.get(`/admin/orders/${id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Ошибка получения заказа:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка получения заказа');
+  }
 };
 
-// Обновить статус заказа
 export const updateOrderStatus = async (id: number, status: string): Promise<AdminOrder> => {
-  const response = await client.patch(`/admin/orders/${id}/status`, { status });
-  return response.data;
+  try {
+    const response = await apiClient.patch(`/admin/orders/${id}/status`, { status });
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Ошибка обновления статуса заказа:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка обновления статуса');
+  }
 };
 
-// Получить аналитику
 export const getAnalytics = async (period: string = 'week'): Promise<any> => {
-  const response = await client.get(`/admin/analytics?period=${period}`);
-  return response.data;
+  try {
+    const response = await apiClient.get(`/admin/analytics?period=${period}`);
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Ошибка получения аналитики:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка получения аналитики');
+  }
 };
 
-// Получить клиентов
 export const getCustomers = async (): Promise<any[]> => {
-  const response = await client.get('/admin/customers');
-  return response.data;
+  try {
+    const response = await apiClient.get('/admin/customers');
+    return response.data || [];
+  } catch (error: any) {
+    console.error('❌ Ошибка получения клиентов:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка получения клиентов');
+  }
 };
 
-// Получить товары
 export const getProducts = async (): Promise<any[]> => {
-  const response = await client.get('/admin/products');
-  return response.data;
+  try {
+    const response = await apiClient.get('/admin/products');
+    return response.data || [];
+  } catch (error: any) {
+    console.error('❌ Ошибка получения товаров:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка получения товаров');
+  }
 };
 
-// Создать товар
 export const createProduct = async (productData: any): Promise<any> => {
-  const response = await client.post('/admin/products', productData);
-  return response.data;
+  try {
+    const response = await apiClient.post('/admin/products', productData);
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Ошибка создания товара:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка создания товара');
+  }
 };
 
-// Обновить товар
 export const updateProduct = async (id: string, productData: any): Promise<any> => {
-  const response = await client.put(`/admin/products/${id}`, productData);
-  return response.data;
+  try {
+    const response = await apiClient.put(`/admin/products/${id}`, productData);
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Ошибка обновления товара:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка обновления товара');
+  }
 };
 
-// Удалить товар
 export const deleteProduct = async (id: string): Promise<any> => {
-  const response = await client.delete(`/admin/products/${id}`);
-  return response.data;
+  try {
+    const response = await apiClient.delete(`/admin/products/${id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Ошибка удаления товара:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка удаления товара');
+  }
 };
 
 
