@@ -50,7 +50,7 @@ export const uploadPaymentProof = async (file: File, orderId: string | number, o
 
   // Определяем URL в зависимости от устройства
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const baseURL = isMobile ? '/api' : '/api';
+  const baseURL = isMobile ? 'https://147.45.141.113:3001/api' : 'https://147.45.141.113:3001/api';
 
   try {
     const response = await fetch(`${baseURL}/orders/payment-proof`, {

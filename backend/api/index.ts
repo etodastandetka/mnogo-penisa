@@ -2062,7 +2062,7 @@ const createHttpsServer = () => {
 
 // Запускаем сервер для локальной разработки
 const PORT = process.env.PORT || 3000; // Порт для локальной разработки
-const HTTPS_PORT = process.env.HTTPS_PORT || 3444; // HTTPS порт
+const HTTPS_PORT = process.env.HTTPS_PORT || 3001; // HTTPS порт
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const USE_HTTPS = process.env.USE_HTTPS === 'true'; // Принудительно использовать HTTPS
 
@@ -2440,13 +2440,19 @@ app.post('/api/upload-cdn', upload.single('image'), (req, res) => {
   }
 });
 
-// Запускаем HTTP сервер на порту 3001
-const HTTP_PORT = 3001; // HTTP порт для nginx прокси
+// Запускаем HTTPS сервер на порту 3001
+const HTTPS_PORT = 3001; // HTTPS порт для nginx прокси
 
-// Запускаем HTTP сервер напрямую
-console.log('🔄 Запускаем HTTP сервер на порту:', HTTP_PORT);
-app.listen(HTTP_PORT, '0.0.0.0', () => {
-  console.log('🌐 HTTP Server started on port:', HTTP_PORT);
-  console.log('🌐 URL: http://127.0.0.1:' + HTTP_PORT);
-  console.log('🌐 Готов для nginx прокси');
+// Пути к SSL сертификатам
+const SSL_OPTIONS = {
+  key: fs.readFileSync('/etc/letsencrypt/live/mnogo-rolly.online/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/mnogo-rolly.online/fullchain.pem')
+};
+
+// Запускаем HTTPS сервер
+console.log('🔄 Запускаем HTTPS сервер на порту:', HTTPS_PORT);
+https.createServer(SSL_OPTIONS, app).listen(HTTPS_PORT, '0.0.0.0', () => {
+  console.log('🔒 HTTPS Server started on port:', HTTPS_PORT);
+  console.log('🔒 URL: https://127.0.0.1:' + HTTPS_PORT);
+  console.log('🔒 Готов для nginx прокси');
 });
