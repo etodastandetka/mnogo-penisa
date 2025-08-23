@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// API клиент для работы на одном сервере (фронтенд + бэкенд)
+// API клиент для работы с сервером
 export const client = axios.create({
-  baseURL: 'http://localhost:3001/api',
+  baseURL: 'https://147.45.141.113:3444/api',
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',

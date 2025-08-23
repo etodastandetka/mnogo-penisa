@@ -2053,27 +2053,26 @@ const createHttpsServer = () => {
   }
 };
 
-// Запускаем сервер если файл запущен напрямую
-if (require.main === module) {
-  const HTTPS_PORT = 3444; // Принудительно устанавливаем порт 3444
-  const HTTP_PORT = 3001; // HTTP порт для fallback
-  
-  // Запускаем HTTPS сервер
-  const httpsServer = createHttpsServer();
-  
-  if (httpsServer) {
-    httpsServer.listen(Number(HTTPS_PORT), '0.0.0.0', () => {
-      console.log('🔒 HTTPS Server started on port:', HTTPS_PORT);
-      console.log('🌐 URL: https://147.45.141.113:' + HTTPS_PORT);
-    });
-  } else {
-    // Если HTTPS не работает, запускаем HTTP сервер
-    console.log('🔄 Запускаем HTTP сервер на порту:', HTTP_PORT);
-    app.listen(HTTP_PORT, '0.0.0.0', () => {
-      console.log('🌐 HTTP Server started on port:', HTTP_PORT);
-      console.log('🌐 URL: http://localhost:' + HTTP_PORT);
-    });
-  }
+// Запускаем сервер
+const HTTPS_PORT = 3444; // HTTPS порт
+const HTTP_PORT = 3001; // HTTP порт для fallback
+
+// Запускаем HTTPS сервер
+const httpsServer = createHttpsServer();
+
+if (httpsServer) {
+  httpsServer.listen(Number(HTTPS_PORT), '0.0.0.0', () => {
+    console.log('🔒 HTTPS Server started on port:', HTTPS_PORT);
+    console.log('🌐 URL: https://147.45.141.113:' + HTTPS_PORT);
+  });
+} else {
+  // Если HTTPS не работает, запускаем HTTP сервер
+  console.log('🔄 Запускаем HTTP сервер на порту:', HTTP_PORT);
+  app.listen(HTTP_PORT, '0.0.0.0', () => {
+    console.log('🌐 HTTP Server started on port:', HTTP_PORT);
+    console.log('🌐 URL: http://localhost:' + HTTP_PORT);
+    console.log('🌐 URL: http://0.0.0.0:' + HTTP_PORT);
+  });
 }
 
 
