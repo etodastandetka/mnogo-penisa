@@ -39,21 +39,7 @@ export const MenuPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error('❌ Ошибка загрузки товаров:', error);
-      
-      // Улучшенная обработка ошибок для мобильных устройств
-      let errorMessage = 'Ошибка загрузки товаров';
-      
-      if (error.code === 'NETWORK_ERROR' || error.message?.includes('network')) {
-        errorMessage = 'Проблема с интернет-соединением. Проверьте подключение.';
-      } else if (error.code === 'TIMEOUT_ERROR' || error.message?.includes('timeout')) {
-        errorMessage = 'Превышено время ожидания. Попробуйте еще раз.';
-      } else if (error.response?.status === 500) {
-        errorMessage = 'Ошибка сервера. Попробуйте позже.';
-      } else if (error.response?.status === 404) {
-        errorMessage = 'Страница не найдена.';
-      }
-      
-      setError(errorMessage);
+      setError('Не удалось загрузить товары. Попробуйте обновить страницу.');
       setProducts([]);
       setFilteredProducts([]);
     } finally {
@@ -87,38 +73,22 @@ export const MenuPage: React.FC = () => {
       setFilteredProducts(filtered);
     } catch (error) {
       console.error('❌ Ошибка фильтрации товаров:', error);
-      // Fallback - показываем все товары если фильтрация не удалась
       setFilteredProducts(products);
     }
   };
 
   const handleCategoryChange = (category: string | 'all') => {
-    try {
-      setSelectedCategory(category);
-    } catch (error) {
-      console.error('❌ Ошибка изменения категории:', error);
-    }
+    setSelectedCategory(category);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      setSearchQuery(e.target.value);
-    } catch (error) {
-      console.error('❌ Ошибка изменения поиска:', error);
-    }
+    setSearchQuery(e.target.value);
   };
 
   const handleRetry = () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      // Простая повторная попытка без очистки кеша
-      fetchProducts();
-    } catch (error) {
-      console.error('❌ Ошибка повторной попытки:', error);
-      setError('Не удалось повторить попытку');
-    }
+    setLoading(true);
+    setError('');
+    fetchProducts();
   };
 
   // Убираем сложные функции очистки кеша для iOS

@@ -68,47 +68,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    try {
-      setImageError(true);
-      console.log('⚠️ Ошибка загрузки изображения для товара:', product.name);
-      
-      // Простая обработка ошибки без автоматического исправления на iOS
-      
-    } catch (error) {
-      console.error('❌ Ошибка обработки ошибки изображения:', error);
-    }
+    setImageError(true);
+    console.log('⚠️ Ошибка загрузки изображения для товара:', product.name);
   };
 
-  // Убираем сложные функции автоматического исправления для iOS
-  // const autoFixImageError = (imgElement: HTMLImageElement) => { ... };
-  // const showImageFixNotification = () => { ... };
-
   const handleAddToCart = () => {
-    try {
-      addItem(product);
-    } catch (error) {
-      console.error('❌ Ошибка добавления в корзину:', error);
-      alert('Не удалось добавить товар в корзину. Попробуйте еще раз.');
-    }
+    addItem(product);
   };
 
   const handleRemoveFromCart = () => {
-    try {
-      removeItem(product.id.toString());
-    } catch (error) {
-      console.error('❌ Ошибка удаления из корзины:', error);
-    }
+    removeItem(product.id.toString());
   };
 
   const handleUpdateQuantity = (newQuantity: number) => {
-    try {
-      if (newQuantity <= 0) {
-        removeItem(product.id.toString());
-      } else {
-        updateQuantity(product.id.toString(), newQuantity);
-      }
-    } catch (error) {
-      console.error('❌ Ошибка обновления количества:', error);
+    if (newQuantity <= 0) {
+      removeItem(product.id.toString());
+    } else {
+      updateQuantity(product.id.toString(), newQuantity);
     }
   };
 
