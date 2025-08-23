@@ -2065,6 +2065,16 @@ const PORT = process.env.PORT || 3000; // Порт для локальной р�
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const USE_HTTPS = process.env.USE_HTTPS === 'true'; // Принудительно использовать HTTPS
 
+// Отладочная информация
+console.log('🔧 Переменные окружения:');
+console.log('  PORT:', process.env.PORT);
+console.log('  NODE_ENV:', process.env.NODE_ENV);
+console.log('  USE_HTTPS:', process.env.USE_HTTPS);
+console.log('  Итоговые значения:');
+console.log('    PORT:', PORT);
+console.log('    NODE_ENV:', NODE_ENV);
+console.log('    USE_HTTPS:', USE_HTTPS);
+
 // Проверяем, есть ли SSL сертификаты
 const httpsServer = createHttpsServer();
 
