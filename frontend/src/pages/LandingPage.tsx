@@ -46,11 +46,34 @@ export const LandingPage: React.FC = () => {
       try {
         setError(null);
         console.log('🔄 Загружаем товары...');
+        
+        // Специальная проверка для мобильных устройств
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+          console.log('📱 Мобильное устройство обнаружено');
+          console.log('📱 User-Agent:', navigator.userAgent);
+          console.log('📱 Размер экрана:', window.innerWidth, 'x', window.innerHeight);
+        }
+        
         const productsData = await productsApi.getAll();
         setProducts(productsData);
         console.log(`✅ Товары загружены: ${productsData.length}`);
       } catch (error: any) {
         console.error('❌ Ошибка загрузки продуктов:', error);
+        
+        // Детальная диагностика для мобильных
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+          console.log('📱 Детали ошибки на мобильном:');
+          console.log('📱 Код ошибки:', error.code);
+          console.log('📱 Сообщение:', error.message);
+          console.log('📱 Тип ошибки:', error.name);
+          if (error.response) {
+            console.log('📱 Статус ответа:', error.response.status);
+            console.log('📱 Данные ответа:', error.response.data);
+          }
+        }
+        
         setError(error.message || 'Ошибка загрузки данных');
         
         // Fallback: используем базовые данные
