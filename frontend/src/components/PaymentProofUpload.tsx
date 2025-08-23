@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from './ui/Button';
 import { Upload, X, CheckCircle } from 'lucide-react';
-import { uploadPaymentProof } from '../api/upload';
+import { uploadPaymentProof } from '../utils/fileUpload';
 
 interface PaymentProofUploadProps {
 	orderId?: string; // необязательно
@@ -41,8 +41,8 @@ export const PaymentProofUpload: React.FC<PaymentProofUploadProps> = ({
 			console.log('💰 Загружаем чек об оплате');
 			
 			// Если orderId есть, загружаем на сервер, иначе просто возвращаем base64
-			if (orderId) {
-				const result = await uploadPaymentProof(selectedFile, orderId);
+			if (orderId && orderNumber) {
+				const result = await uploadPaymentProof(selectedFile, orderId, orderNumber);
 				
 				if (result.success && result.fileUrl) {
 					console.log('✅ Чек об оплате успешно загружен на сервер');

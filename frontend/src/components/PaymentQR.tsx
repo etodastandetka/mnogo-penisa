@@ -8,7 +8,7 @@ import {
   Receipt
 } from 'lucide-react';
 import { BankPaymentButtons } from './BankPaymentButtons';
-import { uploadPaymentProof } from '../api/upload';
+import { uploadPaymentProof } from '../utils/fileUpload';
 
 interface PaymentQRProps {
   order: any;
@@ -65,7 +65,7 @@ export const PaymentQR: React.FC<PaymentQRProps> = ({
     setUploading(true);
     try {
       // Реальная загрузка файла на сервер
-      const result = await uploadPaymentProof(selectedImage, order.id);
+      const result = await uploadPaymentProof(selectedImage, order.id, order.orderNumber || order.id.toString());
       
       if (result.success && result.fileUrl) {
         alert('Фото чека успешно загружено и привязано к заказу!');

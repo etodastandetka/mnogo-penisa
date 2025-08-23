@@ -17,6 +17,7 @@ export const LandingPage: React.FC = () => {
   const { user } = useUserStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   // Определяем мобильное устройство
@@ -34,17 +35,25 @@ export const LandingPage: React.FC = () => {
   useEffect(() => {
     const loadProducts = async () => {
       try {
+        setError(null);
         const productsData = await productsApi.getAll();
         setProducts(productsData);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Ошибка загрузки продуктов:', error);
+        setError(error.message || 'Ошибка загрузки данных');
         // Fallback для мобильных устройств
         setProducts([]);
       } finally {
         setLoading(false);
       }
     };
-    loadProducts();
+    
+    // Добавляем задержку для стабильности на мобильных
+    const timer = setTimeout(() => {
+      loadProducts();
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const features = [
@@ -103,10 +112,41 @@ export const LandingPage: React.FC = () => {
 
   const randomReviews = allReviews.slice(0, 3);
 
+  // Показываем загрузку пока данные не загружены
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-xl">Загружаем...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Показываем ошибку если что-то пошло не так
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 flex items-center justify-center">
+        <div className="text-white text-center max-w-md mx-auto px-4">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-bold mb-4">Что-то пошло не так</h1>
+          <p className="text-lg mb-6 text-white/90">{error}</p>
+          <Button 
+            onClick={() => window.location.reload()}
+            className="bg-white text-orange-600 hover:bg-gray-100 font-bold px-6 py-3 rounded-xl"
+          >
+            Попробовать снова
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative bg-orange-500 text-white overflow-hidden">
+      <section className="relative bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 text-white overflow-hidden">
         {/* Fallback для старых браузеров */}
         <div className="absolute inset-0 bg-orange-500"></div>
         
@@ -114,13 +154,13 @@ export const LandingPage: React.FC = () => {
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700"></div>
           <div className="absolute inset-0 opacity-20">
-            <div className={`absolute top-10 left-10 w-32 h-32 bg-orange-300 rounded-full blur-2xl ${!isMobile ? 'animate-pulse' : ''}`}></div>
-            <div className={`absolute top-20 right-20 w-24 h-24 bg-orange-400 rounded-full blur-xl ${!isMobile ? 'animate-pulse' : ''}`} style={{animationDelay: '1s'}}></div>
-            <div className={`absolute bottom-20 left-1/4 w-28 h-28 bg-orange-500 rounded-full blur-2xl ${!isMobile ? 'animate-pulse' : ''}`} style={{animationDelay: '2s'}}></div>
+            <div className="absolute top-10 left-10 w-32 h-32 bg-orange-300 rounded-full blur-2xl animate-pulse"></div>
+            <div className="absolute top-20 right-20 w-24 h-24 bg-orange-400 rounded-full blur-xl animate-pulse" style={{animationDelay: '1s'}}></div>
+            <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-orange-500 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
           </div>
           
-          {/* Дополнительные блики - только на десктопе */}
-          <div className="hidden md:block absolute top-0 left-0 w-full h-full">
+          {/* Дополнительные блики */}
+          <div className="absolute top-0 left-0 w-full h-full">
             <div className="absolute top-1/4 right-1/4 w-6 h-6 bg-white/40 rounded-full opacity-50 animate-pulse" style={{animationDelay: '0.5s'}}></div>
             <div className="absolute bottom-1/3 right-1/3 w-5 h-5 bg-white/30 rounded-full opacity-60 animate-pulse" style={{animationDelay: '1.5s'}}></div>
             <div className="absolute top-1/2 left-1/4 w-3 h-3 bg-white/50 rounded-full opacity-70 animate-ping" style={{animationDelay: '0.8s'}}></div>
@@ -130,7 +170,7 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Левая колонка - основной контент */}
             <div className="text-left lg:-ml-16">
@@ -143,45 +183,45 @@ export const LandingPage: React.FC = () => {
                 </Badge>
               </div>
               
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
                 Вкусные роллы
                 <span className="block text-yellow-300">с доставкой</span>
             </h1>
               
-              <p className="text-sm sm:text-base md:text-xl lg:text-2xl text-white/90 mb-4 sm:mb-6 lg:mb-8 leading-relaxed">
+              <p className="text-base sm:text-xl md:text-2xl text-white/90 mb-6 sm:mb-8 leading-relaxed">
                 Свежие ингредиенты, оригинальные рецепты и быстрая доставка прямо к вашему столу
             </p>
               
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6 lg:mb-8">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
               <Button 
                 onClick={() => navigate('/menu')}
-                  className="bg-white text-orange-600 hover:bg-gray-100 font-bold text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-10 py-2 sm:py-3 md:py-5 rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg sm:shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 border-2 border-white/20"
+                  className="bg-white text-orange-600 hover:bg-gray-100 font-bold text-base sm:text-lg px-6 sm:px-10 py-3 sm:py-5 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 border-2 border-white/20"
               >
-                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 mr-2 sm:mr-3" />
+                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                 Заказать сейчас
               </Button>
               <Button 
                 variant="outline"
                 onClick={() => window.location.href = 'tel:+996709611043'}
-                  className="bg-white/10 border-2 border-white/30 text-white hover:bg-white hover:text-orange-600 font-bold text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-10 py-2 sm:py-3 md:py-5 rounded-lg sm:rounded-xl md:rounded-2xl backdrop-blur-md transition-all duration-300 shadow-lg sm:shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transform hover:scale-105 hover:-translate-y-1 border-2 border-white/20"
+                  className="bg-white/10 border-2 border-white/30 text-white hover:bg-white hover:text-orange-600 font-bold text-base sm:text-lg px-6 sm:px-10 py-3 sm:py-5 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all duration-300 shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transform hover:scale-105 hover:-translate-y-1 border-2 border-white/20"
               >
-                <Phone className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 mr-2 sm:mr-3" />
+                <Phone className="w-5 h-5 sm:w-6 sm:w-6 mr-2 sm:mr-3" />
                   <span className="hidden sm:inline">Связаться с нами</span>
                   <span className="sm:hidden">Позвонить</span>
               </Button>
               </div>
               
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 md:gap-8 text-white/80 text-xs sm:text-sm md:text-base">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 text-white/80 text-sm sm:text-base">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>30-60 мин</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>По всему городу</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Star className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-yellow-300" />
+                  <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-300" />
                   <span>4.9/5</span>
                 </div>
               </div>
@@ -398,7 +438,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-16 bg-orange-500 text-white overflow-hidden">
+      <section className="relative py-16 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 text-white overflow-hidden">
         {/* Fallback для старых браузеров */}
         <div className="absolute inset-0 bg-orange-500"></div>
         
@@ -406,9 +446,9 @@ export const LandingPage: React.FC = () => {
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700"></div>
           <div className="absolute inset-0 opacity-20">
-            <div className={`absolute top-10 left-10 w-32 h-32 bg-orange-300 rounded-full blur-2xl ${!isMobile ? 'animate-pulse' : ''}`}></div>
-            <div className={`absolute top-20 right-20 w-24 h-24 bg-orange-400 rounded-full blur-xl ${!isMobile ? 'animate-pulse' : ''}`} style={{animationDelay: '1s'}}></div>
-            <div className={`absolute bottom-20 left-1/4 w-28 h-28 bg-orange-500 rounded-full blur-2xl ${!isMobile ? 'animate-pulse' : ''}`} style={{animationDelay: '2s'}}></div>
+            <div className="absolute top-10 left-10 w-32 h-32 bg-orange-300 rounded-full blur-2xl animate-pulse"></div>
+            <div className="absolute top-20 right-20 w-24 h-24 bg-orange-400 rounded-full blur-xl animate-pulse" style={{animationDelay: '1s'}}></div>
+            <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-orange-500 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
           </div>
         </div>
         
