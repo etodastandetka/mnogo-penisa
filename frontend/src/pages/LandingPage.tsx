@@ -23,7 +23,16 @@ export const LandingPage: React.FC = () => {
   // Определяем мобильное устройство
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      const isMobile = window.innerWidth < 768;
+      setIsMobile(isMobile);
+      
+      // Специальная проверка для iPhone Safari
+      const isIPhone = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+      
+      if (isIPhone && isSafari) {
+        console.log('🍎 Обнаружен iPhone Safari - применяем специальные настройки');
+      }
     };
     
     checkMobile();
@@ -33,16 +42,39 @@ export const LandingPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const loadProducts = async (retryCount = 0) => {
       try {
         setError(null);
+        console.log(`🔄 Попытка загрузки товаров #${retryCount + 1}...`);
         const productsData = await productsApi.getAll();
         setProducts(productsData);
+        console.log(`✅ Товары успешно загружены: ${productsData.length}`);
       } catch (error: any) {
-        console.error('Ошибка загрузки продуктов:', error);
+        console.error('❌ Ошибка загрузки продуктов:', error);
+        
+        // Если это первая попытка и ошибка сети, пробуем еще раз
+        if (retryCount < 2 && (!error.response && error.request)) {
+          console.log(`🔄 Повторная попытка через 2 секунды... (${retryCount + 1}/2)`);
+          setTimeout(() => loadProducts(retryCount + 1), 2000);
+          return;
+        }
+        
+        // Специальная обработка для iPhone Safari
+        const isIPhone = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+        
+        if (isIPhone && isSafari && retryCount < 3) {
+          console.log(`🍎 iPhone Safari - дополнительная попытка через 3 секунды... (${retryCount + 1}/3)`);
+          setTimeout(() => loadProducts(retryCount + 1), 3000);
+          return;
+        }
+        
+        // Если все попытки исчерпаны, показываем ошибку
         setError(error.message || 'Ошибка загрузки данных');
-        // Fallback для мобильных устройств
-        setProducts([]);
+        
+        // Fallback: используем базовые данные вместо пустого массива
+        console.log('🔄 Используем fallback данные...');
+        setProducts(fallbackProducts);
       } finally {
         setLoading(false);
       }
@@ -51,10 +83,47 @@ export const LandingPage: React.FC = () => {
     // Добавляем задержку для стабильности на мобильных
     const timer = setTimeout(() => {
       loadProducts();
-    }, 100);
+    }, 200); // Увеличиваем задержку для iPhone
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Fallback данные для случаев, когда API недоступен
+  const fallbackProducts: Product[] = [
+    {
+      id: 'fallback-1',
+      name: 'Филадельфия ролл',
+      description: 'Классический ролл с лососем, сливочным сыром и огурцом',
+      price: 1200,
+      category: 'rolls',
+      image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&h=200&fit=crop',
+      mobile_image_url: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&h=200&fit=crop',
+      isAvailable: true,
+      isPopular: true
+    },
+    {
+      id: 'fallback-2',
+      name: 'Калифорния ролл',
+      description: 'Нежный ролл с крабом, авокадо и огурцом',
+      price: 1100,
+      category: 'rolls',
+      image_url: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=300&h=200&fit=crop',
+      mobile_image_url: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=300&h=200&fit=crop',
+      isAvailable: true,
+      isPopular: true
+    },
+    {
+      id: 'fallback-3',
+      name: 'Унаги ролл',
+      description: 'Ролл с угрем, огурцом и соусом унаги',
+      price: 1400,
+      category: 'rolls',
+      image_url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&h=200&fit=crop',
+      mobile_image_url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&h=200&fit=crop',
+      isAvailable: true,
+      isPopular: true
+    }
+  ];
 
   const features = [
     {

@@ -1,13 +1,16 @@
 import axios from 'axios';
 
-// Определяем базовый URL в зависимости от устройства
+// Улучшенное определение мобильного устройства
 const getBaseURL = () => {
-  // Проверяем, мобильное ли это устройство
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  // Проверяем несколько способов определения мобильного устройства
+  const isMobile = 
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints && navigator.maxTouchPoints > 2) ||
+    window.innerWidth < 768;
   
   if (isMobile) {
-    // Для мобильных устройств используем HTTP
-    return 'http://45.144.221.227:3001/api';
+    // Для мобильных устройств сначала пробуем HTTPS, потом HTTP как fallback
+    return 'https://45.144.221.227:3444/api';
   } else {
     // Для десктопа используем HTTPS
     return 'https://45.144.221.227:3444/api';
@@ -16,7 +19,7 @@ const getBaseURL = () => {
 
 export const client = axios.create({
   baseURL: getBaseURL(),
-  timeout: 15000,
+  timeout: 30000, // Увеличиваем timeout для iPhone
   headers: {
     'Content-Type': 'application/json',
   },
@@ -30,6 +33,10 @@ client.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Добавляем заголовки для лучшей совместимости с iPhone
+    config.headers['Accept'] = 'application/json';
+    config.headers['Cache-Control'] = 'no-cache';
 
     return config;
   },
@@ -52,6 +59,13 @@ client.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/';
+    }
+    
+    // Если это ошибка сети на мобильном, пробуем HTTP как fallback
+    if (!error.response && error.request && error.code !== 'ECONNABORTED') {
+      console.log('🔄 Пробуем HTTP fallback для мобильного устройства...');
+      // Меняем baseURL на HTTP для следующего запроса
+      client.defaults.baseURL = 'http://45.144.221.227:3001/api';
     }
     
     return Promise.reject(error);
