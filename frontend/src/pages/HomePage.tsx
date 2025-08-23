@@ -21,30 +21,41 @@ export const MenuPage: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      setError(null);
-      console.log('📱 Загружаем товары для меню...');
-      const productsData = await productsApi.getAll();
-      console.log('📱 Загружено товаров:', productsData.length);
-      console.log('📱 Первый товар:', productsData?.[0]);
-      console.log('📱 User Agent:', navigator.userAgent);
+      setLoading(true);
+      setError('');
       
-      if (productsData && Array.isArray(productsData)) {
+      console.log('🔄 Загружаем товары...');
+      const productsData = await productsApi.getAll();
+      
+      if (productsData && productsData.length > 0) {
+        console.log(`✅ Загружено товаров: ${productsData.length}`);
         setProducts(productsData);
         setFilteredProducts(productsData);
-        setRetryCount(0); // Сбрасываем счетчик попыток при успехе
-        
-        // Извлекаем уникальные категории из товаров
-        const categories = [...new Set(productsData.map(p => p.category))].sort();
-        setAvailableCategories(categories);
-        console.log('📂 Найденные категории:', categories);
       } else {
-        console.error('Неверный формат данных:', productsData);
-        setError('Ошибка загрузки данных');
+        console.log('⚠️ Товары не найдены');
+        setProducts([]);
+        setFilteredProducts([]);
+        setError('Товары не найдены');
       }
-    } catch (error) {
-      console.error('Ошибка загрузки продуктов:', error);
-      setError('Не удалось загрузить меню');
-      setRetryCount(prev => prev + 1);
+    } catch (error: any) {
+      console.error('❌ Ошибка загрузки товаров:', error);
+      
+      // Улучшенная обработка ошибок для мобильных устройств
+      let errorMessage = 'Ошибка загрузки товаров';
+      
+      if (error.code === 'NETWORK_ERROR' || error.message?.includes('network')) {
+        errorMessage = 'Проблема с интернет-соединением. Проверьте подключение.';
+      } else if (error.code === 'TIMEOUT_ERROR' || error.message?.includes('timeout')) {
+        errorMessage = 'Превышено время ожидания. Попробуйте еще раз.';
+      } else if (error.response?.status === 500) {
+        errorMessage = 'Ошибка сервера. Попробуйте позже.';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Страница не найдена.';
+      }
+      
+      setError(errorMessage);
+      setProducts([]);
+      setFilteredProducts([]);
     } finally {
       setLoading(false);
     }
@@ -52,11 +63,6 @@ export const MenuPage: React.FC = () => {
 
   useEffect(() => {
     fetchProducts();
-    
-    // Обновляем данные каждые 30 секунд
-    const interval = setInterval(fetchProducts, 30000);
-    
-    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -64,34 +70,75 @@ export const MenuPage: React.FC = () => {
   }, [selectedCategory, searchQuery, products]);
 
   const filterProducts = () => {
-    let filtered = [...products];
+    try {
+      let filtered = [...products];
 
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(product => product.category === selectedCategory);
+      if (selectedCategory !== 'all') {
+        filtered = filtered.filter(product => product.category === selectedCategory);
+      }
+
+      if (searchQuery.trim()) {
+        filtered = filtered.filter(product =>
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
+      setFilteredProducts(filtered);
+    } catch (error) {
+      console.error('❌ Ошибка фильтрации товаров:', error);
+      // Fallback - показываем все товары если фильтрация не удалась
+      setFilteredProducts(products);
     }
-
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    setFilteredProducts(filtered);
   };
 
   const handleCategoryChange = (category: string | 'all') => {
-    setSelectedCategory(category);
+    try {
+      setSelectedCategory(category);
+    } catch (error) {
+      console.error('❌ Ошибка изменения категории:', error);
+    }
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    try {
+      setSearchQuery(e.target.value);
+    } catch (error) {
+      console.error('❌ Ошибка изменения поиска:', error);
+    }
   };
 
   const handleRetry = () => {
-    setLoading(true);
-    fetchProducts();
+    try {
+      setLoading(true);
+      setError('');
+      fetchProducts();
+    } catch (error) {
+      console.error('❌ Ошибка повторной попытки:', error);
+      setError('Не удалось повторить попытку');
+    }
   };
+
+  // Fallback для случаев когда данные не загрузились
+  if (!loading && !error && products.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="text-gray-400 text-6xl mb-4">📦</div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Товары не найдены</h2>
+          <p className="text-gray-600 mb-4">
+            Не удалось загрузить товары. Возможно, проблема с сервером.
+          </p>
+          <button
+            onClick={handleRetry}
+            className="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+          >
+            Попробовать снова
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -108,13 +155,20 @@ export const MenuPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
           <p className="text-orange-600 mb-4 text-sm sm:text-base">{error}</p>
           <p className="text-gray-500 mb-4 text-xs sm:text-sm">
             Попыток: {retryCount}
           </p>
-          <Button onClick={handleRetry} className="w-full sm:w-auto">
+          <button
+            onClick={handleRetry}
+            className="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+          >
             Попробовать снова
-          </Button>
+          </button>
+          <div className="mt-4 text-xs text-gray-500">
+            Если проблема повторяется, попробуйте обновить страницу
+          </div>
         </div>
       </div>
     );

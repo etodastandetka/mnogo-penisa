@@ -52,6 +52,46 @@
   z-index: 9997 !important;
 }
 
+/* Предотвращение белых экранов на мобильных */
+@media (max-width: 768px) {
+  body {
+    min-height: 100vh;
+    background-color: #f9fafb !important;
+    overflow-x: hidden;
+  }
+  
+  #root {
+    min-height: 100vh;
+    background-color: #f9fafb !important;
+  }
+  
+  .App {
+    min-height: 100vh;
+    background-color: #f9fafb !important;
+  }
+  
+  /* Принудительное отображение контента */
+  .min-h-screen {
+    min-height: 100vh !important;
+  }
+  
+  /* Fallback для изображений */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  /* Предотвращение скрытия контента */
+  .hidden {
+    display: none !important;
+  }
+  
+  /* Улучшенная видимость текста */
+  p, h1, h2, h3, h4, h5, h6 {
+    color: #111827 !important;
+  }
+}
+
 /* Скрытие скроллбара для мобильных устройств */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* Internet Explorer 10+ */

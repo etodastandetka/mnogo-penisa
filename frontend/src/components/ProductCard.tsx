@@ -16,8 +16,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Защита от undefined/null
   if (!product) {
     console.log('❌ ProductCard: product is undefined/null');
-    return null;
+    return (
+      <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+        <div className="text-center text-gray-500">
+          <div className="w-32 h-32 bg-gray-200 rounded-lg mx-auto mb-3"></div>
+          <p>Товар не найден</p>
+        </div>
+      </div>
+    );
   }
+
   const { addItem, removeItem, updateQuantity, getItemQuantity } = useCartStore();
   const quantity = getItemQuantity(product.id.toString());
   const [imageError, setImageError] = useState(false);
@@ -25,49 +33,75 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   // Функция для получения URL изображения - мобильные фото приоритет везде
   const getImageUrl = (): string | null => {
-    let imageUrl = '';
-    
-    // Приоритет: мобильное фото везде, затем основное как fallback
-    if (product.mobile_image_url && product.mobile_image_url !== 'null' && product.mobile_image_url !== '') {
-      imageUrl = product.mobile_image_url;
-    } else if (product.image_url && product.image_url !== 'null' && product.image_url !== '') {
-      imageUrl = product.image_url;
-    }
-    
-    // Если есть изображение - используем его
-    if (imageUrl && imageUrl.trim() && imageUrl !== 'null') {
-      // Проверяем все типы URL
-      if (imageUrl.startsWith('http') || imageUrl.startsWith('/') || imageUrl.startsWith('data:image/')) {
-        return imageUrl;
+    try {
+      let imageUrl = '';
+      
+      // Приоритет: мобильное фото везде, затем основное как fallback
+      if (product.mobile_image_url && product.mobile_image_url !== 'null' && product.mobile_image_url !== '') {
+        imageUrl = product.mobile_image_url;
+      } else if (product.image_url && product.image_url !== 'null' && product.image_url !== '') {
+        imageUrl = product.image_url;
       }
+      
+      // Если есть изображение - используем его
+      if (imageUrl && imageUrl.trim() && imageUrl !== 'null') {
+        // Проверяем все типы URL
+        if (imageUrl.startsWith('http') || imageUrl.startsWith('/') || imageUrl.startsWith('data:image/')) {
+          return imageUrl;
+        }
+      }
+      
+      return null; // Нет изображения - покажем эмодзи
+    } catch (error) {
+      console.error('❌ Ошибка получения URL изображения:', error);
+      return null;
     }
-    
-    return null; // Нет изображения - покажем эмодзи
   };
 
   const handleImageLoad = () => {
-    console.log('✅ Изображение загружено для товара:', product.name);
-    setImageError(false);
+    try {
+      console.log('✅ Изображение загружено для товара:', product.name);
+      setImageError(false);
+    } catch (error) {
+      console.error('❌ Ошибка обработки загрузки изображения:', error);
+    }
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    setImageError(true);
-    // Показываем эмодзи fallback
+    try {
+      setImageError(true);
+      console.log('⚠️ Ошибка загрузки изображения для товара:', product.name);
+    } catch (error) {
+      console.error('❌ Ошибка обработки ошибки изображения:', error);
+    }
   };
 
   const handleAddToCart = () => {
-    addItem(product);
+    try {
+      addItem(product);
+    } catch (error) {
+      console.error('❌ Ошибка добавления в корзину:', error);
+      alert('Не удалось добавить товар в корзину. Попробуйте еще раз.');
+    }
   };
 
   const handleRemoveFromCart = () => {
-    removeItem(product.id.toString());
+    try {
+      removeItem(product.id.toString());
+    } catch (error) {
+      console.error('❌ Ошибка удаления из корзины:', error);
+    }
   };
 
   const handleUpdateQuantity = (newQuantity: number) => {
-    if (newQuantity <= 0) {
-      removeItem(product.id.toString());
-    } else {
-      updateQuantity(product.id.toString(), newQuantity);
+    try {
+      if (newQuantity <= 0) {
+        removeItem(product.id.toString());
+      } else {
+        updateQuantity(product.id.toString(), newQuantity);
+      }
+    } catch (error) {
+      console.error('❌ Ошибка обновления количества:', error);
     }
   };
 
