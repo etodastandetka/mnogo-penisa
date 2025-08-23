@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'api',
       script: 'start-server.js',
-      cwd: './backend',
+      cwd: '.',
       instances: 1,
       autorestart: true,
       watch: false,
