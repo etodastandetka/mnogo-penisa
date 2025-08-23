@@ -2053,9 +2053,8 @@ const createHttpsServer = () => {
   }
 };
 
-// Запускаем сервер
+// Запускаем только HTTPS сервер
 const HTTPS_PORT = 3444; // HTTPS порт
-const HTTP_PORT = 3001; // HTTP порт для fallback
 
 // Запускаем HTTPS сервер
 const httpsServer = createHttpsServer();
@@ -2066,13 +2065,7 @@ if (httpsServer) {
     console.log('🌐 URL: https://147.45.141.113:' + HTTPS_PORT);
   });
 } else {
-  // Если HTTPS не работает, запускаем HTTP сервер
-  console.log('🔄 Запускаем HTTP сервер на порту:', HTTP_PORT);
-  app.listen(HTTP_PORT, '0.0.0.0', () => {
-    console.log('🌐 HTTP Server started on port:', HTTP_PORT);
-    console.log('🌐 URL: http://localhost:' + HTTP_PORT);
-    console.log('🌐 URL: http://0.0.0.0:' + HTTP_PORT);
-  });
+  console.log('❌ Не удалось запустить HTTPS сервер');
 }
 
 
