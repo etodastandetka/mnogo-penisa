@@ -72,73 +72,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       setImageError(true);
       console.log('⚠️ Ошибка загрузки изображения для товара:', product.name);
       
-      // Пытаемся автоматически исправить ошибку изображения
-      autoFixImageError(e.target as HTMLImageElement);
+      // Простая обработка ошибки без автоматического исправления на iOS
       
     } catch (error) {
       console.error('❌ Ошибка обработки ошибки изображения:', error);
     }
   };
 
-  // Автоматическое исправление ошибок изображений
-  const autoFixImageError = (imgElement: HTMLImageElement) => {
-    try {
-      console.log('🔧 Пытаемся автоматически исправить изображение...');
-      
-      // Если это ошибка кеша или сети, пытаемся перезагрузить
-      if (imgElement.src && (
-        imgElement.src.includes('cache') || 
-        imgElement.src.includes('Failed to fetch') ||
-        imgElement.src.includes('NetworkError')
-      )) {
-        console.log('🔄 Ошибка кеша/сети - перезагружаем изображение...');
-        
-        // Добавляем timestamp для обхода кеша
-        const timestamp = Date.now();
-        const separator = imgElement.src.includes('?') ? '&' : '?';
-        imgElement.src = `${imgElement.src}${separator}_t=${timestamp}`;
-        
-        // Показываем уведомление
-        showImageFixNotification();
-      }
-      
-    } catch (error) {
-      console.error('❌ Не удалось автоматически исправить изображение:', error);
-    }
-  };
-
-  // Уведомление об исправлении изображения
-  const showImageFixNotification = () => {
-    try {
-      const notification = document.createElement('div');
-      notification.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #10b981;
-        color: white;
-        padding: 8px 16px;
-        border-radius: 6px;
-        z-index: 10000;
-        font-family: Arial, sans-serif;
-        font-size: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      `;
-      notification.textContent = '🔄 Исправляем изображение...';
-      
-      document.body.appendChild(notification);
-      
-      // Убираем уведомление через 3 секунды
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.parentNode.removeChild(notification);
-        }
-      }, 3000);
-    } catch (e) {
-      console.error('Не удалось показать уведомление:', e);
-    }
-  };
+  // Убираем сложные функции автоматического исправления для iOS
+  // const autoFixImageError = (imgElement: HTMLImageElement) => { ... };
+  // const showImageFixNotification = () => { ... };
 
   const handleAddToCart = () => {
     try {

@@ -113,9 +113,7 @@ export const MenuPage: React.FC = () => {
       setLoading(true);
       setError('');
       
-      // Пытаемся очистить кеш перед повторной попыткой
-      clearPageCache();
-      
+      // Простая повторная попытка без очистки кеша
       fetchProducts();
     } catch (error) {
       console.error('❌ Ошибка повторной попытки:', error);
@@ -123,89 +121,10 @@ export const MenuPage: React.FC = () => {
     }
   };
 
-  // Функция очистки кеша страницы
-  const clearPageCache = async () => {
-    try {
-      console.log('🧹 Очищаем кеш страницы...');
-      
-      // Очищаем sessionStorage
-      sessionStorage.clear();
-      
-      // Пытаемся очистить кеш браузера
-      if ('caches' in window) {
-        try {
-          const cacheNames = await caches.keys();
-          await Promise.all(cacheNames.map(name => caches.delete(name)));
-          console.log('🧹 Кеш браузера очищен');
-        } catch (e) {
-          console.log('⚠️ Не удалось очистить кеш браузера:', e);
-        }
-      }
-      
-      // Очищаем localStorage если много ошибок
-      if (retryCount > 2) {
-        localStorage.clear();
-        console.log('🧹 localStorage очищен');
-      }
-      
-    } catch (error) {
-      console.error('❌ Ошибка при очистке кеша:', error);
-    }
-  };
-
-  // Автоматическое восстановление при критических ошибках
-  useEffect(() => {
-    if (error && retryCount > 3) {
-      console.log('🔄 Много ошибок - пытаемся автоматически восстановить...');
-      
-      // Показываем уведомление
-      showAutoFixNotification();
-      
-      // Автоматически очищаем кеш и перезагружаем через 5 секунд
-      setTimeout(() => {
-        console.log('🔄 Автоматическое восстановление...');
-        clearPageCache();
-        window.location.reload();
-      }, 5000);
-    }
-  }, [error, retryCount]);
-
-  // Показ уведомления об автоматическом исправлении
-  const showAutoFixNotification = () => {
-    try {
-      const notification = document.createElement('div');
-      notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #f59e0b;
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        z-index: 10000;
-        font-family: Arial, sans-serif;
-        font-size: 14px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        text-align: center;
-      `;
-      notification.innerHTML = `
-        <div>🔄 Автоматически исправляем проблему...</div>
-        <div style="font-size: 12px; margin-top: 4px;">Страница перезагрузится через 5 секунд</div>
-      `;
-      
-      document.body.appendChild(notification);
-      
-      // Убираем уведомление через 5 секунд
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.parentNode.removeChild(notification);
-        }
-      }, 5000);
-    } catch (e) {
-      console.error('Не удалось показать уведомление:', e);
-    }
-  };
+  // Убираем сложные функции очистки кеша для iOS
+  // const clearPageCache = async () => { ... };
+  // const showAutoFixNotification = () => { ... };
+  // useEffect для автоматического восстановления тоже убираем
 
   // Fallback для случаев когда данные не загрузились
   if (!loading && !error && products.length === 0) {
