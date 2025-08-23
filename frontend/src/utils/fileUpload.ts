@@ -48,8 +48,12 @@ export const uploadPaymentProof = async (file: File, orderId: string | number, o
   formData.append('orderId', orderId.toString());
   formData.append('orderNumber', orderNumber);
 
+  // Определяем URL в зависимости от устройства
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const baseURL = isMobile ? 'http://45.144.221.227:3001' : 'https://45.144.221.227:3444';
+
   try {
-    const response = await fetch('https://45.144.221.227:3444/api/orders/payment-proof', {
+    const response = await fetch(`${baseURL}/api/orders/payment-proof`, {
       method: 'POST',
       body: formData,
     });
