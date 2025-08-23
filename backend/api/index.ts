@@ -2062,7 +2062,6 @@ const createHttpsServer = () => {
 
 // Запускаем сервер для локальной разработки
 const PORT = process.env.PORT || 3000; // Порт для локальной разработки
-const HTTPS_PORT = process.env.HTTPS_PORT || 3001; // HTTPS порт
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const USE_HTTPS = process.env.USE_HTTPS === 'true'; // Принудительно использовать HTTPS
 
@@ -2071,7 +2070,7 @@ const httpsServer = createHttpsServer();
 
 if (httpsServer && (NODE_ENV === 'production' || USE_HTTPS)) {
   // Если есть SSL сертификаты и продакшн режим или принудительно HTTPS
-  const port = NODE_ENV === 'production' ? HTTPS_PORT : PORT;
+  const port = NODE_ENV === 'production' ? 3001 : PORT;
   httpsServer.listen(Number(port), '0.0.0.0', () => {
     console.log('🔒 HTTPS Server started on port:', port);
     console.log('🌐 URL: https://127.0.0.1:' + port);
@@ -2150,7 +2149,7 @@ app.get('/api/check-image/:filename(*)', (req, res) => {
     extension: ext,
     created: stats.birthtime,
     modified: stats.mtime,
-                     url: `https://147.45.141.113:3444/uploads/${filename}`
+                     url: `https://147.45.141.113:3001/uploads/${filename}`
   });
 });
 
@@ -2440,19 +2439,5 @@ app.post('/api/upload-cdn', upload.single('image'), (req, res) => {
   }
 });
 
-// Запускаем HTTPS сервер на порту 3001
-const HTTPS_PORT = 3001; // HTTPS порт для nginx прокси
-
-// Пути к SSL сертификатам
-const SSL_OPTIONS = {
-  key: fs.readFileSync('/etc/letsencrypt/live/mnogo-rolly.online/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/mnogo-rolly.online/fullchain.pem')
-};
-
-// Запускаем HTTPS сервер
-console.log('🔄 Запускаем HTTPS сервер на порту:', HTTPS_PORT);
-https.createServer(SSL_OPTIONS, app).listen(HTTPS_PORT, '0.0.0.0', () => {
-  console.log('🔒 HTTPS Server started on port:', HTTPS_PORT);
-  console.log('🔒 URL: https://127.0.0.1:' + HTTPS_PORT);
-  console.log('🔒 Готов для nginx прокси');
-});
+// Сервер уже запущен выше в коде
+console.log('✅ Backend сервер готов к работе');
