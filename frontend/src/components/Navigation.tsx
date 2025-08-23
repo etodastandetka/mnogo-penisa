@@ -1,349 +1,208 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Button } from './ui/Button';
-import { Badge } from './ui/Badge';
-import { ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
-import { useCartStore } from '../store/cartStore';
+import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
-import { useGuestOrderStore } from '../store/guestOrderStore';
-
-import { OrderNotification } from './OrderNotification';
-import { AdminPanelButton } from './AdminPanelButton';
-import { ordersApi } from '../api/orders';
+import { getUserOrders } from '../api/orders';
+import { 
+  Menu, 
+  X, 
+  ShoppingCart, 
+  User, 
+  LogOut, 
+  Package,
+  Clock
+} from 'lucide-react';
+import { Button } from './ui/Button';
 
 export const Navigation: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeOrders, setActiveOrders] = useState(0);
+  const { user, clearUser } = useUserStore();
   const navigate = useNavigate();
-  const location = useLocation();
-  const { getItemCount } = useCartStore();
-  const { user, isAdmin, clearUser } = useUserStore();
-  const { orders: guestOrders } = useGuestOrderStore();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const [showOrderNotification, setShowOrderNotification] = useState(false);
-  const [userOrders, setUserOrders] = useState<any[]>([]);
-
-  // Проверяем, есть ли активные заказы для показа уведомления
   useEffect(() => {
     const checkActiveOrders = async () => {
-      // Проверяем гостевые заказы из разных источников
-      const guestOrdersFromStorage = JSON.parse(localStorage.getItem('guestOrders') || '[]');
-      const guestOrdersFromZustand = JSON.parse(localStorage.getItem('mnogo-rolly-guest-orders') || '{"state":{"orders":[]}}');
-      
-      console.log('🔍 Проверка заказов:', {
-        user: !!user,
-        guestOrdersFromStore: guestOrders.length,
-        guestOrdersFromStorage: guestOrdersFromStorage.length,
-        guestOrdersFromZustand: guestOrdersFromZustand.state?.orders?.length || 0
-      });
-      
       if (user) {
         try {
-          const orders = await ordersApi.getUserOrders();
-          setUserOrders(orders);
-          
-          if (orders.length > 0) {
-            const latestOrder = orders[0];
-            const hasActiveOrder = latestOrder.status !== 'delivered' && latestOrder.status !== 'cancelled';
-            console.log('✅ Авторизованный пользователь, активный заказ:', hasActiveOrder);
-            setShowOrderNotification(hasActiveOrder);
-          }
+          const orders = await getUserOrders();
+          const active = orders.filter((order: any) => 
+            order.status === 'pending' || 
+            order.status === 'preparing' || 
+            order.status === 'delivering'
+          ).length;
+          setActiveOrders(active);
         } catch (error) {
-          console.error('Ошибка получения заказов:', error);
-        }
-      } else {
-        // Для неавторизованных пользователей проверяем гостевые заказы
-        const zustandOrders = guestOrdersFromZustand.state?.orders || [];
-        const allGuestOrders = [...guestOrders, ...guestOrdersFromStorage, ...zustandOrders];
-        
-        console.log('👤 Все гостевые заказы:', {
-          fromStore: guestOrders,
-          fromStorage: guestOrdersFromStorage,
-          fromZustand: zustandOrders,
-          combined: allGuestOrders
-        });
-        
-        if (allGuestOrders.length > 0) {
-          // Берем самый последний заказ
-          const latestOrder = allGuestOrders.sort((a, b) => 
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )[0];
-          
-          const hasActiveOrder = latestOrder.status !== 'delivered' && latestOrder.status !== 'cancelled';
-          console.log('✅ Гостевой заказ, активный:', hasActiveOrder, latestOrder);
-          setShowOrderNotification(hasActiveOrder);
-        } else {
-          console.log('❌ Нет гостевых заказов');
-          setShowOrderNotification(false);
+          console.error('❌ Ошибка проверки активных заказов:', error);
         }
       }
     };
 
     checkActiveOrders();
-  }, [user, guestOrders]);
+    const interval = setInterval(checkActiveOrders, 30000); // Проверяем каждые 30 секунд
 
-  const isMenuPage = location.pathname === '/menu';
-  const isLandingPage = location.pathname === '/';
-  const isContactPage = location.pathname === '/contact';
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    // Очищаем store пользователя
     clearUser();
-    // Перенаправляем на главную страницу
     navigate('/');
   };
 
+  const toggleMenu = () => setIsOpen(!isOpen);
+
+  const closeMenu = () => setIsOpen(false);
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    closeMenu();
+  };
+
   return (
-    <>
-      {/* Уведомление о заказе */}
-      {showOrderNotification && (
-        <OrderNotification onClose={() => setShowOrderNotification(false)} />
-      )}
-
-      {/* Основной header - статичный */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
-            
-            {/* Логотип */}
-            <div 
-              className="flex items-center cursor-pointer group flex-shrink-0"
-              onClick={() => navigate('/')}
+    <nav className="bg-white shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          {/* Логотип */}
+          <div className="flex items-center">
+            <button
+              onClick={() => handleNavigation('/')}
+              className="flex-shrink-0 flex items-center"
             >
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-red-600 group-hover:text-red-700 transition-colors">
-                Mnogo Rolly
-                <span className="text-sm ml-1 sm:ml-2">🍣</span>
-              </h1>
-            </div>
-            
-            {/* Навигационные ссылки - десктоп */}
-            <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-              <button
-                onClick={() => navigate('/')}
-                className={`relative text-sm lg:text-base font-medium transition-all duration-300 hover:text-orange-600 ${
-                  isLandingPage 
-                    ? 'text-orange-600' 
-                    : 'text-gray-700'
-                }`}
-              >
-                Главная
-                {isLandingPage && (
-                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-orange-600 rounded-full"></div>
-                )}
-              </button>
-              
-              <button
-                onClick={() => navigate('/menu')}
-                className={`relative text-sm lg:text-base font-medium transition-all duration-300 hover:text-orange-600 ${
-                  isMenuPage 
-                    ? 'text-orange-600' 
-                    : 'text-gray-700'
-                }`}
-              >
-                Меню
-                {isMenuPage && (
-                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-orange-600 rounded-full"></div>
-                )}
-              </button>
-              
-              <button
-                onClick={() => navigate('/contact')}
-                className={`relative text-sm lg:text-base font-medium transition-all duration-300 hover:text-orange-600 ${
-                  isContactPage 
-                    ? 'text-orange-600' 
-                    : 'text-gray-700'
-                }`}
-              >
-                Контакты
-                {isContactPage && (
-                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-orange-600 rounded-full"></div>
-                )}
-              </button>
-            </nav>
-            
-            {/* Правая часть - только корзина и бургер-меню на мобильном */}
-            <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
-              
-              {/* Корзина на странице меню */}
-              {isMenuPage && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate('/checkout')}
-                  className="relative p-2"
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  {getItemCount() > 0 && (
-                    <Badge
-                      variant="primary"
-                      size="sm"
-                      className="absolute -top-1 -right-1 bg-orange-500 text-white min-w-[16px] h-4 text-xs"
-                    >
-                      {getItemCount()}
-                    </Badge>
-                  )}
-                </Button>
-              )}
-
-              {/* Пользователь - только на десктопе */}
-              {user ? (
-                <div className="hidden md:flex items-center gap-1">
-                  {/* Кнопка админ панели */}
-                  <AdminPanelButton />
-                  
-                  <span className="text-xs text-gray-700 hidden lg:block max-w-20 truncate">
-                    {user?.name || 'Пользователь'}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate('/profile')}
-                    className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 p-2"
-                  >
-                    <User className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleLogout}
-                    className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 p-2"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate('/auth')}
-                  className="hidden md:flex text-gray-700 hover:text-orange-600 hover:bg-orange-50 px-3 py-2"
-                >
-                  <User className="w-4 h-4 mr-1" />
-                  <span className="text-sm">Войти</span>
-                </Button>
-              )}
-              
-              {/* Мобильное меню кнопка */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="md:hidden p-2"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-              </Button>
-            </div>
+              <span className="text-2xl font-bold text-orange-600">🍣</span>
+              <span className="ml-2 text-xl font-bold text-gray-800">Mnogo Rolly</span>
+            </button>
           </div>
-        </div>
 
-        {/* Мобильное меню */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-200 shadow-lg">
-            <div className="px-4 py-4 space-y-3">
-              
-              {/* Навигация */}
-              <button
-                onClick={() => {
-                  navigate('/');
-                  setMobileMenuOpen(false);
-                }}
-                className={`block w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                  isLandingPage 
-                    ? 'bg-red-50 text-red-600 border-l-4 border-red-600' 
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                Главная
-              </button>
-              
-              <button
-                onClick={() => {
-                  navigate('/menu');
-                  setMobileMenuOpen(false);
-                }}
-                className={`block w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                  isMenuPage 
-                    ? 'bg-red-50 text-red-600 border-l-4 border-red-600' 
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                Меню
-              </button>
-              
-              <button
-                onClick={() => {
-                  navigate('/contact');
-                  setMobileMenuOpen(false);
-                }}
-                className={`block w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                  isContactPage 
-                    ? 'bg-red-50 text-red-600 border-l-4 border-red-600' 
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                Контакты
-              </button>
+          {/* Десктопное меню */}
+          <div className="hidden md:flex items-center space-x-4">
+            <button
+              onClick={() => handleNavigation('/')}
+              className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Меню
+            </button>
+            
+            <button
+              onClick={() => handleNavigation('/cart')}
+              className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors relative"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {activeOrders > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {activeOrders}
+                </span>
+              )}
+            </button>
 
-              {/* Разделитель */}
-              <div className="border-t border-gray-200 pt-3">
-                {user ? (
-                  <div className="space-y-2">
-                    <div className="px-4 py-2 text-sm text-gray-600">
-                      Привет, {user?.name || 'Пользователь'}!
-                    </div>
-                    
-                    {/* Кнопка админ панели в мобильном меню */}
-                    {isAdmin && (
-                      <button
-                        onClick={() => {
-                          navigate('/admin');
-                          setMobileMenuOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold transition-colors"
-                      >
-                        🛠️ Админ панель
-                      </button>
-                    )}
-                    
-                    <button
-                      onClick={() => {
-                        navigate('/profile');
-                        setMobileMenuOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <User className="w-4 h-4 inline mr-2" />
-                      Профиль
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setMobileMenuOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <LogOut className="w-4 h-4 inline mr-2" />
-                      Выйти
-                    </button>
-                  </div>
-                ) : (
+            {user ? (
+              <>
+                <button
+                  onClick={() => handleNavigation('/profile')}
+                  className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+                >
+                  <User className="w-4 h-4" />
+                  <span>{user.name}</span>
+                </button>
+                
+                {user.isAdmin && (
                   <button
-                    onClick={() => {
-                      navigate('/auth');
-                      setMobileMenuOpen(false);
-                    }}
-                    className="block w-full text-left px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                    onClick={() => handleNavigation('/admin')}
+                    className="bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-700 transition-colors"
                   >
-                    <User className="w-4 h-4 inline mr-2" />
-                    Войти
+                    Админ
                   </button>
                 )}
-              </div>
-            </div>
+                
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Выйти</span>
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => handleNavigation('/auth')}
+                className="bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-700 transition-colors"
+              >
+                Войти
+              </button>
+            )}
           </div>
-        )}
-      </header>
 
-    </>
+          {/* Мобильное меню кнопка */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={toggleMenu}
+              className="text-gray-700 hover:text-orange-600 p-2 rounded-md"
+            >
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Мобильное меню */}
+      {isOpen && (
+        <div className="md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+            <button
+              onClick={() => handleNavigation('/')}
+              className="text-gray-700 hover:text-orange-600 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
+            >
+              Меню
+            </button>
+            
+            <button
+              onClick={() => handleNavigation('/cart')}
+              className="text-gray-700 hover:text-orange-600 block px-3 py-2 rounded-md text-base font-medium w-full text-left flex items-center justify-between"
+            >
+              <span>Корзина</span>
+              {activeOrders > 0 && (
+                <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {activeOrders}
+                </span>
+              )}
+            </button>
+
+            {user ? (
+              <>
+                <button
+                  onClick={() => handleNavigation('/profile')}
+                  className="text-gray-700 hover:text-orange-600 block px-3 py-2 rounded-md text-base font-medium w-full text-left flex items-center space-x-2"
+                >
+                  <User className="w-4 h-4" />
+                  <span>{user.name}</span>
+                </button>
+                
+                {user.isAdmin && (
+                  <button
+                    onClick={() => handleNavigation('/admin')}
+                    className="bg-orange-600 text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left"
+                  >
+                    Админ панель
+                  </button>
+                )}
+                
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-700 hover:text-red-600 block px-3 py-2 rounded-md text-base font-medium w-full text-left flex items-center space-x-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Выйти</span>
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => handleNavigation('/auth')}
+                className="bg-orange-600 text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left"
+              >
+                Войти
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </nav>
   );
 };

@@ -16,6 +16,6 @@ export const getTodayStats = async (): Promise<{ success: boolean; stats: TodayS
     return { success: true, stats: response.data };
   } catch (error: any) {
     console.error('❌ Ошибка получения статистики за день:', error);
-    return { success: false, stats: response.data };
+    return { success: false, stats: {} as TodayStats };
   }
 };

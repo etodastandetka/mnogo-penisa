@@ -30,22 +30,12 @@ export const uploadFileToServer = async (
   }
 };
 
-// Конвертируем файл в base64 для fallback
-const fileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
-  });
-};
-
 export const updateOrderPaymentProof = async (
   orderId: number, 
   fileUrl: string
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    const response = await apiClient.post(`/orders/${orderId}/payment-proof`, {
+    await apiClient.post(`/orders/${orderId}/payment-proof`, {
       paymentProof: fileUrl
     });
     return { success: true };

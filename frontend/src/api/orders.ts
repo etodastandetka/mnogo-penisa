@@ -1,8 +1,13 @@
 import { apiClient } from './client';
-import { CartItem, PaymentMethod } from '../types';
 
 export interface CreateOrderRequest {
-  items: CartItem[];
+  items: Array<{
+    product: {
+      id: string | number;
+      price: number;
+    };
+    quantity: number;
+  }>;
   customer: {
     name: string;
     phone: string;
@@ -10,7 +15,7 @@ export interface CreateOrderRequest {
     notes?: string;
   };
   total: number;
-  paymentMethod: PaymentMethod;
+  paymentMethod: string;
   notes?: string;
 }
 
