@@ -17,8 +17,8 @@ const getBaseURL = () => {
       : 'http://127.0.0.1:3001/api';
   }
   
-  // Для продакшена используем HTTPS
-  return 'https://147.45.141.113:3001/api';
+  // Для продакшена используем HTTP (backend работает на HTTP)
+  return 'http://147.45.141.113:3001/api';
 };
 
 const baseURL = getBaseURL();
