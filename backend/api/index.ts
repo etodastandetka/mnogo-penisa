@@ -2053,8 +2053,8 @@ const createHttpsServer = () => {
   }
 };
 
-// Запускаем только HTTPS сервер
-const HTTPS_PORT = 3444; // HTTPS порт
+// Запускаем HTTPS сервер на порту 3444 для работы с nginx
+const HTTPS_PORT = 3444; // HTTPS порт для nginx прокси
 
 // Запускаем HTTPS сервер
 const httpsServer = createHttpsServer();
@@ -2062,10 +2062,12 @@ const httpsServer = createHttpsServer();
 if (httpsServer) {
   httpsServer.listen(Number(HTTPS_PORT), '0.0.0.0', () => {
     console.log('🔒 HTTPS Server started on port:', HTTPS_PORT);
-    console.log('🌐 URL: https://147.45.141.113:' + HTTPS_PORT);
+    console.log('🌐 URL: https://127.0.0.1:' + HTTPS_PORT);
+    console.log('🌐 nginx будет проксировать на этот порт');
   });
 } else {
   console.log('❌ Не удалось запустить HTTPS сервер');
+  console.log('❌ Проверьте SSL сертификаты в папке certs/');
 }
 
 
@@ -2415,4 +2417,15 @@ app.post('/api/upload-cdn', upload.single('image'), (req, res) => {
     console.error('❌ Ошибка загрузки на CDN:', error);
     res.status(500).json({ success: false, message: 'Ошибка загрузки файла' });
   }
+});
+
+// Запускаем простой HTTP сервер на порту 3001 (как было раньше)
+const HTTP_PORT = 3001; // HTTP порт для быстрой работы
+
+// Запускаем HTTP сервер напрямую
+console.log('🔄 Запускаем HTTP сервер на порту:', HTTP_PORT);
+app.listen(HTTP_PORT, '0.0.0.0', () => {
+  console.log('🌐 HTTP Server started on port:', HTTP_PORT);
+  console.log('🌐 URL: http://127.0.0.1:' + HTTP_PORT);
+  console.log('🌐 Быстрая работа без HTTPS сложностей');
 });
