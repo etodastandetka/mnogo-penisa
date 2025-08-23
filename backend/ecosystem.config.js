@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'mnogo-rolly-backend',
+      name: 'api',
       script: 'start-server.js',
       cwd: './backend',
       instances: 1,
