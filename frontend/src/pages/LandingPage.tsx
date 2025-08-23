@@ -53,6 +53,8 @@ export const LandingPage: React.FC = () => {
           console.log('📱 Мобильное устройство обнаружено');
           console.log('📱 User-Agent:', navigator.userAgent);
           console.log('📱 Размер экрана:', window.innerWidth, 'x', window.innerHeight);
+          console.log('📱 API Base URL: https://147.45.141.113:3444/api');
+          console.log('📱 Полный URL для товаров: https://147.45.141.113:3444/api/products');
         }
         
         const productsData = await productsApi.getAll();

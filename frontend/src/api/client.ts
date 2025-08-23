@@ -3,7 +3,7 @@ import axios from 'axios';
 // Определяем мобильное устройство
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-// API клиент для работы с сервером
+// API клиент для работы с сервером - используем только HTTPS
 export const client = axios.create({
   baseURL: 'https://147.45.141.113:3444/api',
   timeout: 30000, // Увеличиваем timeout для мобильных
@@ -25,6 +25,7 @@ client.interceptors.request.use(
     if (isMobile) {
       console.log(`📱 Мобильный запрос: ${config.method?.toUpperCase()} ${config.url}`);
       console.log(`📱 User-Agent: ${navigator.userAgent}`);
+      console.log(`📱 Полный URL: ${config.baseURL}${config.url}`);
     }
 
     return config;
@@ -52,13 +53,7 @@ client.interceptors.response.use(
       console.log(`📱 Сообщение: ${error.message}`);
       console.log(`📱 Статус: ${error.response?.status}`);
       console.log(`📱 Данные:`, error.response?.data);
-      
-      // Если это ошибка сети на мобильном, пробуем HTTP как fallback
-      if (!error.response && error.request && error.code !== 'ECONNABORTED') {
-        console.log('🔄 Пробуем HTTP fallback для мобильного устройства...');
-        // Меняем baseURL на HTTP для следующего запроса
-        client.defaults.baseURL = 'http://147.45.141.113:3001/api';
-      }
+      console.log(`📱 Полный URL запроса: ${error.config?.baseURL}${error.config?.url}`);
     } else {
       console.log('🚨 API Error:', error.config?.url, error.response?.status, error.response?.data);
     }
