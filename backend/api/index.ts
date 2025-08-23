@@ -210,6 +210,7 @@ const initDatabase = () => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
+      username TEXT,
       email TEXT UNIQUE NOT NULL,
       phone TEXT,
       address TEXT,
@@ -274,6 +275,24 @@ const initDatabase = () => {
         console.log('Column mobile_image_url already exists or error:', err.message);
       } else {
         console.log('Column mobile_image_url added successfully');
+      }
+    });
+
+    // Добавляем колонку username если её нет (для совместимости)
+    db.run(`ALTER TABLE users ADD COLUMN username TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column name')) {
+        console.log('Column username already exists or error:', err.message);
+      } else {
+        console.log('Column username added successfully');
+      }
+    });
+
+    // Копируем name в username если username пустой
+    db.run(`UPDATE users SET username = name WHERE username IS NULL OR username = ''`, (err) => {
+      if (err) {
+        console.log('Error updating username from name:', err.message);
+      } else {
+        console.log('Username updated from name successfully');
       }
     });
 
@@ -2037,8 +2056,9 @@ const createHttpsServer = () => {
 // Запускаем сервер если файл запущен напрямую
 if (require.main === module) {
   const HTTPS_PORT = 3444; // Принудительно устанавливаем порт 3444
+  const HTTP_PORT = 3001; // HTTP порт для fallback
   
-  // Запускаем только HTTPS сервер
+  // Запускаем HTTPS сервер
   const httpsServer = createHttpsServer();
   
   if (httpsServer) {
@@ -2047,7 +2067,12 @@ if (require.main === module) {
       console.log('🌐 URL: https://147.45.141.113:' + HTTPS_PORT);
     });
   } else {
-    console.log('❌ Не удалось запустить HTTPS сервер');
+    // Если HTTPS не работает, запускаем HTTP сервер
+    console.log('🔄 Запускаем HTTP сервер на порту:', HTTP_PORT);
+    app.listen(HTTP_PORT, '0.0.0.0', () => {
+      console.log('🌐 HTTP Server started on port:', HTTP_PORT);
+      console.log('🌐 URL: http://localhost:' + HTTP_PORT);
+    });
   }
 }
 
@@ -2159,7 +2184,7 @@ app.get('/api/admin/shifts/current', authenticateToken, requireAdmin, (req, res)
     
     // Таблица существует, получаем текущую смену
     db.get(`
-      SELECT s.*, u.username as opened_by_name
+      SELECT s.*, COALESCE(u.username, u.name) as opened_by_name
       FROM shifts s
       LEFT JOIN users u ON s.opened_by = u.id
       WHERE s.status = 'open'
