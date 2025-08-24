@@ -420,6 +420,33 @@ export const LandingPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Contact Section */}
+      <div className="bg-gradient-to-br from-orange-500 to-red-600 py-20 relative overflow-hidden">
+        {/* Background Decorations */}
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-6 h-6 bg-white/20 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-10 right-10 w-4 h-4 bg-white/20 rounded-full animate-bounce"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-white/20 rounded-full animate-ping"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <div className="mb-8">
+            <Button 
+              onClick={() => navigate('/contact')}
+              className="bg-white text-orange-600 hover:bg-orange-50 px-6 py-3 rounded-full font-semibold mb-6"
+            >
+              <Phone className="w-4 h-4 mr-2" />
+              Свяжитесь с нами
+            </Button>
+          </div>
+          
+          <h2 className="text-4xl font-bold text-white mb-6">Контакты</h2>
+          <p className="text-xl text-orange-100 max-w-3xl mx-auto">
+            Мы всегда готовы помочь вам с заказом и ответить на любые вопросы
+          </p>
+        </div>
+      </div>
+
       {/* Corporate Services Section */}
       <div className="bg-gray-50 py-16 relative">
         {/* Background Decorations */}
@@ -464,132 +491,41 @@ export const LandingPage: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-20 relative overflow-hidden">
-        {/* Background Decorations */}
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-40 h-40 bg-red-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-yellow-500/10 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Main Footer Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-            {/* Company Info */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">🍣</span>
-                <h3 className="text-2xl font-bold text-orange-400">Mnogo Rolly</h3>
-              </div>
-              <p className="text-orange-100 text-lg leading-relaxed">
+      <footer className="bg-gray-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-orange-400">Mnogo Rolly</h3>
+              <p className="text-gray-400">
                 Лучшие роллы и японская кухня в городе
               </p>
-              <div className="flex gap-4">
-                <div className="bg-orange-500/20 p-3 rounded-full hover:bg-orange-500/30 transition-colors cursor-pointer">
-                  <Instagram className="w-5 h-5 text-orange-400" />
-                </div>
-                <div className="bg-orange-500/20 p-3 rounded-full hover:bg-orange-500/30 transition-colors cursor-pointer">
-                  <Phone className="w-5 h-5 text-orange-400" />
-                </div>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-orange-400">Контакты</h3>
+              <div className="space-y-2 text-gray-400">
+                <p>Телефон: +996 (709) 611-043</p>
+                <p>Email: info@mnogo-rolly.online</p>
+                <p>Адрес: г. Бишкек, ул. Ахунбаева, 182 Б</p>
               </div>
             </div>
-
-            {/* Contacts */}
-            <div className="space-y-6">
-              <h3 className="text-xl font-bold text-orange-400 border-b-2 border-orange-500 pb-2">Контакты</h3>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 group">
-                  <div className="bg-orange-500 p-2 rounded-full group-hover:bg-orange-400 transition-colors">
-                    <Phone className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-orange-100 font-semibold">Телефон</p>
-                    <p className="text-white">+996 (709) 611-043</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 group">
-                  <div className="bg-orange-500 p-2 rounded-full group-hover:bg-orange-400 transition-colors">
-                    <MapPin className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-orange-100 font-semibold">Адрес</p>
-                    <p className="text-white">г. Бишкек, ул. Ахунбаева, 182 Б</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 group">
-                  <div className="bg-orange-500 p-2 rounded-full group-hover:bg-orange-400 transition-colors">
-                    <Clock className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-orange-100 font-semibold">Время работы</p>
-                    <p className="text-white">10:00 - 23:00</p>
-                  </div>
-                </div>
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-orange-400">Юридическая информация</h3>
+              <div className="space-y-2 text-gray-400 text-sm">
+                <p>ИП: Султанкулов Адилет Б.</p>
+                <p>ИНН: 20504198701431</p>
+                <p>Адрес: г. Бишкек, ул. Ахунбаева, 182 Б</p>
               </div>
             </div>
-
-            {/* Legal Info */}
-            <div className="space-y-6">
-              <h3 className="text-xl font-bold text-orange-400 border-b-2 border-orange-500 pb-2">Юридическая информация</h3>
-              <div className="space-y-4">
-                <div className="bg-gray-800/50 p-4 rounded-lg border-l-4 border-orange-500">
-                  <p className="text-orange-100 font-semibold text-sm">ИП</p>
-                  <p className="text-white">Султанкулов Адилет Б.</p>
-                </div>
-                <div className="bg-gray-800/50 p-4 rounded-lg border-l-4 border-orange-500">
-                  <p className="text-orange-100 font-semibold text-sm">ИНН</p>
-                  <p className="text-white">20504198701431</p>
-                </div>
-                <div className="bg-gray-800/50 p-4 rounded-lg border-l-4 border-orange-500">
-                  <p className="text-orange-100 font-semibold text-sm">Адрес</p>
-                  <p className="text-white">г. Бишкек, ул. Ахунбаева, 182 Б</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Development */}
-            <div className="space-y-6">
-              <h3 className="text-xl font-bold text-orange-400 border-b-2 border-orange-500 pb-2">Разработка</h3>
-              <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 p-6 rounded-xl border border-orange-500/30">
-                <p className="text-orange-100 font-semibold mb-3">Нужен такой же сайт?</p>
-                <p className="text-white text-sm mb-4">Создам для вас профессиональный сайт с современным дизайном</p>
-                <a 
-                  href="https://t.me/namekotik" 
-                  className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors font-semibold"
-                >
-                  <span>Написать</span>
-                  <span className="text-lg">→</span>
-                </a>
-              </div>
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-orange-400">Разработка</h3>
+              <p className="text-gray-400 text-sm">
+                Нужен такой же сайт?<br />
+                Напишите мне: <a href="https://t.me/namekotik" className="text-orange-400 hover:text-orange-300 transition-colors">@namekotik</a>
+              </p>
             </div>
           </div>
 
-          {/* Additional Info */}
-          <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-2xl p-8 border border-orange-500/20 mb-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-              <div>
-                <div className="bg-orange-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Star className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="text-orange-400 font-bold text-lg mb-2">Качество</h4>
-                <p className="text-white">Только свежие ингредиенты</p>
-              </div>
-              <div>
-                <div className="bg-orange-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Clock className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="text-orange-400 font-bold text-lg mb-2">Скорость</h4>
-                <p className="text-white">Доставка за 30-60 минут</p>
-              </div>
-              <div>
-                <div className="bg-orange-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ShoppingCart className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="text-orange-400 font-bold text-lg mb-2">Удобство</h4>
-                <p className="text-white">Заказ в один клик</p>
-              </div>
-            </div>
-          </div>
+
           
           {/* Copyright */}
           <div className="border-t border-orange-500/30 pt-8 text-center">

@@ -121,7 +121,7 @@ export const MenuPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:pr-80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mobile-heading">Меню</h1>
@@ -136,7 +136,7 @@ export const MenuPage: React.FC = () => {
 
       {/* Search and Filters */}
       <div className="bg-white border-b">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:pr-80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
             <div className="flex-1">
@@ -174,7 +174,7 @@ export const MenuPage: React.FC = () => {
       </div>
 
       {/* Products Grid */}
-              <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:pr-80">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 text-6xl mb-4">🔍</div>
@@ -196,8 +196,10 @@ export const MenuPage: React.FC = () => {
       </div>
 
       {/* Fixed Cart on the Right Side */}
-      <div className="fixed right-4 top-1/2 transform -translate-y-1/2 z-50 hidden lg:block">
-        <FixedCart />
+      <div className="fixed right-6 top-24 z-40 hidden lg:block">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+          <FixedCart />
+        </div>
       </div>
     </div>
   );
