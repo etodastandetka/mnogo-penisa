@@ -4,10 +4,10 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
 import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
-import CheckoutPage from './pages/CheckoutPage';
-import ContactPage from './pages/ContactPage';
-import AuthPage from './pages/AuthPage';
-import ProfilePage from './pages/ProfilePage';
+import { CheckoutPage } from './pages/CheckoutPage';
+import { ContactPage } from './pages/ContactPage';
+import { AuthPage } from './pages/AuthPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { ImageDebugger } from './components/ImageDebugger';
 import CartPage from './pages/CartPage';
 
