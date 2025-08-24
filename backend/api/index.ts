@@ -457,7 +457,7 @@ app.get('/api/health', (req, res) => {
         return res.status(500).json({ 
           status: 'ERROR', 
           message: 'Ошибка подключения к базе данных',
-          error: err.message
+          error: err instanceof Error ? err.message : 'Database error'
         });
       }
       
@@ -554,7 +554,7 @@ app.post('/api/receipts', uploadMemory.single('receiptFile'), async (req, res) =
         return res.status(500).json({ 
           success: false, 
           message: 'Ошибка при сохранении чека в базу данных',
-          error: err.message 
+          error: err instanceof Error ? err.message : 'Database error'
         });
       }
       
@@ -577,7 +577,7 @@ app.post('/api/receipts', uploadMemory.single('receiptFile'), async (req, res) =
     res.status(500).json({ 
       success: false, 
       message: 'Ошибка при сохранении чека',
-      error: error.message 
+      error: error instanceof Error ? error.message : 'Неизвестная ошибка'
     });
   }
 });
@@ -726,7 +726,7 @@ app.post('/api/orders', authenticateToken, (req: any, res) => {
         return res.status(500).json({
           success: false,
           message: 'Ошибка создания заказа',
-          error: err.message
+          error: err instanceof Error ? err.message : 'Database error'
         });
       }
 
@@ -823,7 +823,7 @@ app.post('/api/orders/guest', (req: any, res) => {
         return res.status(500).json({
           success: false,
           message: 'Ошибка создания заказа',
-          error: err.message
+          error: err instanceof Error ? err.message : 'Database error'
         });
       }
 
@@ -898,7 +898,7 @@ app.get('/api/orders/guest/:orderNumber', (req, res) => {
     WHERE o.order_number = ? AND o.user_id IS NULL
   `, [orderNumber], (err, order) => {
     if (err) {
-      return res.status(500).json({ message: 'Ошибка поиска заказа', error: err.message });
+      return res.status(500).json({ message: 'Ошибка поиска заказа', error: err instanceof Error ? err.message : 'Database error' });
     }
     if (!order) {
       return res.status(404).json({ message: 'Заказ не найден' });
@@ -941,7 +941,7 @@ app.get('/api/orders/status/:orderNumber', (req, res) => {
     WHERE o.order_number = ?
   `, [orderNumber], (err, order) => {
     if (err) {
-      return res.status(500).json({ message: 'Ошибка поиска заказа', error: err.message });
+      return res.status(500).json({ message: 'Ошибка поиска заказа', error: err instanceof Error ? err.message : 'Database error' });
     }
     if (!order) {
       return res.status(404).json({ message: 'Заказ не найден' });
@@ -1208,7 +1208,7 @@ app.get('/api/admin/orders/:id', authenticateToken, requireAdmin, (req, res) => 
   db.get('SELECT * FROM orders WHERE id = ?', [id], (err, order: any) => {
     if (err) {
       console.error('Database error getting order:', err);
-      return res.status(500).json({ message: 'Ошибка получения заказа', error: err.message });
+      return res.status(500).json({ message: 'Ошибка получения заказа', error: err instanceof Error ? err.message : 'Database error' });
     }
     
     if (!order) {
@@ -1227,7 +1227,7 @@ app.get('/api/admin/orders/:id', authenticateToken, requireAdmin, (req, res) => 
     `, [id], (err, items) => {
       if (err) {
         console.error('Database error getting order items:', err);
-        return res.status(500).json({ message: 'Ошибка получения товаров заказа', error: err.message });
+        return res.status(500).json({ message: 'Ошибка получения товаров заказа', error: err instanceof Error ? err.message : 'Database error' });
       }
 
       const orderDetail = {
@@ -1291,7 +1291,7 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
       console.error('Database error in /api/admin/orders:', err);
       return res.status(500).json({ 
         message: 'Ошибка загрузки заказов', 
-        error: err.message 
+        error: err instanceof Error ? err.message : 'Database error'
       });
     }
     
@@ -1413,7 +1413,7 @@ app.patch('/api/admin/orders/:id/status', authenticateToken, requireAdmin, (req,
   db.run('UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, id], function(err) {
     if (err) {
       console.error('Database error updating order status:', err);
-      return res.status(500).json({ message: 'Ошибка обновления статуса', error: err.message });
+      return res.status(500).json({ message: 'Ошибка обновления статуса', error: err instanceof Error ? err.message : 'Database error' });
     }
     
     if (this.changes === 0) {
@@ -2080,7 +2080,7 @@ app.get('/api/orders/user', authenticateToken, (req: any, res) => {
         return res.status(500).json({ 
           success: false, 
           message: 'Ошибка получения заказов',
-          error: err.message
+          error: err instanceof Error ? err.message : 'Database error'
         });
       }
 
