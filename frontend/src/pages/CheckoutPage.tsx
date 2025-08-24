@@ -30,34 +30,8 @@ export const CheckoutPage: React.FC = () => {
       return;
     }
 
-    try {
-      setLoading(true);
-      
-      const orderData = {
-        items: items.map(item => ({
-          product: {
-            id: item.product.id,
-            price: item.product.price
-          },
-          quantity: item.quantity
-        })),
-        customer: customerData,
-        total: getTotal(),
-        paymentMethod: selectedPaymentMethod,
-        notes: customerData.notes
-      };
-
-      const result = await createOrder(orderData);
-      
-      // Сохраняем ID заказа и показываем компонент оплаты
-      setOrderId(result.orderId);
-      setShowPaymentComponent(true);
-    } catch (error: any) {
-      console.error('❌ Ошибка создания заказа:', error);
-      alert('Ошибка создания заказа: ' + (error.message || 'Неизвестная ошибка'));
-    } finally {
-      setLoading(false);
-    }
+    // Показываем компонент оплаты сразу при отправке формы
+    setShowPaymentComponent(true);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -73,9 +47,29 @@ export const CheckoutPage: React.FC = () => {
 
   const handlePaymentComplete = async (paymentData: any) => {
     try {
-      // Отправляем данные о платеже на сервер
+      setLoading(true);
+      
+      // Сначала создаем заказ
+      const orderData = {
+        items: items.map(item => ({
+          product: {
+            id: item.product.id,
+            price: item.product.price
+          },
+          quantity: item.quantity
+        })),
+        customer: customerData,
+        total: getTotal(),
+        paymentMethod: selectedPaymentMethod,
+        notes: customerData.notes
+      };
+
+      const result = await createOrder(orderData);
+      setOrderId(result.orderId);
+
+      // Затем отправляем данные о платеже
       const formData = new FormData();
-      formData.append('orderId', orderId?.toString() || '');
+      formData.append('orderId', result.orderId.toString());
       formData.append('paymentMethod', paymentData.method);
       formData.append('amount', paymentData.amount.toString());
       formData.append('note', paymentData.note);
@@ -95,10 +89,12 @@ export const CheckoutPage: React.FC = () => {
 
       // Очищаем корзину и перенаправляем на страницу успеха
       clearCart();
-      navigate(`/order-success/${orderId}`);
+      navigate(`/order-success/${result.orderId}`);
     } catch (error: any) {
       console.error('Ошибка сохранения чека:', error);
       alert('Ошибка сохранения чека: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -253,11 +249,19 @@ export const CheckoutPage: React.FC = () => {
       </div>
 
       {/* Компонент оплаты */}
-      {showPaymentComponent && orderId && (
+      {showPaymentComponent && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              <h2 className="text-2xl font-bold mb-4">Оплата заказа #{orderId}</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold">Оплата заказа</h2>
+                <button
+                  onClick={() => setShowPaymentComponent(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                >
+                  ×
+                </button>
+              </div>
               <PaymentMethodComponent
                 totalAmount={getTotal()}
                 onPaymentComplete={handlePaymentComplete}
