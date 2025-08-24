@@ -75,7 +75,7 @@ export const Navigation: React.FC = () => {
           {/* Десктопное меню */}
           <div className="hidden md:flex items-center space-x-4">
             <button
-              onClick={() => handleNavigation('/')}
+              onClick={() => handleNavigation('/menu')}
               className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               Меню
