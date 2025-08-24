@@ -27,7 +27,13 @@ export interface CreateOrderResponse {
 export const createOrder = async (orderData: CreateOrderRequest): Promise<CreateOrderResponse> => {
   try {
     const response = await apiClient.post('/orders', orderData);
-    return response.data;
+    
+    // Бэкенд возвращает { success: true, data: { orderId, orderNumber } }
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    
+    throw new Error('Неверный формат ответа от сервера');
   } catch (error: any) {
     console.error('❌ Ошибка создания заказа:', error);
     throw new Error(error.response?.data?.message || 'Ошибка создания заказа');
