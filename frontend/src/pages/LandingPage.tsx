@@ -420,32 +420,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Contact Section */}
-      <div className="bg-gradient-to-br from-orange-500 to-red-600 py-20 relative overflow-hidden">
-        {/* Background Decorations */}
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-6 h-6 bg-white/20 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-10 right-10 w-4 h-4 bg-white/20 rounded-full animate-bounce"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-white/20 rounded-full animate-ping"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <div className="mb-8">
-            <Button 
-              onClick={() => navigate('/contact')}
-              className="bg-white text-orange-600 hover:bg-orange-50 px-6 py-3 rounded-full font-semibold mb-6"
-            >
-              <Phone className="w-4 h-4 mr-2" />
-              Свяжитесь с нами
-            </Button>
-          </div>
-          
-          <h2 className="text-4xl font-bold text-white mb-6">Контакты</h2>
-          <p className="text-xl text-orange-100 max-w-3xl mx-auto">
-            Мы всегда готовы помочь вам с заказом и ответить на любые вопросы
-          </p>
-        </div>
-      </div>
+
 
       {/* Corporate Services Section */}
       <div className="bg-gray-50 py-16 relative">
