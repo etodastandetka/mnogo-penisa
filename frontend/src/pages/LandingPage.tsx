@@ -112,232 +112,229 @@ export const LandingPage: React.FC = () => {
     { name: 'Елена', rating: 5, text: 'Свежие ингредиенты, рекомендую!' },
     { name: 'Дмитрий', rating: 4, text: 'Хорошее качество, но можно быстрее.' },
     { name: 'Ольга', rating: 5, text: 'Лучшие роллы в городе!' },
-    { name: 'Сергей', rating: 5, text: 'Отличный сервис и вкусная еда.' }
+    { name: 'Сергей', rating: 5, text: 'Отличный сервис и вкусная еда.' },
+    { name: 'Айнура Абдыкадырова', rating: 5, text: 'Невероятно вкусные роллы! Доставили за 25 минут, все было свежим и горячим. Обязательно закажу еще!' },
+    { name: 'Михаил Соколов', rating: 5, text: 'Отличное качество и быстрая доставка. Роллы просто пальчики оближешь!' },
+    { name: 'Айгерим Токтобекова', rating: 5, text: 'Лучшие роллы в городе! Заказываю регулярно, всегда довольна качеством.' },
+    { name: 'Александр', rating: 5, text: 'Превосходное качество блюд и быстрая доставка!' },
+    { name: 'Мария', rating: 5, text: 'Очень вкусно! Заказываю каждый день.' },
+    { name: 'Иван', rating: 4, text: 'Хорошие роллы, доставка быстрая.' },
+    { name: 'Екатерина', rating: 5, text: 'Лучший сервис доставки в городе!' },
+    { name: 'Андрей', rating: 5, text: 'Отличные цены и качество на высоте!' },
+    { name: 'Наталья', rating: 5, text: 'Очень довольна сервисом и едой!' },
+    { name: 'Павел', rating: 4, text: 'Хорошо, но можно добавить больше соусов.' },
+    { name: 'Юлия', rating: 5, text: 'Превосходно! Рекомендую всем!' },
+    { name: 'Владимир', rating: 5, text: 'Отличный выбор и быстрая доставка!' },
+    { name: 'Татьяна', rating: 5, text: 'Очень вкусно и красиво оформлено!' },
+    { name: 'Артем', rating: 4, text: 'Хорошее качество, заказываю регулярно.' },
+    { name: 'Светлана', rating: 5, text: 'Лучший сервис доставки еды!' }
   ];
 
   const randomReviews = allReviews.sort(() => 0.5 - Math.random()).slice(0, 3);
 
+  const corporateServices = [
+    {
+      title: 'Корпоративные обеды',
+      description: 'Питание для вашей команды с доставкой в офис',
+      discount: '15%',
+      features: ['Меню на выбор', 'Доставка к определенному времени', 'Скидка от 10 заказов']
+    },
+    {
+      title: 'Детские праздники',
+      description: 'Вкусные и красивые блюда для детских мероприятий',
+      discount: '12%',
+      features: ['Детское меню', 'Красивое оформление', 'Скидка от 5 заказов']
+    },
+    {
+      title: 'Свадебные банкеты',
+      description: 'Элитное меню для вашего особенного дня',
+      discount: '10%',
+      features: ['Премиум ингредиенты', 'Профессиональное оформление', 'Скидка от 20 заказов']
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden hero-section">
+      {/* Hero Section with Reviews Sidebar */}
+      <section className="relative overflow-hidden hero-section bg-gradient-to-br from-orange-500 via-orange-600 to-red-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-          <div className="text-center">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 mobile-heading">
-              Попробуйте наши лучшие блюда
-            </h1>
-            <p className="text-xl sm:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto mobile-subheading">
-              Выберите из нашего разнообразного меню свежих роллов, сетов и других блюд японской кухни
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            {/* Left Side - Hero Content */}
+            <div className="flex-1 text-center lg:text-left">
+              {/* Promotional Badges */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-6">
+                <span className="bg-orange-200 text-orange-800 px-4 py-2 rounded-full text-sm font-medium">
+                  Лучшие роллы в городе
+                </span>
+                <span className="bg-orange-200 text-orange-800 px-4 py-2 rounded-full text-sm font-medium">
+                  Быстрая доставка
+                </span>
+              </div>
+              
+              {/* Main Headline */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 mobile-heading">
+                Вкусные роллы с доставкой
+              </h1>
+              
+              {/* Sub-headline */}
+              <p className="text-xl sm:text-2xl text-white/90 mb-8 max-w-2xl mx-auto lg:mx-0 mobile-subheading">
+                Свежие ингредиенты, оригинальные рецепты и быстрая доставка прямо к вашему столу
+              </p>
+              
+              {/* Call to Action Button */}
               <Button 
                 onClick={() => navigate('/menu')}
-                className="text-lg px-8 py-4 bg-orange-600 hover:bg-orange-700 mobile-btn mobile-btn-lg"
+                className="text-lg px-8 py-4 bg-orange-600 hover:bg-orange-700 mobile-btn mobile-btn-lg mb-6"
               >
-                Смотреть все меню
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ShoppingCart className="mr-2 h-5 w-5" />
+                Заказать сейчас
               </Button>
-              <Button 
-                variant="outline"
-                onClick={() => navigate('/contact')}
-                className="text-lg px-8 py-4 mobile-btn"
-              >
-                Связаться с нами
-              </Button>
+              
+              {/* Delivery Information */}
+              <div className="flex flex-wrap justify-center lg:justify-start items-center gap-6 text-white/80 text-sm">
+                <span className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  30-60 мин
+                </span>
+                <span className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  По всему городу
+                </span>
+                <span className="flex items-center gap-2">
+                  <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                  4.9/5
+                </span>
+              </div>
+            </div>
+            
+            {/* Right Side - Customer Reviews */}
+            <div className="lg:w-96 space-y-4">
+              <h3 className="text-xl font-semibold text-white text-center lg:text-left mb-6">
+                Отзывы наших клиентов
+              </h3>
+              
+              {/* Review Cards */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-white">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-bold text-white">
+                    А
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Айнура Абдыкадырова</h4>
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-white/90 text-sm italic">
+                  "Невероятно вкусные роллы! Доставили за 25 минут, все было свежим и горячим. Обязательно закажу еще!"
+                </p>
+              </div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-white">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-bold text-white">
+                    М
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Михаил Соколов</h4>
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-white/90 text-sm italic">
+                  "Отличное качество и быстрая доставка. Роллы просто пальчики оближешь!"
+                </p>
+              </div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-white">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-bold text-white">
+                    А
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Айгерим Токтобекова</h4>
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-white/90 text-sm italic">
+                  "Лучшие роллы в городе! Заказываю регулярно, всегда довольна качеством."
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 bg-white features-section">
+      {/* Corporate Services Section */}
+      <section className="py-16 bg-gradient-to-br from-orange-50 to-red-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 mobile-heading">
+              Специальные предложения
+            </h2>
+            <p className="text-xl text-gray-600 mobile-subheading">
+              Корпоративное питание и мероприятия со скидками
+            </p>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="text-center feature-card">
-                <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 feature-icon">
-                  <feature.icon className="h-8 w-8 text-orange-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2 feature-title">{feature.title}</h3>
-                <p className="text-gray-600 feature-description">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Popular Categories */}
-      <section className="py-16 bg-gray-50 categories-section">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 mobile-heading">
-              Популярные категории
-            </h2>
-            <p className="text-xl text-gray-600 mobile-subheading">
-              Выберите любимую категорию блюд
-            </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 category-grid">
-            {popularCategories.map((category, index) => (
-              <div key={index} className="text-center category-card">
-                <div className="text-4xl mb-3 category-emoji">{category.emoji}</div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 category-name">{category.name}</h3>
-                <p className="text-sm text-gray-600 category-count">{category.count} блюд</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Menu */}
-      <section className="py-16 bg-white quick-menu-section">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 mobile-heading">
-              Быстрое меню
-            </h2>
-            <p className="text-xl text-gray-600 mobile-subheading">
-              Популярные блюда для быстрого заказа
-            </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 quick-menu-grid">
-            {quickMenu.map((item, index) => (
-              <div key={index} className="text-center quick-menu-item">
-                <img 
-                  src={item.image} 
-                  alt={item.name}
-                  className="w-20 h-20 mx-auto mb-3 rounded-lg object-cover quick-menu-image"
-                />
-                <h3 className="font-semibold text-gray-900 mb-1 quick-menu-name">{item.name}</h3>
-                <p className="text-orange-600 font-bold quick-menu-price">{item.price}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 mobile-heading">
-              Популярные блюда
-            </h2>
-            <p className="text-xl text-gray-600 mobile-subheading">
-              Наши самые любимые клиентами блюда
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow mobile-card">
-                <div className="aspect-square overflow-hidden">
-                  <img
-                    src={product.image_url || (product as any).mobile_image_url}
-                    alt={product.name}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 mobile-image"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/images/logo.svg';
-                    }}
-                  />
-                </div>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900 line-clamp-2">{product.name}</h3>
-                    <Badge variant="secondary" className="ml-2 flex-shrink-0">
-                      {product.category}
-                    </Badge>
+            {corporateServices.map((service, index) => (
+              <div key={index} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div className="text-center mb-6">
+                  <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-orange-600">{service.discount}</span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {product.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-orange-600">
-                      {formatPrice(product.price)}
-                    </span>
-                    <Button
-                      size="sm"
-                      onClick={() => navigate('/menu')}
-                      className="bg-orange-600 hover:bg-orange-700"
-                    >
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Заказать
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Button 
-              onClick={() => navigate('/menu')}
-              className="text-lg px-8 py-4 bg-orange-600 hover:bg-orange-700 mobile-btn mobile-btn-lg"
-            >
-              Смотреть все меню
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Reviews Section */}
-      <section className="py-16 bg-white reviews-section">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 mobile-heading">
-              Отзывы наших клиентов
-            </h2>
-            <p className="text-xl text-gray-600 mobile-subheading">
-              Что говорят о нас довольные клиенты
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 reviews-grid">
-            {randomReviews.map((review, index) => (
-              <div key={index} className="bg-gray-50 rounded-2xl p-6 text-center review-card">
-                <div className="flex justify-center mb-4 review-stars">
-                  {[...Array(review.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{service.title}</h3>
+                  <p className="text-gray-600 text-sm">{service.description}</p>
+                </div>
+                
+                <div className="space-y-2 mb-6">
+                  {service.features.map((feature, featureIndex) => (
+                    <div key={featureIndex} className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                      <span className="text-sm text-gray-700">{feature}</span>
+                    </div>
                   ))}
                 </div>
-                <p className="text-gray-700 mb-4 italic review-text">"{review.text}"</p>
-                <p className="font-semibold text-gray-900 review-author">{review.name}</p>
+                
+                <Button 
+                  onClick={() => navigate('/contact')}
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                >
+                  Связаться с нами
+                </Button>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section className="py-16 bg-gray-50 contact-section">
+      {/* Bottom Section */}
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8 mobile-heading">
-            Свяжитесь с нами
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-8 mobile-heading">
+            Попробуйте наши лучшие блюда
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 contact-grid">
-            <div className="text-center contact-item">
-              <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 contact-icon">
-                <Phone className="h-8 w-8 text-orange-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2 contact-title">Телефон</h3>
-              <p className="text-gray-600 contact-info">+7 (XXX) XXX-XX-XX</p>
-            </div>
-            <div className="text-center contact-item">
-              <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 contact-icon">
-                <MapPin className="h-8 w-8 text-orange-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2 contact-title">Адрес</h3>
-              <p className="text-gray-600 contact-info">ул. Примерная, д. 123</p>
-            </div>
-            <div className="text-center contact-item">
-              <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 contact-icon">
-                <Clock className="h-8 w-8 text-orange-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2 contact-title">Время работы</h3>
-              <p className="text-gray-600 contact-info">24/7</p>
-            </div>
-          </div>
+          <p className="text-xl text-gray-600 mb-8 mobile-subheading">
+            Выберите из нашего разнообразного меню свежих роллов, сетов и других блюд японской кухни
+          </p>
+          <Button 
+            onClick={() => navigate('/menu')}
+            className="text-lg px-8 py-4 bg-orange-600 hover:bg-orange-700 mobile-btn mobile-btn-lg"
+          >
+            Смотреть все меню
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
         </div>
       </section>
 
@@ -354,17 +351,16 @@ export const LandingPage: React.FC = () => {
             <div className="footer-section">
               <h3 className="text-xl font-semibold mb-4 footer-title">Контакты</h3>
               <div className="space-y-2 text-gray-400 footer-content">
-                <p>Телефон: +7 (XXX) XXX-XX-XX</p>
+                <p>Телефон: +7 (747) 123-45-67</p>
                 <p>Email: info@mnogo-rolly.online</p>
-                <p>Адрес: ул. Примерная, д. 123</p>
+                <p>IP: 147.45.141.113</p>
               </div>
             </div>
             <div className="footer-section">
               <h3 className="text-xl font-semibold mb-4 footer-title">Социальные сети</h3>
               <div className="flex space-x-4 footer-social">
                 <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  {/* Assuming Instagram icon is available, otherwise remove or replace */}
-                  {/* <Instagram className="h-6 w-6" /> */}
+                  {/* Instagram icon */}
                 </a>
               </div>
             </div>
