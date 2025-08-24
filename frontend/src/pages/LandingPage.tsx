@@ -12,22 +12,22 @@ export const LandingPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const loadProducts = async () => {
-    try {
+    const loadProducts = async () => {
+      try {
       setLoading(true);
       const data = await getAllProducts();
       setProducts(data);
-      setError(null);
+        setError(null);
     } catch (err: any) {
       console.error('❌ Ошибка загрузки товаров:', err);
       setError(err.message || 'Ошибка загрузки товаров');
-    } finally {
-      setLoading(false);
-    }
-  };
-  
+      } finally {
+        setLoading(false);
+      }
+    };
+    
   useEffect(() => {
-    loadProducts();
+      loadProducts();
   }, []);
 
   // 21 отзывов для отображения
@@ -169,12 +169,12 @@ export const LandingPage: React.FC = () => {
               {/* Main Headline */}
               <h1 className="text-6xl font-bold text-white leading-tight drop-shadow-2xl">
                 Вкусные роллы с доставкой
-              </h1>
+            </h1>
               
               {/* Sub-headline */}
               <p className="text-2xl text-orange-100 leading-relaxed drop-shadow-lg">
                 Свежие ингредиенты, оригинальные рецепты и быстрая доставка прямо к вашему столу
-              </p>
+            </p>
               
               {/* Emotional CTA */}
               <div>
@@ -188,13 +188,13 @@ export const LandingPage: React.FC = () => {
               
               {/* CTA Button */}
               <div>
-                <Button 
-                  onClick={() => navigate('/menu')}
+              <Button 
+                onClick={() => navigate('/menu')}
                   className="bg-orange-600 hover:bg-orange-700 text-white text-lg px-8 py-4 rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 border-2 border-orange-400"
-                >
+              >
                   <ShoppingCart className="w-5 h-5 mr-2" />
-                  Заказать сейчас
-                </Button>
+                Заказать сейчас
+              </Button>
               </div>
               
               {/* Delivery Info */}
@@ -224,18 +224,18 @@ export const LandingPage: React.FC = () => {
             </div>
             
             {/* Customer Reviews - Right Side */}
-            <div className="space-y-6">
+              <div className="space-y-6">
               <h2 className="text-3xl font-bold text-white text-center mb-8">Отзывы наших клиентов</h2>
               {randomReviews.map((review, index) => (
                 <div
                   key={review.name}
                   className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
                 >
-                  <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-4">
                     <div className="bg-orange-500 rounded-full w-12 h-12 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                       {review.name.charAt(0)}
-                    </div>
-                    <div className="flex-1">
+                      </div>
+                      <div className="flex-1">
                       <h3 className="font-semibold text-white text-lg mb-2">{review.name}</h3>
                       <div className="flex gap-1 mb-3">
                         {[...Array(review.rating)].map((_, i) => (
@@ -243,10 +243,10 @@ export const LandingPage: React.FC = () => {
                         ))}
                       </div>
                       <p className="text-orange-100 leading-relaxed">{review.text}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </div>
@@ -268,7 +268,7 @@ export const LandingPage: React.FC = () => {
               Наши самые популярные и вкусные блюда, которые заказывают чаще всего
             </p>
             <p className="text-lg text-orange-600 font-semibold">
-              🔥 Хит продаж! Попробуйте прямо сейчас!
+              Хит продаж! Попробуйте прямо сейчас!
             </p>
           </div>
 
@@ -318,7 +318,7 @@ export const LandingPage: React.FC = () => {
         
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">🍽️ Категории блюд</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Категории блюд</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Выберите категорию и насладитесь нашими лучшими блюдами
             </p>
@@ -338,9 +338,6 @@ export const LandingPage: React.FC = () => {
                 <div className="absolute inset-0 bg-black/20 z-0 group-hover:bg-black/10 transition-all duration-300"></div>
 
                 <div className="relative z-10 p-8 text-center text-white h-48 flex flex-col items-center justify-center">
-                  <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                    {category.icon}
-                  </div>
                   <h3 className="font-bold text-2xl mb-2 group-hover:text-orange-200 transition-colors">{category.name}</h3>
                   <p className="text-orange-100 font-semibold mb-2">{category.count} блюд</p>
                   <p className="text-orange-50 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -357,7 +354,7 @@ export const LandingPage: React.FC = () => {
             ))}
           </div>
         </div>
-      </div>
+          </div>
 
       {/* About Us Section */}
       <div className="bg-white py-16 relative">
@@ -380,24 +377,18 @@ export const LandingPage: React.FC = () => {
             {[
               {
                 title: 'Свежие ингредиенты',
-                description: 'Используем только свежие и качественные продукты',
-                icon: '🥬'
+                description: 'Используем только свежие и качественные продукты'
               },
               {
                 title: 'Быстрая доставка',
-                description: 'Доставляем за 30-60 минут',
-                icon: '🚚'
+                description: 'Доставляем за 30-60 минут'
               },
               {
                 title: 'Отличное качество',
-                description: 'Гарантируем высокое качество каждого блюда',
-                icon: '⭐'
+                description: 'Гарантируем высокое качество каждого блюда'
               }
             ].map((feature, index) => (
               <div key={index} className="text-center group">
-                <div className="bg-orange-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <span className="text-3xl">{feature.icon}</span>
-                </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
               </div>
@@ -406,7 +397,7 @@ export const LandingPage: React.FC = () => {
 
 
         </div>
-      </div>
+          </div>
 
 
 
@@ -426,7 +417,7 @@ export const LandingPage: React.FC = () => {
               Выгодные предложения для ваших мероприятий
             </p>
           </div>
-
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {corporateServices.map((service, index) => (
               <div
