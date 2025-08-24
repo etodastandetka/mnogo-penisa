@@ -195,9 +195,16 @@ export const MenuPage: React.FC = () => {
         )}
       </div>
 
-      {/* Fixed Cart on the Right Side */}
-      <div className="fixed right-6 top-24 z-40 hidden lg:block">
-        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+      {/* Fixed Cart - Desktop Right Side, Mobile Bottom */}
+      <div className="fixed right-6 top-20 z-30 hidden lg:block">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-h-[80vh] overflow-y-auto">
+          <FixedCart />
+        </div>
+      </div>
+      
+      {/* Mobile Cart at Bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden">
+        <div className="bg-white border-t border-gray-200 shadow-2xl">
           <FixedCart />
         </div>
       </div>
