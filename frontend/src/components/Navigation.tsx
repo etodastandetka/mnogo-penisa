@@ -89,7 +89,7 @@ export const Navigation: React.FC = () => {
             </button>
             
             <button
-              onClick={() => handleNavigation('/cart')}
+              onClick={() => handleNavigation('/checkout')}
               className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors relative"
             >
               <ShoppingCart className="w-5 h-5" />
@@ -168,7 +168,7 @@ export const Navigation: React.FC = () => {
             </button>
             
             <button
-              onClick={() => handleNavigation('/cart')}
+              onClick={() => handleNavigation('/checkout')}
               className="text-gray-700 hover:text-orange-600 block px-3 py-2 rounded-md text-base font-medium w-full text-left flex items-center justify-between"
             >
               <span>Корзина</span>
