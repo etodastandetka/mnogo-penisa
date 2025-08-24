@@ -82,6 +82,13 @@ export const Navigation: React.FC = () => {
             </button>
             
             <button
+              onClick={() => handleNavigation('/contact')}
+              className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Контакты
+            </button>
+            
+            <button
               onClick={() => handleNavigation('/cart')}
               className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors relative"
             >
@@ -151,6 +158,13 @@ export const Navigation: React.FC = () => {
               className="text-gray-700 hover:text-orange-600 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
             >
               Меню
+            </button>
+            
+            <button
+              onClick={() => handleNavigation('/contact')}
+              className="text-gray-700 hover:text-orange-600 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
+            >
+              Контакты
             </button>
             
             <button
