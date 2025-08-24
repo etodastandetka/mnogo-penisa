@@ -144,22 +144,10 @@ const LandingPage: React.FC = () => {
       <section className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 flex items-center relative overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 right-20 w-8 h-8 bg-orange-300/30 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-20 left-20 w-6 h-6 bg-red-300/30 rounded-full animate-ping"></div>
-          <div className="absolute top-1/2 left-1/4 w-4 h-4 bg-yellow-300/30 rounded-full animate-bounce"></div>
-          <div className="absolute top-20 right-1/3 w-5 h-5 bg-pink-300/30 rounded-full animate-spin"></div>
-          <div className="absolute bottom-20 left-1/3 w-7 h-7 bg-purple-300/30 rounded-full animate-pulse"></div>
-          <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-blue-300/30 rounded-full animate-bounce"></div>
-          <div className="absolute bottom-1/3 right-1/3 w-5 h-5 bg-green-300/30 rounded-full animate-ping"></div>
-          <div className="absolute top-1/4 left-1/3 w-4 h-4 bg-indigo-300/30 rounded-full animate-spin"></div>
-          <div className="absolute top-1/6 right-1/6 w-6 h-6 bg-orange-200/40 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-1/6 left-1/6 w-4 h-4 bg-red-200/40 rounded-full animate-bounce"></div>
-          <div className="absolute top-2/3 right-2/3 w-5 h-5 bg-yellow-200/40 rounded-full animate-spin"></div>
-          <div className="absolute bottom-2/3 left-2/3 w-3 h-3 bg-pink-200/40 rounded-full animate-ping"></div>
-          <div className="absolute top-3/4 right-1/5 w-4 h-4 bg-blue-200/40 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-3/4 left-1/5 w-6 h-6 bg-green-200/40 rounded-full animate-bounce"></div>
-          <div className="absolute top-1/5 right-2/5 w-3 h-3 bg-purple-200/40 rounded-full animate-spin"></div>
-          <div className="absolute bottom-1/5 left-2/5 w-5 h-5 bg-indigo-200/40 rounded-full animate-ping"></div>
+          <div className="absolute top-20 right-20 w-6 h-6 bg-orange-300/20 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-20 left-20 w-4 h-4 bg-red-300/20 rounded-full animate-ping"></div>
+          <div className="absolute top-1/2 left-1/4 w-3 h-3 bg-yellow-300/20 rounded-full animate-bounce"></div>
+          <div className="absolute top-1/3 right-1/3 w-5 h-5 bg-pink-300/20 rounded-full animate-spin"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
@@ -264,15 +252,9 @@ const LandingPage: React.FC = () => {
       <section className="py-20 bg-gradient-to-br from-orange-50 to-red-50 relative overflow-hidden">
         {/* Background Decorations */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-10 left-10 w-4 h-4 bg-orange-200/40 rounded-full animate-ping"></div>
-          <div className="absolute bottom-10 right-10 w-6 h-6 bg-red-200/40 rounded-full animate-pulse"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-yellow-200/40 rounded-full animate-bounce"></div>
-          <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-pink-200/40 rounded-full animate-spin"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-4 h-4 bg-purple-200/40 rounded-full animate-ping"></div>
-          <div className="absolute top-1/3 right-1/3 w-5 h-5 bg-blue-200/40 rounded-full animate-bounce"></div>
-          <div className="absolute bottom-1/3 left-1/3 w-3 h-3 bg-green-200/40 rounded-full animate-spin"></div>
-          <div className="absolute top-2/3 left-2/3 w-4 h-4 bg-orange-200/30 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-2/3 right-2/3 w-5 h-5 bg-red-200/30 rounded-full animate-bounce"></div>
+          <div className="absolute top-10 left-10 w-4 h-4 bg-orange-200/30 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-10 right-10 w-3 h-3 bg-red-200/30 rounded-full animate-bounce"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-yellow-200/30 rounded-full animate-ping"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -303,7 +285,7 @@ const LandingPage: React.FC = () => {
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                   <div className="absolute top-3 right-3 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                    {product.price} ₸
+                    {product.price} сом
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                     <h3 className="font-semibold text-white text-lg">{product.name}</h3>
@@ -328,14 +310,9 @@ const LandingPage: React.FC = () => {
       <section className="py-20 bg-gradient-to-br from-gray-50 to-orange-50 relative overflow-hidden">
         {/* Background Decorations */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 right-20 w-5 h-5 bg-orange-200/40 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-20 left-20 w-4 h-4 bg-red-200/40 rounded-full animate-bounce"></div>
-          <div className="absolute top-1/2 left-1/4 w-6 h-6 bg-yellow-200/40 rounded-full animate-spin"></div>
-          <div className="absolute top-1/3 right-1/3 w-3 h-3 bg-pink-200/40 rounded-full animate-ping"></div>
-          <div className="absolute bottom-1/3 right-1/4 w-5 h-5 bg-purple-200/40 rounded-full animate-bounce"></div>
-          <div className="absolute top-1/4 left-1/2 w-4 h-4 bg-blue-200/40 rounded-full animate-spin"></div>
-          <div className="absolute top-1/6 right-1/5 w-6 h-6 bg-orange-200/30 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-1/6 left-1/5 w-3 h-3 bg-red-200/30 rounded-full animate-bounce"></div>
+          <div className="absolute top-20 right-20 w-4 h-4 bg-orange-200/30 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-20 left-20 w-3 h-3 bg-red-200/30 rounded-full animate-bounce"></div>
+          <div className="absolute top-1/2 left-1/4 w-5 h-5 bg-yellow-200/30 rounded-full animate-ping"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -396,15 +373,9 @@ const LandingPage: React.FC = () => {
       <section className="py-20 bg-gradient-to-br from-orange-50 to-red-50 relative overflow-hidden">
         {/* Background Decorations */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-10 left-10 w-5 h-5 bg-orange-200/40 rounded-full animate-ping"></div>
-          <div className="absolute bottom-10 right-10 w-4 h-4 bg-red-200/40 rounded-full animate-pulse"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-yellow-200/40 rounded-full animate-bounce"></div>
-          <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-pink-200/40 rounded-full animate-spin"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-5 h-5 bg-purple-200/40 rounded-full animate-ping"></div>
-          <div className="absolute top-1/3 right-1/3 w-4 h-4 bg-blue-200/40 rounded-full animate-bounce"></div>
-          <div className="absolute bottom-1/3 left-1/3 w-3 h-3 bg-green-200/40 rounded-full animate-spin"></div>
-          <div className="absolute top-2/3 left-2/3 w-5 h-5 bg-orange-200/30 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-2/3 right-2/3 w-4 h-4 bg-red-200/30 rounded-full animate-bounce"></div>
+          <div className="absolute top-10 left-10 w-4 h-4 bg-orange-200/30 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-10 right-10 w-3 h-3 bg-red-200/30 rounded-full animate-bounce"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-yellow-200/30 rounded-full animate-ping"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -442,16 +413,9 @@ const LandingPage: React.FC = () => {
       <section className="py-20 bg-gradient-to-br from-gray-50 to-orange-50 relative overflow-hidden">
         {/* Background Decorations */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 right-20 w-6 h-6 bg-orange-200/40 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-20 left-20 w-4 h-4 bg-red-200/40 rounded-full animate-bounce"></div>
-          <div className="absolute top-1/2 left-1/4 w-5 h-5 bg-yellow-200/40 rounded-full animate-spin"></div>
-          <div className="absolute top-1/3 right-1/3 w-3 h-3 bg-pink-200/40 rounded-full animate-ping"></div>
-          <div className="absolute bottom-1/3 right-1/4 w-7 h-7 bg-purple-200/40 rounded-full animate-bounce"></div>
-          <div className="absolute top-1/4 left-1/2 w-4 h-4 bg-blue-200/40 rounded-full animate-spin"></div>
-          <div className="absolute top-1/6 right-1/5 w-5 h-5 bg-orange-200/30 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-1/6 left-1/5 w-3 h-3 bg-red-200/30 rounded-full animate-bounce"></div>
-          <div className="absolute top-2/3 right-2/3 w-4 h-4 bg-yellow-200/30 rounded-full animate-spin"></div>
-          <div className="absolute bottom-2/3 left-2/3 w-6 h-6 bg-pink-200/30 rounded-full animate-ping"></div>
+          <div className="absolute top-20 right-20 w-4 h-4 bg-orange-200/30 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-20 left-20 w-3 h-3 bg-red-200/30 rounded-full animate-bounce"></div>
+          <div className="absolute top-1/2 left-1/4 w-5 h-5 bg-yellow-200/30 rounded-full animate-ping"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
