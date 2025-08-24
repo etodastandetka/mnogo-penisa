@@ -2,14 +2,14 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
-import { LandingPage } from './pages/LandingPage';
-import { MenuPage } from './pages/HomePage';
-import { CheckoutPage } from './pages/CheckoutPage';
-import { ContactPage } from './pages/ContactPage';
-import { AuthPage } from './pages/AuthPage';
-import { ProfilePage } from './pages/ProfilePage';
+import LandingPage from './pages/LandingPage';
+import HomePage from './pages/HomePage';
+import CheckoutPage from './pages/CheckoutPage';
+import ContactPage from './pages/ContactPage';
+import AuthPage from './pages/AuthPage';
+import ProfilePage from './pages/ProfilePage';
 import { ImageDebugger } from './components/ImageDebugger';
-import { CartPage } from './pages/CartPage';
+import CartPage from './pages/CartPage';
 
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminOrdersPage } from './pages/AdminOrdersPage';
@@ -36,7 +36,7 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<PageWithNavigation><LandingPage /></PageWithNavigation>} />
-          <Route path="/menu" element={<PageWithNavigation><MenuPage /></PageWithNavigation>} />
+          <Route path="/menu" element={<PageWithNavigation><HomePage /></PageWithNavigation>} />
           <Route path="/contact" element={<PageWithNavigation><ContactPage /></PageWithNavigation>} />
           <Route path="/checkout" element={<PageWithNavigation><CheckoutPage /></PageWithNavigation>} />
           <Route path="/auth" element={<AuthPage />} />
