@@ -124,11 +124,11 @@ export const MenuPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Меню</h1>
-              <p className="text-gray-600">Выберите из нашего разнообразного меню</p>
+              <h1 className="text-2xl font-bold text-gray-900 mobile-heading">Меню</h1>
+              <p className="text-gray-600 mobile-subheading">Выберите из нашего разнообразного меню</p>
             </div>
             <div className="flex gap-2">
-              <ErrorFixButton onFix={handleRetry} />
+              <ErrorFixButton onFix={handleRetry} error={error || undefined} />
             </div>
           </div>
         </div>
@@ -145,16 +145,16 @@ export const MenuPage: React.FC = () => {
                 placeholder="Поиск блюд..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="w-full"
+                className="w-full search-input"
               />
             </div>
 
             {/* Category Filter */}
-            <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
+            <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 category-filters">
               <Button
-                                 variant={selectedCategory === 'all' ? 'primary' : 'outline'}
+                variant={selectedCategory === 'all' ? 'primary' : 'outline'}
                 onClick={() => handleCategoryChange('all')}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap category-filter-btn"
               >
                 Все ({products.length})
               </Button>
@@ -163,9 +163,9 @@ export const MenuPage: React.FC = () => {
                   key={category}
                   variant={selectedCategory === category ? 'primary' : 'outline'}
                   onClick={() => handleCategoryChange(category)}
-                  className="whitespace-nowrap"
+                  className="whitespace-nowrap category-filter-btn"
                 >
-                  {getCategoryEmoji(category)} {getCategoryName(category)} ({products.filter(p => p.category === category).length})
+                  {getCategoryEmoji(category)} {getCategoryName(category)}
                 </Button>
               ))}
             </div>
@@ -178,11 +178,16 @@ export const MenuPage: React.FC = () => {
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">Товары не найдены</h3>
-            <p className="text-gray-500">Попробуйте изменить фильтры или поисковый запрос</p>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Товары не найдены</h3>
+            <p className="text-gray-600 mb-6">
+              {searchQuery ? `По запросу "${searchQuery}" ничего не найдено` : 'В данной категории пока нет товаров'}
+            </p>
+            <Button onClick={handleRetry} className="bg-orange-600 hover:bg-orange-700 mobile-btn">
+              Попробовать снова
+            </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 product-grid">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -190,7 +195,6 @@ export const MenuPage: React.FC = () => {
         )}
       </div>
 
-      {/* Fixed Cart */}
       <FixedCart />
     </div>
   );
