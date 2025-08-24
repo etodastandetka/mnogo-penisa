@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { LandingPage } from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import { CheckoutPage } from './pages/CheckoutPage';
+import { OrderSuccessPage } from './pages/OrderSuccessPage';
 import { ContactPage } from './pages/ContactPage';
 import { AuthPage } from './pages/AuthPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -40,6 +41,7 @@ function App() {
           <Route path="/menu" element={<PageWithNavigation><HomePage /></PageWithNavigation>} />
           <Route path="/contact" element={<PageWithNavigation><ContactPage /></PageWithNavigation>} />
           <Route path="/checkout" element={<PageWithNavigation><CheckoutPage /></PageWithNavigation>} />
+          <Route path="/order-success/:orderId" element={<PageWithNavigation><OrderSuccessPage /></PageWithNavigation>} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/profile" element={<PageWithNavigation><ProfilePage /></PageWithNavigation>} />
           <Route path="/cart" element={<PageWithNavigation><CartPage /></PageWithNavigation>} />
