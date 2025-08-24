@@ -13,9 +13,10 @@ export const Cart: React.FC = () => {
   const { items, updateQuantity, removeItem, clearCart, getTotal, getItemCount } = useCartStore();
   
   // Отладочная информация
-  // Отслеживаем изменения в корзине
   useEffect(() => {
-    }, [items]);
+    console.log('🛒 Cart component mounted, items:', items);
+    console.log('🛒 Cart store functions:', { updateQuantity, removeItem, clearCart, getTotal, getItemCount });
+  }, [items, updateQuantity, removeItem, clearCart, getTotal, getItemCount]);
 
   if (items.length === 0) {
     return (
