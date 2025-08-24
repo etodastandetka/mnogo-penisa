@@ -27,7 +27,7 @@ export const AdminReceipts: React.FC = () => {
   const fetchReceipts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://147.45.141.113:3001/api/receipts', {
+      const response = await fetch('/api/receipts', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -49,7 +49,7 @@ export const AdminReceipts: React.FC = () => {
   const updateReceiptStatus = async (receiptId: number, status: 'confirmed' | 'rejected') => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://147.45.141.113:3001/api/receipts/${receiptId}/status`, {
+      const response = await fetch(`/api/receipts/${receiptId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -184,27 +184,27 @@ export const AdminReceipts: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <span className="font-semibold">Чек:</span>
                       <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(`https://147.45.141.113:3001${receipt.receipt_file}`, '_blank')}
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Просмотр
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const link = document.createElement('a');
-                            link.href = `https://147.45.141.113:3001${receipt.receipt_file}`;
-                            link.download = `receipt-${receipt.id}.jpg`;
-                            link.click();
-                          }}
-                        >
-                          <Download className="w-4 h-4 mr-1" />
-                          Скачать
-                        </Button>
+                                                 <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => window.open(`${receipt.receipt_file}`, '_blank')}
+                         >
+                           <Eye className="w-4 h-4 mr-1" />
+                           Просмотр
+                         </Button>
+                         <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => {
+                             const link = document.createElement('a');
+                             link.href = `${receipt.receipt_file}`;
+                             link.download = `receipt-${receipt.id}.jpg`;
+                             link.click();
+                           }}
+                         >
+                           <Download className="w-4 h-4 mr-1" />
+                           Скачать
+                         </Button>
                       </div>
                     </div>
                   </div>

@@ -65,6 +65,12 @@ export const CheckoutPage: React.FC = () => {
       };
 
       const result = await createOrder(orderData);
+      
+      // Проверяем, что заказ создан успешно
+      if (!result || !result.orderId) {
+        throw new Error('Не удалось получить ID заказа');
+      }
+      
       setOrderId(result.orderId);
 
       // Затем отправляем данные о платеже
@@ -78,7 +84,7 @@ export const CheckoutPage: React.FC = () => {
         formData.append('receiptFile', paymentData.receipt);
       }
 
-      const response = await fetch('https://147.45.141.113:3001/api/receipts', {
+      const response = await fetch('/api/receipts', {
         method: 'POST',
         body: formData
       });
