@@ -7,6 +7,7 @@ import { Input } from '../components/ui/Input';
 import { PaymentMethod } from '../types';
 import { createOrder } from '../api/orders';
 import { PaymentMethod as PaymentMethodComponent } from '../components/PaymentMethod';
+import { apiClient } from '../api/client';
 
 export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -84,14 +85,11 @@ export const CheckoutPage: React.FC = () => {
         formData.append('receiptFile', paymentData.receipt);
       }
 
-      const response = await fetch('/api/receipts', {
-        method: 'POST',
-        body: formData
+      const response = await apiClient.post('/receipts', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-
-      if (!response.ok) {
-        throw new Error('Ошибка сохранения чека');
-      }
 
       // Очищаем корзину и перенаправляем на страницу успеха
       clearCart();

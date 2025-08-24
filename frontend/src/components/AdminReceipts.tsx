@@ -3,6 +3,7 @@ import { Button } from './ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { Badge } from './ui/Badge';
 import { Eye, CheckCircle, XCircle, Download } from 'lucide-react';
+import { apiClient } from '../api/client';
 
 interface Receipt {
   id: number;
@@ -26,19 +27,8 @@ export const AdminReceipts: React.FC = () => {
 
   const fetchReceipts = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/receipts', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Ошибка загрузки чеков');
-      }
-
-      const data = await response.json();
-      setReceipts(data);
+      const response = await apiClient.get('/receipts');
+      setReceipts(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Неизвестная ошибка');
     } finally {
@@ -48,19 +38,7 @@ export const AdminReceipts: React.FC = () => {
 
   const updateReceiptStatus = async (receiptId: number, status: 'confirmed' | 'rejected') => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/receipts/${receiptId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ status })
-      });
-
-      if (!response.ok) {
-        throw new Error('Ошибка обновления статуса');
-      }
+      const response = await apiClient.patch(`/receipts/${receiptId}/status`, { status });
 
       // Обновляем локальное состояние
       setReceipts(prev => prev.map(receipt => 
