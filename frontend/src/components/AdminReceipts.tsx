@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
+import { Button } from './ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
+import { Badge } from './ui/Badge';
 import { Eye, CheckCircle, XCircle, Download } from 'lucide-react';
 
 interface Receipt {

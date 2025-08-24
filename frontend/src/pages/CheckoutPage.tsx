@@ -50,7 +50,7 @@ export const CheckoutPage: React.FC = () => {
       const result = await createOrder(orderData);
       
       // Сохраняем ID заказа и показываем компонент оплаты
-      setOrderId(result.id);
+      setOrderId(result.orderId);
       setShowPaymentComponent(true);
     } catch (error: any) {
       console.error('❌ Ошибка создания заказа:', error);

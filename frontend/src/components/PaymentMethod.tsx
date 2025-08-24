@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
+import { Label } from './ui/Label';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs';
 import { CreditCard, QrCode, DollarSign, Receipt } from 'lucide-react';
 
 interface PaymentMethodProps {
@@ -27,6 +27,7 @@ export const PaymentMethod: React.FC<PaymentMethodProps> = ({ totalAmount, onPay
   const [cashAmount, setCashAmount] = useState('');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [paymentNote, setPaymentNote] = useState('');
+  const [activeTab, setActiveTab] = useState('card');
 
   const handleBankPayment = (bankUrl: string) => {
     window.open(bankUrl, '_blank');
@@ -80,7 +81,7 @@ export const PaymentMethod: React.FC<PaymentMethodProps> = ({ totalAmount, onPay
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="card" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="card">Карта</TabsTrigger>
             <TabsTrigger value="qr">QR-код</TabsTrigger>

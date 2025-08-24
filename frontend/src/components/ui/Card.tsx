@@ -34,6 +34,19 @@ export const CardHeader: React.FC<CardHeaderProps> = ({ children, className }) =
   );
 };
 
+interface CardTitleProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const CardTitle: React.FC<CardTitleProps> = ({ children, className }) => {
+  return (
+    <h3 className={cn('text-lg font-semibold text-gray-900', className)}>
+      {children}
+    </h3>
+  );
+};
+
 interface CardContentProps {
   children: React.ReactNode;
   className?: string;
