@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
-import LandingPage from './pages/LandingPage';
+import { LandingPage } from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { ContactPage } from './pages/ContactPage';
