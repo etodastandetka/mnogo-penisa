@@ -510,7 +510,7 @@ app.get('/api/products', (req, res) => {
       
       // Если есть относительный путь к изображению, делаем его полным
       if (product.image_url && product.image_url.startsWith('/uploads/')) {
-        processedImageUrl = `https://147.45.141.113:3444${product.image_url}`;
+        processedImageUrl = `https://147.45.141.113:3001${product.image_url}`;
       }
       
       // Если это внешний URL (Unsplash или другие), оставляем как есть
@@ -531,7 +531,7 @@ app.get('/api/products', (req, res) => {
       // Если есть mobile_image_url, используем его как fallback
       if (!processedImageUrl && product.mobile_image_url && product.mobile_image_url !== '' && !product.mobile_image_url.includes('unsplash.com')) {
         if (product.mobile_image_url.startsWith('/uploads/')) {
-          processedImageUrl = `https://147.45.141.113:3444${product.mobile_image_url}`;
+          processedImageUrl = `https://147.45.141.113:3001${product.mobile_image_url}`;
         } else if (product.mobile_image_url.startsWith('data:image/')) {
           processedImageUrl = product.mobile_image_url;
         } else if (product.mobile_image_url.startsWith('http://') || product.mobile_image_url.startsWith('https://')) {
@@ -934,7 +934,7 @@ app.post('/api/orders/payment-proof', uploadMemory.single('file'), (req, res) =>
     fs.writeFileSync(filePath, req.file.buffer);
     
     // Создаем URL для файла
-    const fileUrl = 'https://147.45.141.113:3444/uploads/' + fileName;
+    const fileUrl = 'https://147.45.141.113:3001/uploads/' + fileName;
     
     console.log('Обновляем заказ в базе:', { orderId, orderNumber, fileUrl });
     
@@ -1019,7 +1019,7 @@ app.post('/api/admin/orders/:orderNumber/payment-proof', upload.single('file'), 
     fs.writeFileSync(filePath, req.file.buffer);
     
     // Создаем URL для файла
-    const fileUrl = 'https://147.45.141.113:3444/uploads/' + fileName;
+    const fileUrl = 'https://147.45.141.113:3001/uploads/' + fileName;
     
     // Ищем заказ по номеру
     db.get('SELECT id, order_number FROM orders WHERE order_number = ?', [orderNumber], (err, order) => {
@@ -1315,7 +1315,7 @@ app.get('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
       
       // Если есть относительный путь к изображению, делаем его полным
       if (product.image_url && product.image_url.startsWith('/uploads/')) {
-        processedImageUrl = `https://147.45.141.113:3444${product.image_url}`;
+        processedImageUrl = `https://147.45.141.113:3001${product.image_url}`;
       }
       
       // Если это внешний URL, оставляем как есть
@@ -1331,7 +1331,7 @@ app.get('/api/admin/products', authenticateToken, requireAdmin, (req, res) => {
       // Если есть mobile_image_url, используем его как fallback
       if (!processedImageUrl && product.mobile_image_url && product.mobile_image_url !== '' && !product.mobile_image_url.includes('unsplash.com')) {
         if (product.mobile_image_url.startsWith('/uploads/')) {
-          processedImageUrl = `https://147.45.141.113:3444${product.mobile_image_url}`;
+          processedImageUrl = `https://147.45.141.113:3001${product.mobile_image_url}`;
         } else if (product.mobile_image_url.startsWith('data:image/')) {
           processedImageUrl = product.mobile_image_url;
         } else if (product.mobile_image_url.startsWith('http://') || product.mobile_image_url.startsWith('https://')) {

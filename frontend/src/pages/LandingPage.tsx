@@ -1,51 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { formatPrice } from '../utils/format';
-import { useUserStore } from '../store/userStore';
+import { Truck, Shield, Clock, Star, MapPin, Phone, Mail, ArrowRight, ShoppingCart, Instagram } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { getAllProducts } from '../api/products';
-import { Product } from '../types';
-import { 
-  ShoppingCart, Clock, MapPin, Phone, Star, Truck, Shield, Heart,
-  ArrowRight, ChefHat, Utensils, Sparkles, Zap, Award, Instagram
-} from 'lucide-react';
-import { ErrorFixButton } from '../components/ErrorFixButton';
 import { sortProductsByCategory } from '../utils/categories';
+import { formatPrice } from '../utils/format';
+import { ErrorFixButton } from '../components/ErrorFixButton';
+import type { Product } from '../types';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getAllProducts();
-      // Сортируем товары по категориям (роллы и пицца первыми)
-      const sortedProducts = sortProductsByCategory(data);
-      setProducts(sortedProducts);
-    } catch (err: any) {
-      console.error('❌ Ошибка загрузки товаров:', err);
-      setError(err.message || 'Ошибка загрузки товаров');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
- 
-  const handleRetry = () => {
-    loadProducts();
-  };
-
-  // Показываем только первые 8 товаров для красивого отображения
-  const featuredProducts = products.slice(0, 8);
 
   // Fallback данные для красивого отображения
   const fallbackProducts = [
@@ -82,6 +49,30 @@ export const LandingPage: React.FC = () => {
       image_url: '/images/chai.png'
     }
   ];
+
+  const loadProducts = async () => {
+    try {
+      const data = await getAllProducts();
+      // Сортируем товары по категориям (роллы и пицца первыми)
+      const sortedProducts = sortProductsByCategory(data);
+      setProducts(sortedProducts);
+    } catch (err: any) {
+      console.error('❌ Ошибка загрузки товаров:', err);
+      // При ошибке используем fallback данные
+      setProducts(fallbackProducts);
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const handleRetry = () => {
+    loadProducts();
+  };
+
+  // Показываем только первые 8 товаров для красивого отображения
+  const featuredProducts = products.length > 0 ? products.slice(0, 8) : fallbackProducts;
 
   const features = [
     {
@@ -237,66 +228,47 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-              <p className="text-gray-600">Загружаем меню...</p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <div className="text-red-500 text-6xl mb-4">⚠️</div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">Ошибка загрузки</h3>
-              <p className="text-gray-600 mb-6">{error}</p>
-              <div className="space-y-3">
-                <Button onClick={handleRetry} className="bg-orange-600 hover:bg-orange-700 mobile-btn">
-                  Попробовать снова
-                </Button>
-                <ErrorFixButton onFix={handleRetry} error={error} />
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => (
-                <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow mobile-card">
-                  <div className="aspect-square overflow-hidden">
-                    <img
-                      src={product.image_url || product.mobile_image_url}
-                      alt={product.name}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 mobile-image"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/images/logo.svg';
-                      }}
-                    />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {featuredProducts.map((product) => (
+              <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow mobile-card">
+                <div className="aspect-square overflow-hidden">
+                  <img
+                    src={product.image_url || (product as any).mobile_image_url}
+                    alt={product.name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 mobile-image"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/images/logo.svg';
+                    }}
+                  />
+                </div>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-gray-900 line-clamp-2">{product.name}</h3>
+                    <Badge variant="secondary" className="ml-2 flex-shrink-0">
+                      {product.category}
+                    </Badge>
                   </div>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900 line-clamp-2">{product.name}</h3>
-                      <Badge variant="secondary" className="ml-2 flex-shrink-0">
-                        {product.category}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-orange-600">
-                        {formatPrice(product.price)}
-                      </span>
-                      <Button
-                        size="sm"
-                        onClick={() => navigate('/menu')}
-                        className="bg-orange-600 hover:bg-orange-700"
-                      >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        Заказать
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    {product.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold text-orange-600">
+                      {formatPrice(product.price)}
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate('/menu')}
+                      className="bg-orange-600 hover:bg-orange-700"
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Заказать
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
           <div className="text-center mt-12">
             <Button 

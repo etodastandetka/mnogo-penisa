@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
 import { LandingPage } from './pages/LandingPage';
@@ -33,70 +33,68 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/" element={<PageWithNavigation><LandingPage /></PageWithNavigation>} />
-            <Route path="/menu" element={<PageWithNavigation><MenuPage /></PageWithNavigation>} />
-            <Route path="/contact" element={<PageWithNavigation><ContactPage /></PageWithNavigation>} />
-            <Route path="/checkout" element={<PageWithNavigation><CheckoutPage /></PageWithNavigation>} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/profile" element={<PageWithNavigation><ProfilePage /></PageWithNavigation>} />
-            <Route path="/cart" element={<PageWithNavigation><CartPage /></PageWithNavigation>} />
-            
-            {/* Отладчик изображений (только в development) */}
-            {process.env.NODE_ENV === 'development' && (
-              <Route path="/debug-images" element={<ImageDebugger />} />
-            )}
-            
-            {/* Админ-панель */}
-            <Route path="/admin" element={
-              <ProtectedRoute requireAdmin={true}>
-                <AdminDashboardPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/dashboard" element={
-              <ProtectedRoute requireAdmin={true}>
-                <AdminDashboardPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/orders" element={
-              <ProtectedRoute requireAdmin={true}>
-                <AdminOrdersPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/products" element={
-              <ProtectedRoute requireAdmin={true}>
-                <AdminProductsPage />
-              </ProtectedRoute>
-            } />
-
-            <Route path="/admin/analytics" element={
-              <ProtectedRoute requireAdmin={true}>
-                <AdminAnalyticsPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/settings" element={
-              <ProtectedRoute requireAdmin={true}>
-                <AdminSettingsPage />
-              </ProtectedRoute>
-            } />
-          </Routes>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<PageWithNavigation><LandingPage /></PageWithNavigation>} />
+          <Route path="/menu" element={<PageWithNavigation><MenuPage /></PageWithNavigation>} />
+          <Route path="/contact" element={<PageWithNavigation><ContactPage /></PageWithNavigation>} />
+          <Route path="/checkout" element={<PageWithNavigation><CheckoutPage /></PageWithNavigation>} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/profile" element={<PageWithNavigation><ProfilePage /></PageWithNavigation>} />
+          <Route path="/cart" element={<PageWithNavigation><CartPage /></PageWithNavigation>} />
           
-          {/* Уведомления */}
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#363636',
-                color: '#fff',
-                borderRadius: '12px',
-              },
-            }}
-          />
-        </div>
-      </Router>
+          {/* Отладчик изображений (только в development) */}
+          {process.env.NODE_ENV === 'development' && (
+            <Route path="/debug-images" element={<ImageDebugger />} />
+          )}
+          
+          {/* Админ-панель */}
+          <Route path="/admin" element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminDashboardPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminDashboardPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/orders" element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminOrdersPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/products" element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminProductsPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/admin/analytics" element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminAnalyticsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/settings" element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminSettingsPage />
+            </ProtectedRoute>
+          } />
+        </Routes>
+        
+        {/* Уведомления */}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+              borderRadius: '12px',
+            },
+          }}
+        />
+      </div>
     </QueryClientProvider>
   );
 }
