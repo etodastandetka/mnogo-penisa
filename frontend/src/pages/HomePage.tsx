@@ -8,7 +8,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { getCategoryName, getCategoryEmoji, sortProductsByCategory } from '../utils/categories';
 
-export const MenuPage: React.FC = () => {
+export const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -205,5 +205,4 @@ export const MenuPage: React.FC = () => {
   );
 };
 
-export const HomePage = MenuPage;
-export default MenuPage;
+export default HomePage;

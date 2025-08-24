@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import { getUserOrders } from '../api/orders';
 import { 
@@ -18,6 +18,7 @@ export const Navigation: React.FC = () => {
   const [activeOrders, setActiveOrders] = useState(0);
   const { user, clearUser } = useUserStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const checkActiveOrders = async () => {
@@ -42,6 +43,11 @@ export const Navigation: React.FC = () => {
     return () => clearInterval(interval);
   }, [user]);
 
+  // Логируем изменения пути
+  useEffect(() => {
+    console.log('📍 Текущий путь:', location.pathname);
+  }, [location.pathname]);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     clearUser();
@@ -53,6 +59,7 @@ export const Navigation: React.FC = () => {
   const closeMenu = () => setIsOpen(false);
 
   const handleNavigation = (path: string) => {
+    console.log('🚀 Навигация на:', path);
     navigate(path);
     closeMenu();
   };
@@ -75,14 +82,20 @@ export const Navigation: React.FC = () => {
           {/* Десктопное меню */}
           <div className="hidden md:flex items-center space-x-4">
             <button
-              onClick={() => handleNavigation('/menu')}
+              onClick={() => {
+                console.log('🔘 Клик по кнопке Меню');
+                handleNavigation('/menu');
+              }}
               className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               Меню
             </button>
             
             <button
-              onClick={() => handleNavigation('/contact')}
+              onClick={() => {
+                console.log('🔘 Клик по кнопке Контакты');
+                handleNavigation('/contact');
+              }}
               className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               Контакты
@@ -154,14 +167,20 @@ export const Navigation: React.FC = () => {
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
             <button
-              onClick={() => handleNavigation('/')}
+              onClick={() => {
+                console.log('📱 Мобильное меню: клик по Меню');
+                handleNavigation('/');
+              }}
               className="text-gray-700 hover:text-orange-600 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
             >
               Меню
             </button>
             
             <button
-              onClick={() => handleNavigation('/contact')}
+              onClick={() => {
+                console.log('📱 Мобильное меню: клик по Контакты');
+                handleNavigation('/contact');
+              }}
               className="text-gray-700 hover:text-orange-600 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
             >
               Контакты
