@@ -4,21 +4,27 @@ import { Input } from './ui/Input';
 import { Label } from './ui/Label';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs';
-import { CreditCard, QrCode, DollarSign, Receipt } from 'lucide-react';
+import { CreditCard, QrCode, DollarSign, Receipt, Building2, Wallet, Smartphone, Users } from 'lucide-react';
 
 interface PaymentMethodProps {
   totalAmount: number;
   onPaymentComplete: (paymentData: any) => void;
 }
 
-const bankApps = [
-  { name: 'Megapay', url: 'https://megapay.kg/get#00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: '🏦' },
-  { name: 'Balance.kg', url: 'https://balance.kg/#00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: '💰' },
-  { name: 'Demirbank', url: 'https://apps.demirbank.kg/ib/#00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: '🏛️' },
-  { name: 'O!Dengi', url: 'https://api.dengi.o.kg/ru/qr/#00020101021132670013QR00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: '📱' },
-  { name: 'Bakai', url: 'https://bakai24.app/#00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: '🏢' },
-  { name: 'Companion', url: 'https://payqr.kg/qr/#00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: '🤝' },
-  { name: 'Mbank', url: 'https://app.mbank.kg/#qr00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: '📲' }
+interface BankApp {
+  name: string;
+  url: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const bankApps: BankApp[] = [
+  { name: 'Megapay', url: 'https://megapay.kg/get#00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: Building2 },
+  { name: 'Balance.kg', url: 'https://balance.kg/#00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: Wallet },
+  { name: 'Demirbank', url: 'https://apps.demirbank.kg/ib/#00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: Building2 },
+  { name: 'O!Dengi', url: 'https://api.dengi.o.kg/ru/qr/#00020101021132670013QR00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: Smartphone },
+  { name: 'Bakai', url: 'https://bakai24.app/#00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: Building2 },
+  { name: 'Companion', url: 'https://payqr.kg/qr/#00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: Users },
+  { name: 'Mbank', url: 'https://app.mbank.kg/#qr00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a', icon: Smartphone }
 ];
 
 const qrCodeUrl = 'https://payqr.kg/qr/#00020101021132590015qr.demirbank.kg01047001101611800003478401861202111302125204482953034175909DEMIRBANK63049e3a';
@@ -97,7 +103,7 @@ export const PaymentMethod: React.FC<PaymentMethodProps> = ({ totalAmount, onPay
                   className="h-16 flex flex-col items-center justify-center gap-2"
                   onClick={() => handleBankPayment(bank.url)}
                 >
-                  <span className="text-2xl">{bank.icon}</span>
+                  <bank.icon className="w-6 h-6 text-gray-600" />
                   <span className="text-sm font-medium">{bank.name}</span>
                 </Button>
               ))}
