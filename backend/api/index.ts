@@ -1230,40 +1230,45 @@ app.get('/api/admin/orders/:id', authenticateToken, requireAdmin, (req, res) => 
         return res.status(500).json({ message: 'Ошибка получения товаров заказа', error: err instanceof Error ? err.message : 'Database error' });
       }
 
-      const orderDetail = {
-        id: order.id,
-        order_number: order.order_number,
-        customer_name: order.customer_name,
-        customer_phone: order.customer_phone,
-        customer_address: order.customer_address,
-        delivery_address: order.customer_address,
-        total_amount: order.total_amount,
-        status: order.status,
-        payment_method: order.payment_method,
-        payment_status: order.payment_proof ? 'paid' : 'pending',
-        created_at: order.created_at,
-        payment_proof: order.payment_proof,
-        payment_proof_date: order.payment_proof_date,
-        notes: order.notes,
-        items: items ? items.map((item: any) => ({
-          id: item.id,
-          product_name: item.product_name || 'Неизвестный товар',
-          quantity: item.quantity,
-          price: item.price,
-          total: item.price * item.quantity,
-          product_id: item.product_id
-        })) : []
-      };
+      // Получаем информацию о чеке из таблицы receipts
+      db.get('SELECT * FROM receipts WHERE order_id = ? ORDER BY created_at DESC LIMIT 1', [id], (receiptErr, receipt: any) => {
+        const orderDetail = {
+          id: order.id,
+          order_number: order.order_number,
+          customer_name: order.customer_name,
+          customer_phone: order.customer_phone,
+          customer_address: order.customer_address,
+          delivery_address: order.customer_address,
+          total_amount: order.total_amount,
+          status: order.status,
+          payment_method: order.payment_method,
+          payment_status: receipt ? 'paid' : 'pending',
+          created_at: order.created_at,
+          payment_proof: receipt ? receipt.receipt_file : order.payment_proof,
+          payment_proof_date: receipt ? receipt.timestamp : order.payment_proof_date,
+          notes: order.notes,
+          items: items ? items.map((item: any) => ({
+            id: item.id,
+            product_name: item.product_name || 'Неизвестный товар',
+            quantity: item.quantity,
+            price: item.price,
+            total: item.price * item.quantity,
+            product_id: item.product_id
+          })) : []
+        };
 
-      console.log('Order details sent:', {
-        id: orderDetail.id,
-        order_number: orderDetail.order_number,
-        has_notes: !!orderDetail.notes,
-        notes_length: orderDetail.notes ? orderDetail.notes.length : 0,
-        items_count: orderDetail.items.length
+        console.log('Order details sent:', {
+          id: orderDetail.id,
+          order_number: orderDetail.order_number,
+          has_notes: !!orderDetail.notes,
+          notes_length: orderDetail.notes ? orderDetail.notes.length : 0,
+          items_count: orderDetail.items.length,
+          has_receipt: !!receipt,
+          receipt_file: receipt ? receipt.receipt_file : 'none'
+        });
+
+        res.json(orderDetail);
       });
-
-      res.json(orderDetail);
     });
   });
 });
@@ -1357,27 +1362,30 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
                     });
                   }
         
-            resolve({
-              id: order.id,
-              orderNumber: order.order_number,
-              customerName: order.customer_name,
-              customerPhone: order.customer_phone,
-              deliveryAddress: order.customer_address,
-              totalAmount: order.total_amount,
-              status: order.status,
-              paymentMethod: order.payment_method,
-              paymentStatus: order.payment_proof ? 'paid' : 'pending',
-              createdAt: order.created_at,
-              paymentProof: order.payment_proof,
-              paymentProofDate: order.payment_proof_date,
-              items: items ? items.map((item: any) => ({
-                id: item.id,
-                productName: item.product_name || 'Неизвестный товар',
-                quantity: item.quantity,
-                price: item.price,
-                totalPrice: item.price * item.quantity
-              })) : [],
-              items_summary: items_summary
+            // Получаем информацию о чеке из таблицы receipts
+            db.get('SELECT * FROM receipts WHERE order_id = ? ORDER BY created_at DESC LIMIT 1', [order.id], (receiptErr, receipt: any) => {
+              resolve({
+                id: order.id,
+                orderNumber: order.order_number,
+                customerName: order.customer_name,
+                customerPhone: order.customer_phone,
+                deliveryAddress: order.customer_address,
+                totalAmount: order.total_amount,
+                status: order.status,
+                paymentMethod: order.payment_method,
+                paymentStatus: receipt ? 'paid' : 'pending',
+                createdAt: order.created_at,
+                paymentProof: receipt ? receipt.receipt_file : order.payment_proof,
+                paymentProofDate: receipt ? receipt.timestamp : order.payment_proof_date,
+                items: items ? items.map((item: any) => ({
+                  id: item.id,
+                  productName: item.product_name || 'Неизвестный товар',
+                  quantity: item.quantity,
+                  price: item.price,
+                  totalPrice: item.price * item.quantity
+                })) : [],
+                items_summary: items_summary
+              });
             });
         });
       });
