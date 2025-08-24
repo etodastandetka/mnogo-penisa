@@ -16,6 +16,7 @@ import { AdminOrdersPage } from './pages/AdminOrdersPage';
 import { AdminProductsPage } from './pages/AdminProductsPage';
 import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage';
 import { AdminSettingsPage } from './pages/AdminSettingsPage';
+import { AdminReceiptsPage } from './pages/AdminReceiptsPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PageWithNavigation } from './components/PageWithNavigation';
 import './index.css';
@@ -78,6 +79,11 @@ function App() {
           <Route path="/admin/settings" element={
             <ProtectedRoute requireAdmin={true}>
               <AdminSettingsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/receipts" element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminReceiptsPage />
             </ProtectedRoute>
           } />
         </Routes>

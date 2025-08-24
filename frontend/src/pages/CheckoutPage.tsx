@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { PaymentMethod } from '../types';
 import { createOrder } from '../api/orders';
+import { PaymentMethod as PaymentMethodComponent } from '../components/PaymentMethod';
 
 export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ export const CheckoutPage: React.FC = () => {
     notes: ''
   });
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
+  const [showPaymentComponent, setShowPaymentComponent] = useState(false);
+  const [orderId, setOrderId] = useState<number | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,11 +49,9 @@ export const CheckoutPage: React.FC = () => {
 
       const result = await createOrder(orderData);
       
-      // Очищаем корзину
-      clearCart();
-      
-      // Перенаправляем на страницу успеха
-      navigate(`/order-success/${result.orderNumber}`);
+      // Сохраняем ID заказа и показываем компонент оплаты
+      setOrderId(result.id);
+      setShowPaymentComponent(true);
     } catch (error: any) {
       console.error('❌ Ошибка создания заказа:', error);
       alert('Ошибка создания заказа: ' + (error.message || 'Неизвестная ошибка'));
@@ -68,6 +69,37 @@ export const CheckoutPage: React.FC = () => {
 
   const handlePaymentMethodChange = (method: PaymentMethod) => {
     setSelectedPaymentMethod(method);
+  };
+
+  const handlePaymentComplete = async (paymentData: any) => {
+    try {
+      // Отправляем данные о платеже на сервер
+      const formData = new FormData();
+      formData.append('orderId', orderId?.toString() || '');
+      formData.append('paymentMethod', paymentData.method);
+      formData.append('amount', paymentData.amount.toString());
+      formData.append('note', paymentData.note);
+      
+      if (paymentData.receipt) {
+        formData.append('receiptFile', paymentData.receipt);
+      }
+
+      const response = await fetch('https://147.45.141.113:3001/api/receipts', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка сохранения чека');
+      }
+
+      // Очищаем корзину и перенаправляем на страницу успеха
+      clearCart();
+      navigate(`/order-success/${orderId}`);
+    } catch (error: any) {
+      console.error('Ошибка сохранения чека:', error);
+      alert('Ошибка сохранения чека: ' + error.message);
+    }
   };
 
   const getPaymentMethodName = (method: PaymentMethod): string => {
@@ -219,6 +251,21 @@ export const CheckoutPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Компонент оплаты */}
+      {showPaymentComponent && orderId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-2xl font-bold mb-4">Оплата заказа #{orderId}</h2>
+              <PaymentMethodComponent
+                totalAmount={getTotal()}
+                onPaymentComplete={handlePaymentComplete}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

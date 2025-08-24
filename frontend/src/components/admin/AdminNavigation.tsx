@@ -7,7 +7,8 @@ import {
   Users, 
   BarChart3,
   Settings,
-  LogOut
+  LogOut,
+  Receipt
 } from 'lucide-react';
 
 interface AdminNavigationProps {
@@ -19,6 +20,7 @@ const navigationItems = [
   { name: 'Дашборд', href: '/admin/dashboard', icon: TrendingUp },
   { name: 'Заказы', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Товары', href: '/admin/products', icon: Package },
+  { name: 'Чеки', href: '/admin/receipts', icon: Receipt },
   { name: 'Аналитика', href: '/admin/analytics', icon: BarChart3 },
   { name: 'Настройки', href: '/admin/settings', icon: Settings },
 ];

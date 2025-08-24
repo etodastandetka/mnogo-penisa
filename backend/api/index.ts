@@ -356,6 +356,21 @@ const initDatabase = () => {
       FOREIGN KEY (closed_by) REFERENCES users (id)
     )`);
 
+    // Таблица чеков
+    db.run(`CREATE TABLE IF NOT EXISTS receipts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER NOT NULL,
+      payment_method TEXT NOT NULL,
+      amount REAL NOT NULL,
+      receipt_file TEXT,
+      note TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (order_id) REFERENCES orders (id)
+    )`);
+
     // Создание админа по умолчанию
     const adminPassword = bcrypt.hashSync('admin123', 10);
     db.run(`INSERT OR IGNORE INTO users (email, password, name, role, is_admin) VALUES (?, ?, ?, ?, ?)`, 
@@ -488,6 +503,126 @@ app.get('/api/user/me', authenticateToken, (req: any, res) => {
 });
 
 
+
+// Маршруты для чеков
+app.post('/api/receipts', uploadMemory.single('receiptFile'), async (req, res) => {
+  try {
+    const { orderId, paymentMethod, amount, note } = req.body;
+    
+    // Сохраняем файл чека если есть
+    let receiptFileUrl = null;
+    if (req.file) {
+      const fileName = `receipt-${Date.now()}-${Math.round(Math.random() * 1E9)}.jpg`;
+      const filePath = path.join(__dirname, '../uploads/receipts', fileName);
+      
+      // Создаем папку если её нет
+      const uploadsDir = path.join(__dirname, '../uploads/receipts');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      
+      fs.writeFileSync(filePath, req.file.buffer);
+      receiptFileUrl = `/uploads/receipts/${fileName}`;
+    }
+    
+    // Сохраняем информацию о чеке в базу данных
+    const receiptData = {
+      orderId: parseInt(orderId),
+      paymentMethod,
+      amount: parseFloat(amount),
+      receiptFile: receiptFileUrl,
+      note,
+      status: 'pending',
+      timestamp: new Date().toISOString()
+    };
+    
+    // Сохраняем в базу данных
+    db.run(`
+      INSERT INTO receipts (order_id, payment_method, amount, receipt_file, note, status, timestamp)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [
+      receiptData.orderId,
+      receiptData.paymentMethod,
+      receiptData.amount,
+      receiptData.receiptFile,
+      receiptData.note,
+      receiptData.status,
+      receiptData.timestamp
+    ], function(err) {
+      if (err) {
+        console.error('Ошибка сохранения чека в БД:', err);
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Ошибка при сохранении чека в базу данных',
+          error: err.message 
+        });
+      }
+      
+      // Обновляем статус заказа
+      db.run('UPDATE orders SET payment_status = ?, payment_method = ? WHERE id = ?', 
+        ['paid', paymentMethod, orderId], (updateErr) => {
+        if (updateErr) {
+          console.error('Ошибка обновления заказа:', updateErr);
+        }
+      });
+      
+      res.status(201).json({
+        success: true,
+        receipt: { ...receiptData, id: this.lastID },
+        message: 'Чек успешно сохранен'
+      });
+    });
+  } catch (error) {
+    console.error('Ошибка при сохранении чека:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Ошибка при сохранении чека',
+      error: error.message 
+    });
+  }
+});
+
+app.get('/api/receipts', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    db.all(`
+      SELECT r.*, o.customer_name, o.phone, o.address, o.total_amount
+      FROM receipts r
+      LEFT JOIN orders o ON r.order_id = o.id
+      ORDER BY r.timestamp DESC
+    `, (err, receipts) => {
+      if (err) {
+        console.error('Ошибка получения чеков:', err);
+        return res.status(500).json({ message: 'Ошибка при получении чеков' });
+      }
+      
+      res.json(receipts);
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка при получении чеков' });
+  }
+});
+
+app.patch('/api/receipts/:id/status', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { id } = req.params;
+    
+    db.run('UPDATE receipts SET status = ? WHERE id = ?', [status, id], function(err) {
+      if (err) {
+        console.error('Ошибка обновления статуса чека:', err);
+        return res.status(500).json({ message: 'Ошибка при обновлении статуса' });
+      }
+      
+      if (this.changes === 0) {
+        return res.status(404).json({ message: 'Чек не найден' });
+      }
+      
+      res.json({ success: true, message: 'Статус обновлен' });
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка при обновлении статуса' });
+  }
+});
 
 // Продукты
 app.get('/api/products', (req, res) => {
