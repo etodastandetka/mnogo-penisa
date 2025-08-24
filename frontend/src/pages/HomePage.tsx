@@ -110,7 +110,7 @@ export const MenuPage: React.FC = () => {
             <Button onClick={handleRetry} className="w-full">
               Попробовать снова
             </Button>
-            <ErrorFixButton />
+            <ErrorFixButton onFix={handleRetry} error={error || undefined} />
           </div>
         </div>
       </div>
