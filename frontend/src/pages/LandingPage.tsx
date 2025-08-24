@@ -155,121 +155,91 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
-      {/* Hero Section with Reviews Sidebar */}
-      <section className="relative overflow-hidden hero-section bg-gradient-to-br from-orange-500 via-orange-600 to-red-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            {/* Left Side - Hero Content */}
-            <div className="flex-1 text-center lg:text-left">
+      {/* Hero Section */}
+      <section className="min-h-screen bg-gradient-to-br from-salmon-400 via-salmon-500 to-salmon-600 flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Hero Content - Left Side */}
+            <div className="space-y-8 animate-fade-in-up">
               {/* Promotional Badges */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-6">
-                <span className="bg-orange-200 text-orange-800 px-4 py-2 rounded-full text-sm font-medium">
+              <div className="flex flex-wrap gap-4 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+                <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-full px-6 py-2 text-black font-semibold text-sm">
                   Лучшие роллы в городе
-                </span>
-                <span className="bg-orange-200 text-orange-800 px-4 py-2 rounded-full text-sm font-medium">
+                </div>
+                <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-full px-6 py-2 text-black font-semibold text-sm">
                   Быстрая доставка
-                </span>
+                </div>
               </div>
-              
+
               {/* Main Headline */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 mobile-heading">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-black leading-tight animate-fade-in-up" style={{animationDelay: '0.4s'}}>
                 Вкусные роллы с доставкой
               </h1>
-              
+
               {/* Sub-headline */}
-              <p className="text-xl sm:text-2xl text-white/90 mb-8 max-w-2xl mx-auto lg:mx-0 mobile-subheading">
+              <p className="text-xl sm:text-2xl text-black/80 leading-relaxed animate-fade-in-up" style={{animationDelay: '0.6s'}}>
                 Свежие ингредиенты, оригинальные рецепты и быстрая доставка прямо к вашему столу
               </p>
-              
-              {/* Call to Action Button */}
-              <Button 
-                onClick={() => navigate('/menu')}
-                className="text-lg px-8 py-4 bg-orange-600 hover:bg-orange-700 mobile-btn mobile-btn-lg mb-6"
-              >
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Заказать сейчас
-              </Button>
-              
-              {/* Delivery Information */}
-              <div className="flex flex-wrap justify-center lg:justify-start items-center gap-6 text-white/80 text-sm">
-                <span className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  30-60 мин
-                </span>
-                <span className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  По всему городу
-                </span>
-                <span className="flex items-center gap-2">
-                  <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                  4.9/5
-                </span>
+
+              {/* CTA Button */}
+              <div className="animate-fade-in-up" style={{animationDelay: '0.8s'}}>
+                <Button 
+                  onClick={() => navigate('/menu')}
+                  className="bg-black hover:bg-gray-800 text-white text-lg px-8 py-4 rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300"
+                >
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  Заказать сейчас
+                </Button>
+              </div>
+
+              {/* Delivery Info */}
+              <div className="grid grid-cols-3 gap-6 pt-4 animate-fade-in-up" style={{animationDelay: '1s'}}>
+                <div className="text-center">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+                    <Clock className="w-6 h-6 text-black" />
+                  </div>
+                  <p className="text-black font-semibold">30-60 мин</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+                    <MapPin className="w-6 h-6 text-black" />
+                  </div>
+                  <p className="text-black font-semibold">По всему городу</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+                    <Star className="w-6 h-6 text-black" />
+                  </div>
+                  <p className="text-black font-semibold">4.9/5</p>
+                </div>
               </div>
             </div>
-            
-            {/* Right Side - Customer Reviews */}
-            <div className="lg:w-96 space-y-4">
-              <h3 className="text-xl font-semibold text-white text-center lg:text-left mb-6">
-                Отзывы наших клиентов
-              </h3>
-              
-              {/* Review Cards */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-white">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-bold text-white">
-                    А
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Айнура Абдыкадырова</h4>
-                    <div className="flex gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                      ))}
+
+            {/* Customer Reviews - Right Side */}
+            <div className="space-y-6 animate-fade-in-left" style={{animationDelay: '0.5s'}}>
+              <h2 className="text-3xl font-bold text-black text-center mb-8">Отзывы наших клиентов</h2>
+              {randomReviews.map((review, index) => (
+                <div 
+                  key={index} 
+                  className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-fade-in-up"
+                  style={{animationDelay: `${0.7 + index * 0.2}s`}}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="bg-white/30 rounded-full w-12 h-12 flex items-center justify-center text-black font-bold text-lg">
+                      {review.name.charAt(0)}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-black text-lg mb-2">{review.name}</h3>
+                      <div className="flex gap-1 mb-3">
+                        {[...Array(review.rating)].map((_, i) => (
+                          <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                      <p className="text-black/80 text-sm leading-relaxed">{review.text}</p>
                     </div>
                   </div>
                 </div>
-                <p className="text-white/90 text-sm italic">
-                  "Невероятно вкусные роллы! Доставили за 25 минут, все было свежим и горячим. Обязательно закажу еще!"
-                </p>
-              </div>
-              
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-white">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-bold text-white">
-                    М
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Михаил Соколов</h4>
-                    <div className="flex gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-white/90 text-sm italic">
-                  "Отличное качество и быстрая доставка. Роллы просто пальчики оближешь!"
-                </p>
-              </div>
-              
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-white">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-bold text-white">
-                    А
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Айгерим Токтобекова</h4>
-                    <div className="flex gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-white/90 text-sm italic">
-                  "Лучшие роллы в городе! Заказываю регулярно, всегда довольна качеством."
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </div>
