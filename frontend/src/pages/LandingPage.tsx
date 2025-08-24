@@ -431,17 +431,17 @@ export const LandingPage: React.FC = () => {
             {corporateServices.map((service, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-gray-100 p-8 text-center group"
+                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-gray-100 p-8 text-center group flex flex-col h-full"
               >
                 <div className="bg-gradient-to-br from-orange-500 to-red-500 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <span className="text-white text-2xl font-bold">{service.discount.replace('Скидка до ', '')}</span>
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">{service.title}</h3>
                 <p className="text-gray-600 mb-6">{service.description}</p>
-                <p className="text-gray-500 text-sm mb-6">Закажите сейчас и получите выгодную скидку</p>
+                <p className="text-gray-500 text-sm mb-6 flex-grow">Закажите сейчас и получите выгодную скидку</p>
                 <Button 
                   onClick={() => navigate('/contact')}
-                  className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 mt-auto"
                 >
                   Связаться с нами
                 </Button>
