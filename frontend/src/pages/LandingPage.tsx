@@ -61,10 +61,34 @@ const LandingPage: React.FC = () => {
   const randomReviews = allReviews.sort(() => 0.5 - Math.random()).slice(0, 3);
 
   const categories = [
-    { name: 'Роллы', emoji: '🍣', count: products.filter(p => p.category === 'Роллы').length, bgImage: '/images/rolls-bg.jpg' },
-    { name: 'Пицца', emoji: '🍕', count: products.filter(p => p.category === 'Пицца').length, bgImage: '/images/pizza-bg.jpg' },
-    { name: 'Суши', emoji: '🍱', count: products.filter(p => p.category === 'Суши').length, bgImage: '/images/sushi-bg.jpg' },
-    { name: 'Напитки', emoji: '🥤', count: products.filter(p => p.category === 'Напитки').length, bgImage: '/images/drinks-bg.jpg' }
+    { 
+      name: 'Роллы', 
+      icon: '🍣', 
+      count: products.filter(p => p.category === 'Роллы').length || 25, 
+      bgImage: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop',
+      description: 'Свежие роллы с лососем, тунцом и авокадо'
+    },
+    { 
+      name: 'Пицца', 
+      icon: '🍕', 
+      count: products.filter(p => p.category === 'Пицца').length || 18, 
+      bgImage: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop',
+      description: 'Итальянская пицца с моцареллой и пепперони'
+    },
+    { 
+      name: 'Суши', 
+      icon: '🍱', 
+      count: products.filter(p => p.category === 'Суши').length || 32, 
+      bgImage: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop',
+      description: 'Классические суши с рисом и рыбой'
+    },
+    { 
+      name: 'Напитки', 
+      icon: '🥤', 
+      count: products.filter(p => p.category === 'Напитки').length || 15, 
+      bgImage: 'https://images.unsplash.com/photo-1546173159-315724a31696?w=400&h=300&fit=crop',
+      description: 'Освежающие напитки и соки'
+    }
   ];
 
   // Рандомные товары для показа
@@ -162,6 +186,16 @@ const LandingPage: React.FC = () => {
                 Свежие ингредиенты, оригинальные рецепты и быстрая доставка прямо к вашему столу
               </p>
 
+              {/* Emotional CTA */}
+              <div className="animate-fade-in-up" style={{animationDelay: '0.7s'}}>
+                <p className="text-lg text-orange-200 mb-4 font-semibold">
+                  🚀 Закажите сейчас и получите скидку 10% на первый заказ!
+                </p>
+                <p className="text-sm text-orange-100 mb-6">
+                  ⏰ Ограниченное время! Только сегодня!
+                </p>
+              </div>
+
               {/* CTA Button */}
               <div className="animate-fade-in-up" style={{animationDelay: '0.8s'}}>
                 <Button 
@@ -246,8 +280,11 @@ const LandingPage: React.FC = () => {
             <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
               🍣 Популярные блюда
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
               Наши самые популярные и вкусные блюда, которые заказывают чаще всего
+            </p>
+            <p className="text-lg text-orange-600 font-semibold">
+              🔥 Хит продаж! Попробуйте прямо сейчас!
             </p>
           </div>
 
@@ -316,24 +353,39 @@ const LandingPage: React.FC = () => {
             {categories.map((category, index) => (
               <div 
                 key={category.name}
-                className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:scale-105 animate-fade-in-up group"
+                className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:scale-105 animate-fade-in-up group cursor-pointer"
                 style={{animationDelay: `${0.2 + index * 0.1}s`}}
+                onClick={() => navigate('/menu')}
               >
                 {/* Background Image */}
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-400/80 to-red-500/80 z-0"></div>
-                <div className="absolute inset-0 bg-black/20 z-0"></div>
+                <div 
+                  className="absolute inset-0 bg-cover bg-center z-0 group-hover:scale-110 transition-transform duration-500"
+                  style={{backgroundImage: `url(${category.bgImage})`}}
+                ></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-600/80 to-red-700/80 z-0"></div>
+                <div className="absolute inset-0 bg-black/30 z-0 group-hover:bg-black/20 transition-all duration-300"></div>
                 
                 {/* Content */}
                 <div className="relative z-10 p-8 text-center text-white h-48 flex flex-col items-center justify-center">
-                  <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                    {category.emoji}
+                  <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                    {category.icon}
                   </div>
-                  <h3 className="font-bold text-xl mb-2">{category.name}</h3>
-                  <p className="text-orange-100 font-semibold">{category.count} блюд</p>
+                  <h3 className="font-bold text-2xl mb-2 group-hover:text-orange-200 transition-colors">{category.name}</h3>
+                  <p className="text-orange-100 font-semibold mb-2">{category.count} блюд</p>
+                  <p className="text-orange-50 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {category.description}
+                  </p>
                 </div>
                 
                 {/* Hover Effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-500/90 to-red-600/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-5"></div>
+                
+                {/* Call to Action */}
+                <div className="absolute bottom-4 left-4 right-4 z-10">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 text-center">
+                    <span className="text-white font-semibold text-sm">Нажмите для просмотра</span>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -486,17 +538,17 @@ const LandingPage: React.FC = () => {
             <div className="footer-section">
               <h3 className="text-xl font-semibold mb-4 footer-title">Контакты</h3>
               <div className="space-y-2 text-gray-400 footer-content">
-                <p>Телефон: +7 (747) 123-45-67</p>
+                <p>Телефон: +996 (709) 611-043</p>
                 <p>Email: info@mnogo-rolly.online</p>
-                <p>IP: 147.45.141.113</p>
+                <p>Адрес: г. Бишкек, ул. Ахунбаева, 182 Б</p>
               </div>
             </div>
             <div className="footer-section">
-              <h3 className="text-xl font-semibold mb-4 footer-title">Социальные сети</h3>
-              <div className="flex space-x-4 footer-social">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  {/* Instagram icon */}
-                </a>
+              <h3 className="text-xl font-semibold mb-4 footer-title">Юридическая информация</h3>
+              <div className="space-y-2 text-gray-400 footer-content text-sm">
+                <p>ИП: Султанкулов Адилет Б.</p>
+                <p>ИНН: 20504198701431</p>
+                <p>Адрес: г. Бишкек, ул. Ахунбаева, 182 Б</p>
               </div>
             </div>
             <div className="footer-section">
