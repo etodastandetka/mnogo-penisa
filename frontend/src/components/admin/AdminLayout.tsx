@@ -77,7 +77,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Мобильная навигация */}
-      <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
+      <div className={`fixed inset-0 z-50 md:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white">
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
@@ -97,7 +97,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       </div>
 
       {/* Десктопная навигация */}
-      <div className="hidden lg:flex lg:flex-shrink-0">
+      <div className="flex flex-shrink-0">
         <AdminNavigation onLogout={handleLogout} onNavigationClick={handleNavigationClick} />
       </div>
 
@@ -109,7 +109,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <div className="flex items-center">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600"
+                className="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-600"
               >
                 <Menu className="h-6 w-6" />
               </button>
