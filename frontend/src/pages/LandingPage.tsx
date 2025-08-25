@@ -326,7 +326,7 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {categories.map((category, index) => (
               <div
                 key={category.name}
@@ -339,17 +339,17 @@ export const LandingPage: React.FC = () => {
                 ></div>
                 <div className="absolute inset-0 bg-black/20 z-0 group-hover:bg-black/10 transition-all duration-300"></div>
 
-                <div className="relative z-10 p-8 text-center text-white h-48 flex flex-col items-center justify-center">
-                  <h3 className="font-bold text-2xl mb-2 group-hover:text-orange-200 transition-colors">{category.name}</h3>
-                  <p className="text-orange-100 font-semibold mb-2">{category.count} блюд</p>
-                  <p className="text-orange-50 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="relative z-10 p-8 text-center text-white h-64 flex flex-col items-center justify-center">
+                  <h3 className="font-bold text-3xl mb-3 group-hover:text-orange-200 transition-colors">{category.name}</h3>
+                  <p className="text-orange-100 font-semibold text-lg mb-3">{category.count} блюд</p>
+                  <p className="text-orange-50 text-base opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     {category.description}
                   </p>
                 </div>
 
                 <div className="absolute bottom-4 left-4 right-4 z-10">
-                  <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 text-center">
-                    <span className="text-white font-semibold text-sm">Нажмите для просмотра</span>
+                  <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <span className="text-white font-semibold text-base">Нажмите для просмотра</span>
                   </div>
                 </div>
               </div>

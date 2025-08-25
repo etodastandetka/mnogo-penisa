@@ -3,6 +3,18 @@ import axios from 'axios';
 // Умный API клиент для работы с сервером
 const getBaseURL = () => {
   // Для production всегда использовать относительные URL
+  if (typeof window !== 'undefined') {
+    // Проверяем, есть ли проблемы с HTTPS
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    console.log('🌐 Текущий протокол:', protocol);
+    console.log('🌐 Текущий хост:', host);
+    
+    // Если HTTPS, но есть проблемы, пробуем HTTP
+    if (protocol === 'https:' && host.includes('localhost')) {
+      return 'http://localhost:3001/api';
+    }
+  }
   return '/api';
 };
 
