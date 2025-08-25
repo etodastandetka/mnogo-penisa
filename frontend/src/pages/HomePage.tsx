@@ -175,7 +175,7 @@ export const HomePage: React.FC = () => {
 
       {/* Main Content with Products and Cart */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-12">
           {/* Products Grid */}
           <div className="flex-1">
             {filteredProducts.length === 0 ? (
@@ -190,7 +190,7 @@ export const HomePage: React.FC = () => {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 product-grid">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 product-grid">
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -199,7 +199,7 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Cart Sidebar */}
-          <div className="lg:w-80 lg:flex-shrink-0">
+          <div className="lg:w-96 lg:flex-shrink-0">
             <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden sticky top-4">
               <FixedCart />
             </div>
