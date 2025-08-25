@@ -4,7 +4,13 @@ import { User } from '../types';
 export const getUserInfo = async (): Promise<User> => {
   try {
     const response = await apiClient.get('/user/me');
-    return response.data;
+    const userData = response.data;
+    
+    // Преобразуем is_admin в isAdmin для совместимости
+    return {
+      ...userData,
+      isAdmin: userData.is_admin || userData.isAdmin || false
+    };
   } catch (error: any) {
     console.error('❌ Ошибка получения информации о пользователе:', error);
     throw new Error(error.response?.data?.message || 'Ошибка получения профиля');

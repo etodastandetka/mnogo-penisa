@@ -37,7 +37,8 @@ const AuthPage: React.FC = () => {
         id: userData.id.toString(),
         name: userData.name || 'Пользователь',
         phone: userData.phone || '',
-        email: userData.email || ''
+        email: userData.email || '',
+        isAdmin: (userData as any).is_admin || userData.isAdmin || false
       });
       
       // Перенаправляем на главную страницу
@@ -83,7 +84,8 @@ const AuthPage: React.FC = () => {
         id: userInfo.id.toString(),
         name: userInfo.name || 'Пользователь',
         phone: userInfo.phone || '',
-        email: userInfo.email || ''
+        email: userInfo.email || '',
+        isAdmin: (userInfo as any).is_admin || userInfo.isAdmin || false
       });
       
       // Перенаправляем на главную страницу

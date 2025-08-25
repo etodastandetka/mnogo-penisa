@@ -194,6 +194,18 @@ const ProfilePage: React.FC = () => {
                       {user.isAdmin ? 'Администратор' : 'Пользователь'}
                     </Badge>
                   </div>
+                  
+                  {user.isAdmin && (
+                    <div className="pt-4">
+                      <Button 
+                        onClick={() => navigate('/admin')}
+                        className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                      >
+                        <Package className="h-4 w-4 mr-2" />
+                        Админ панель
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
