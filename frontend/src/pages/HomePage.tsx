@@ -7,6 +7,8 @@ import { FixedCart } from '../components/FixedCart';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { getCategoryName, getCategoryEmoji, sortProductsByCategory } from '../utils/categories';
+import { ShoppingCart } from 'lucide-react';
+import { useCartStore } from '../store/cartStore';
 
 export const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -16,6 +18,7 @@ export const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const { items } = useCartStore();
 
   const fetchProducts = async () => {
     try {
@@ -127,7 +130,18 @@ export const HomePage: React.FC = () => {
               <h1 className="text-2xl font-bold text-gray-900 mobile-heading">Меню</h1>
               <p className="text-gray-600 mobile-subheading">Выберите из нашего разнообразного меню</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              <button
+                onClick={() => window.location.href = '/checkout'}
+                className="relative bg-orange-600 hover:bg-orange-700 text-white p-3 rounded-lg transition-colors"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {items.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
+                    {items.length}
+                  </span>
+                )}
+              </button>
               <ErrorFixButton onFix={handleRetry} error={error || undefined} />
             </div>
           </div>
@@ -173,32 +187,37 @@ export const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Products Grid */}
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Товары не найдены</h3>
-            <p className="text-gray-600 mb-6">
-              {searchQuery ? `По запросу "${searchQuery}" ничего не найдено` : 'В данной категории пока нет товаров'}
-            </p>
-            <Button onClick={handleRetry} className="bg-orange-600 hover:bg-orange-700 mobile-btn">
-              Попробовать снова
-            </Button>
+      {/* Products and Cart Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Products Grid */}
+          <div className="flex-1">
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-6xl mb-4">🔍</div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Товары не найдены</h3>
+                <p className="text-gray-600 mb-6">
+                  {searchQuery ? `По запросу "${searchQuery}" ничего не найдено` : 'В данной категории пока нет товаров'}
+                </p>
+                <Button onClick={handleRetry} className="bg-orange-600 hover:bg-orange-700 mobile-btn">
+                  Попробовать снова
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 product-grid">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 product-grid">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* Cart in line with products */}
-      <div className="lg:block">
-        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
-          <FixedCart />
+          {/* Cart Sidebar */}
+          <div className="lg:w-80 lg:flex-shrink-0">
+            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden sticky top-4">
+              <FixedCart />
+            </div>
+          </div>
         </div>
       </div>
     </div>
