@@ -73,6 +73,9 @@ export const Navigation: React.FC = () => {
 
   console.log('🔧 Navigation рендерится, пользователь:', user);
   console.log('🔧 Navigation рендерится, пользователь:', user);
+  console.log('🔧 Navigation рендерится, пользователь:', user);
+  console.log('📍 Текущий путь:', window.location.pathname);
+  
   return (
     <nav className="bg-white shadow-lg relative z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -88,8 +91,8 @@ export const Navigation: React.FC = () => {
             </button>
           </div>
 
-          {/* Десктопное меню */}
-          <div className="hidden md:flex items-center space-x-4">
+                      {/* Десктопное меню */}
+            <div className="flex items-center space-x-4">
             <button
               onClick={() => {
                 console.log('🔘 Клик по кнопке Главная');
@@ -169,8 +172,8 @@ export const Navigation: React.FC = () => {
             )}
           </div>
 
-          {/* Мобильное меню кнопка */}
-          <div className="md:hidden flex items-center">
+                      {/* Мобильное меню кнопка */}
+            <div className="hidden items-center">
             <button
               onClick={toggleMenu}
               className="text-gray-700 hover:text-orange-600 p-2 rounded-md"
@@ -181,9 +184,9 @@ export const Navigation: React.FC = () => {
         </div>
       </div>
 
-      {/* Мобильное меню */}
-      {isOpen && (
-        <div className="md:hidden">
+              {/* Мобильное меню */}
+        {isOpen && (
+          <div className="hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
             <button
               onClick={() => {
