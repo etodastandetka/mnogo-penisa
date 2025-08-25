@@ -26,7 +26,13 @@ export interface CreateOrderResponse {
 
 export const createOrder = async (orderData: CreateOrderRequest): Promise<CreateOrderResponse> => {
   try {
-    const response = await apiClient.post('/orders', orderData);
+    // Проверяем, есть ли токен
+    const token = localStorage.getItem('token');
+    const endpoint = token ? '/orders' : '/orders/guest';
+    
+    console.log('📦 Создаем заказ через endpoint:', endpoint);
+    
+    const response = await apiClient.post(endpoint, orderData);
     
     // Бэкенд возвращает { success: true, data: { orderId, orderNumber } }
     if (response.data.success && response.data.data) {
@@ -42,10 +48,21 @@ export const createOrder = async (orderData: CreateOrderRequest): Promise<Create
 
 export const getUserOrders = async () => {
   try {
+    // Проверяем, есть ли токен
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.log('⚠️ Нет токена, возвращаем пустой массив заказов');
+      return [];
+    }
+    
     const response = await apiClient.get('/orders/user');
     return response.data || [];
   } catch (error: any) {
     console.error('❌ Ошибка получения заказов пользователя:', error);
+    // Если ошибка 401 (не авторизован), возвращаем пустой массив
+    if (error.response?.status === 401) {
+      return [];
+    }
     throw new Error(error.response?.data?.message || 'Ошибка получения заказов');
   }
 };
@@ -56,6 +73,16 @@ export const getOrderById = async (orderId: string | number) => {
     return response.data;
   } catch (error: any) {
     console.error('❌ Ошибка получения заказа:', error);
+    throw new Error(error.response?.data?.message || 'Ошибка получения заказа');
+  }
+};
+
+export const getGuestOrderByNumber = async (orderNumber: string) => {
+  try {
+    const response = await apiClient.get(`/orders/guest/${orderNumber}`);
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Ошибка получения гостевого заказа:', error);
     throw new Error(error.response?.data?.message || 'Ошибка получения заказа');
   }
 };

@@ -33,7 +33,14 @@ export const Navigation: React.FC = () => {
           setActiveOrders(active);
         } catch (error) {
           console.error('❌ Ошибка проверки активных заказов:', error);
+          // Для гостей не показываем ошибки
+          if (user) {
+            setActiveOrders(0);
+          }
         }
+      } else {
+        // Для гостей сбрасываем счетчик заказов
+        setActiveOrders(0);
       }
     };
 
