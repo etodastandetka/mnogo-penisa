@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent } from './ui/Card';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
@@ -6,13 +6,14 @@ import { Plus, Minus, Image as ImageIcon, Eye } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { formatPrice } from '../utils/format';
 import { Product } from '../types';
+import { LazyImage } from './ui/LazyImage';
 import { ProductDetailModal } from './ProductDetailModal';
 
 interface ProductCardProps {
   product: Product;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) => {
   // Защита от undefined/null
   if (!product) {
     console.log('❌ ProductCard: product is undefined/null');
@@ -72,26 +73,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     console.log('⚠️ Ошибка загрузки изображения для товара:', product.name);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
     addItem(product);
-  };
+  }, [addItem, product]);
 
-  const handleRemoveFromCart = () => {
+  const handleRemoveFromCart = useCallback(() => {
     removeItem(product.id.toString());
-  };
+  }, [removeItem, product.id]);
 
-  const handleUpdateQuantity = (newQuantity: number) => {
+  const handleUpdateQuantity = useCallback((newQuantity: number) => {
     if (newQuantity <= 0) {
       removeItem(product.id.toString());
     } else {
       updateQuantity(product.id.toString(), newQuantity);
     }
-  };
+  }, [removeItem, updateQuantity, product.id]);
 
-  const imageUrl = getImageUrl();
+  const imageUrl = useMemo(() => getImageUrl(), [product.mobile_image_url, product.image_url]);
   
   // Функция для получения эмодзи по категории
-  const getCategoryEmoji = (category: string) => {
+  const getCategoryEmoji = useCallback((category: string) => {
     const emojiMap: { [key: string]: string } = {
       'rolls': '🍣',
       'pizza': '🍕', 
@@ -102,7 +103,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       'sets': '🍱'
     };
     return emojiMap[category] || '🍽️';
-  };
+  }, []);
   
 
 
@@ -120,19 +121,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {imageUrl && !imageError ? (
           <>
             {/* Изображение */}
-            <img
+            <LazyImage
               src={imageUrl}
               alt={product.name}
               className="w-full h-56 sm:h-48 md:h-56 object-contain group-hover:scale-110 transition-all duration-300"
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-              loading="lazy"
-              crossOrigin="anonymous"
-              referrerPolicy="no-referrer"
-              decoding="async"
-              style={{ 
-                objectFit: 'cover'
-              }}
             />
             
             {/* Fallback для ошибок изображения */}
@@ -246,4 +238,4 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     )}
     </>
   );
-};
+});

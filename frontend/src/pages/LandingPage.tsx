@@ -4,6 +4,7 @@ import { Button } from '../components/ui/Button';
 import { ShoppingCart, Star, Clock, MapPin, Phone, Instagram } from 'lucide-react';
 import { getAllProducts } from '../api/products';
 import { Product } from '../types';
+import { LazyImage } from '../components/ui/LazyImage';
 
 
 export const LandingPage: React.FC = () => {
@@ -280,8 +281,8 @@ export const LandingPage: React.FC = () => {
                 onClick={() => navigate('/menu')}
               >
                 <div className="relative overflow-hidden rounded-t-2xl">
-                  <img 
-                    src={product.image_url} 
+                  <LazyImage 
+                    src={product.image_url || ''} 
                     alt={product.name}
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
                   />

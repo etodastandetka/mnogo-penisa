@@ -24,7 +24,7 @@ import { formatPrice } from '../utils/format';
 import { getOrders, updateOrderStatus, AdminOrder, getOrder, OrderDetail } from '../api/admin';
 
 
-export const AdminOrdersPage: React.FC = () => {
+const AdminOrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAdmin } = useUserStore();
   
@@ -699,4 +699,6 @@ export const AdminOrdersPage: React.FC = () => {
     </AdminLayout>
   );
 };
+
+export default AdminOrdersPage;
 

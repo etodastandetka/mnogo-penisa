@@ -9,7 +9,7 @@ import { createOrder } from '../api/orders';
 import { PaymentMethod as PaymentMethodComponent } from '../components/PaymentMethod';
 import { apiClient } from '../api/client';
 
-export const CheckoutPage: React.FC = () => {
+const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const { items, clearCart, getTotal } = useCartStore();
   const [loading, setLoading] = useState(false);
@@ -277,4 +277,6 @@ export const CheckoutPage: React.FC = () => {
     </div>
   );
 };
+
+export default CheckoutPage;
 

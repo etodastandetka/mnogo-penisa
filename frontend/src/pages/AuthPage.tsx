@@ -4,7 +4,7 @@ import { RegisterForm } from '../components/auth/RegisterForm';
 import { login, register } from '../api/auth';
 import { useUserStore } from '../store/userStore';
 
-export const AuthPage: React.FC = () => {
+const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,6 +100,8 @@ export const AuthPage: React.FC = () => {
     </div>
   );
 };
+
+export default AuthPage;
 
 
 

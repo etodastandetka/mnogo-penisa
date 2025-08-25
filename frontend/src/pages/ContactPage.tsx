@@ -12,7 +12,7 @@ import {
   Twitter
 } from 'lucide-react';
 
-export const ContactPage: React.FC = () => {
+const ContactPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -194,6 +194,8 @@ export const ContactPage: React.FC = () => {
     </div>
   );
 };
+
+export default ContactPage;
 
 
 

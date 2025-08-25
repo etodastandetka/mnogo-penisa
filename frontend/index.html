@@ -9,9 +9,28 @@
     <meta property="og:title" content="Mnogo Rolly - Доставка роллов" />
     <meta property="og:description" content="Заказывайте вкусные роллы и пиццу с доставкой" />
     <meta property="og:type" content="website" />
+    
+    <!-- Preconnect для быстрой загрузки ресурсов -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    
+    <!-- Критические CSS стили для быстрого отображения -->
+    <style>
+      /* Критические стили для предотвращения FOUC */
+      body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+      .loading-spinner { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+      .loading-spinner::after { content: ''; width: 50px; height: 50px; border: 3px solid #f3f4f6; border-top: 3px solid #f97316; border-radius: 50%; animation: spin 1s linear infinite; }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      
+      /* Оптимизация для мобильных устройств */
+      @media (max-width: 768px) { html { font-size: 14px; } }
+      @media (max-width: 480px) { html { font-size: 13px; } }
+    </style>
+    
+    <!-- Загрузка шрифтов с display=swap для предотвращения блокировки рендеринга -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <title>Mnogo Rolly - Доставка роллов</title>
   </head>
   <body>

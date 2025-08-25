@@ -42,7 +42,7 @@ interface Product {
   created_at: string;
 }
 
-export const AdminProductsPage: React.FC = () => {
+const AdminProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1104,3 +1104,5 @@ export const AdminProductsPage: React.FC = () => {
     </AdminLayout>
   );
 };
+
+export default AdminProductsPage;

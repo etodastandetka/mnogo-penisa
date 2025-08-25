@@ -15,7 +15,7 @@ interface OrderDetails {
   created_at: string;
 }
 
-export const OrderSuccessPage: React.FC = () => {
+const OrderSuccessPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
@@ -165,3 +165,5 @@ export const OrderSuccessPage: React.FC = () => {
     </div>
   );
 };
+
+export default OrderSuccessPage;

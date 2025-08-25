@@ -36,7 +36,7 @@ interface AnalyticsData {
   ordersByDay: { date: string; orders: number; revenue: number }[];
 }
 
-export const AdminAnalyticsPage: React.FC = () => {
+const AdminAnalyticsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAdmin } = useUserStore();
   
@@ -417,3 +417,5 @@ export const AdminAnalyticsPage: React.FC = () => {
     </AdminLayout>
   );
 };
+
+export default AdminAnalyticsPage;

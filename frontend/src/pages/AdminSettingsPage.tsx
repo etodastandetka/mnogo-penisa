@@ -15,7 +15,7 @@ import {
 import { Input } from '../components/ui/Input';
 import { client } from '../api/client';
 
-export const AdminSettingsPage: React.FC = () => {
+const AdminSettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAdmin } = useUserStore();
   
@@ -246,3 +246,5 @@ export const AdminSettingsPage: React.FC = () => {
     </AdminLayout>
   );
 };
+
+export default AdminSettingsPage;

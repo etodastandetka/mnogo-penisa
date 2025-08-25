@@ -17,7 +17,7 @@ import {
 import { formatPrice } from '../utils/format';
 import { getOrders, getProducts } from '../api/admin';
 
-export const AdminDashboardPage: React.FC = () => {
+const AdminDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAdmin } = useUserStore();
   const [stats, setStats] = useState({
@@ -340,6 +340,8 @@ export const AdminDashboardPage: React.FC = () => {
     </AdminLayout>
   );
 };
+
+export default AdminDashboardPage;
 
 // Вспомогательные функции
 function getStatusColor(status: string): string {

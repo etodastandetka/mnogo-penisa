@@ -16,7 +16,7 @@ import { getUserOrders } from '../api/orders';
 import { client } from '../api/client';
 
 
-export const ProfilePage: React.FC = () => {
+const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, clearUser, setUser } = useUserStore();
   const [orders, setOrders] = useState<any[]>([]);
@@ -354,3 +354,5 @@ export const ProfilePage: React.FC = () => {
     </div>
   );
 };
+
+export default ProfilePage;

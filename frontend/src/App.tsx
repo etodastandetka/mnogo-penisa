@@ -1,26 +1,30 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
 import { LandingPage } from './pages/LandingPage';
-import HomePage from './pages/HomePage';
-import { CheckoutPage } from './pages/CheckoutPage';
-import { OrderSuccessPage } from './pages/OrderSuccessPage';
-import { ContactPage } from './pages/ContactPage';
-import { AuthPage } from './pages/AuthPage';
-import { ProfilePage } from './pages/ProfilePage';
 import { ImageDebugger } from './components/ImageDebugger';
-import CartPage from './pages/CartPage';
-
-import { AdminDashboardPage } from './pages/AdminDashboardPage';
-import { AdminOrdersPage } from './pages/AdminOrdersPage';
-import { AdminProductsPage } from './pages/AdminProductsPage';
-import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage';
-import { AdminSettingsPage } from './pages/AdminSettingsPage';
-import { AdminReceiptsPage } from './pages/AdminReceiptsPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PageWithNavigation } from './components/PageWithNavigation';
+import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import './index.css';
+
+// Ленивая загрузка страниц для лучшей производительности
+const HomePage = lazy(() => import('./pages/HomePage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const AuthPage = lazy(() => import('./pages/AuthPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const CartPage = lazy(() => import('./pages/CartPage'));
+
+// Админ страницы
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'));
+const AdminOrdersPage = lazy(() => import('./pages/AdminOrdersPage'));
+const AdminProductsPage = lazy(() => import('./pages/AdminProductsPage'));
+const AdminAnalyticsPage = lazy(() => import('./pages/AdminAnalyticsPage'));
+const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
+const AdminReceiptsPage = lazy(() => import('./pages/AdminReceiptsPage'));
 
 // Простой клиент для React Query без сложных настроек
 const queryClient = new QueryClient({
@@ -38,13 +42,53 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<PageWithNavigation><LandingPage /></PageWithNavigation>} />
-          <Route path="/menu" element={<PageWithNavigation><HomePage /></PageWithNavigation>} />
-          <Route path="/contact" element={<PageWithNavigation><ContactPage /></PageWithNavigation>} />
-          <Route path="/checkout" element={<PageWithNavigation><CheckoutPage /></PageWithNavigation>} />
-          <Route path="/order-success/:orderId" element={<PageWithNavigation><OrderSuccessPage /></PageWithNavigation>} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/profile" element={<PageWithNavigation><ProfilePage /></PageWithNavigation>} />
-          <Route path="/cart" element={<PageWithNavigation><CartPage /></PageWithNavigation>} />
+          <Route path="/menu" element={
+            <PageWithNavigation>
+              <Suspense fallback={<LoadingSpinner />}>
+                <HomePage />
+              </Suspense>
+            </PageWithNavigation>
+          } />
+          <Route path="/contact" element={
+            <PageWithNavigation>
+              <Suspense fallback={<LoadingSpinner />}>
+                <ContactPage />
+              </Suspense>
+            </PageWithNavigation>
+          } />
+          <Route path="/checkout" element={
+            <PageWithNavigation>
+              <Suspense fallback={<LoadingSpinner />}>
+                <CheckoutPage />
+              </Suspense>
+            </PageWithNavigation>
+          } />
+          <Route path="/order-success/:orderId" element={
+            <PageWithNavigation>
+              <Suspense fallback={<LoadingSpinner />}>
+                <OrderSuccessPage />
+              </Suspense>
+            </PageWithNavigation>
+          } />
+          <Route path="/auth" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <AuthPage />
+            </Suspense>
+          } />
+          <Route path="/profile" element={
+            <PageWithNavigation>
+              <Suspense fallback={<LoadingSpinner />}>
+                <ProfilePage />
+              </Suspense>
+            </PageWithNavigation>
+          } />
+          <Route path="/cart" element={
+            <PageWithNavigation>
+              <Suspense fallback={<LoadingSpinner />}>
+                <CartPage />
+              </Suspense>
+            </PageWithNavigation>
+          } />
           
           {/* Отладчик изображений (только в development) */}
           {process.env.NODE_ENV === 'development' && (
@@ -54,38 +98,52 @@ function App() {
           {/* Админ-панель */}
           <Route path="/admin" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminDashboardPage />
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminDashboardPage />
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/dashboard" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminDashboardPage />
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminDashboardPage />
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/orders" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminOrdersPage />
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminOrdersPage />
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/products" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminProductsPage />
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminProductsPage />
+              </Suspense>
             </ProtectedRoute>
           } />
 
           <Route path="/admin/analytics" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminAnalyticsPage />
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminAnalyticsPage />
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/settings" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminSettingsPage />
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminSettingsPage />
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/receipts" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminReceiptsPage />
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminReceiptsPage />
+              </Suspense>
             </ProtectedRoute>
           } />
         </Routes>

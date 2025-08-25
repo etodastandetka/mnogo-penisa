@@ -2,7 +2,7 @@ import React from 'react';
 import { AdminLayout } from '../components/admin/AdminLayout';
 import { AdminReceipts } from '../components/AdminReceipts';
 
-export const AdminReceiptsPage: React.FC = () => {
+const AdminReceiptsPage: React.FC = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -18,3 +18,5 @@ export const AdminReceiptsPage: React.FC = () => {
     </AdminLayout>
   );
 };
+
+export default AdminReceiptsPage;
