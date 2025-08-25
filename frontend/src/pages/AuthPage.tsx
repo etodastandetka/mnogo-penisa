@@ -18,20 +18,28 @@ const AuthPage: React.FC = () => {
       
       console.log('🔧 Login response:', response);
       
-      if (!response || !response.access_token) {
+      if (!response) {
         throw new Error('Неверный ответ от сервера');
       }
       
-      if (!response.user || !response.user.id) {
+      // Проверяем разные варианты ответа
+      const accessToken = response.access_token;
+      const userData = response.user || response;
+      
+      if (!accessToken) {
+        throw new Error('Токен не получен');
+      }
+      
+      if (!userData || !userData.id) {
         throw new Error('Данные пользователя не получены');
       }
       
-      localStorage.setItem('token', response.access_token);
+      localStorage.setItem('token', accessToken);
       setUser({
-        id: response.user.id.toString(),
-        name: response.user.name || 'Пользователь',
-        phone: response.user.phone || '',
-        email: response.user.email || ''
+        id: userData.id.toString(),
+        name: userData.name || 'Пользователь',
+        phone: userData.phone || '',
+        email: userData.email || ''
       });
       
       // Перенаправляем на главную страницу
@@ -55,12 +63,29 @@ const AuthPage: React.FC = () => {
       setError(null);
       const response = await register(userData);
       
-      localStorage.setItem('token', response.access_token);
+      console.log('🔧 Register response:', response);
+      
+      if (!response) {
+        throw new Error('Неверный ответ от сервера');
+      }
+      
+      const accessToken = response.access_token;
+      const userInfo = response.user || response;
+      
+      if (!accessToken) {
+        throw new Error('Токен не получен');
+      }
+      
+      if (!userInfo || !userInfo.id) {
+        throw new Error('Данные пользователя не получены');
+      }
+      
+      localStorage.setItem('token', accessToken);
       setUser({
-        id: response.user.id.toString(),
-        name: response.user.name,
-        phone: response.user.phone || '',
-        email: response.user.email
+        id: userInfo.id.toString(),
+        name: userInfo.name || 'Пользователь',
+        phone: userInfo.phone || '',
+        email: userInfo.email || ''
       });
       
       // Перенаправляем на главную страницу

@@ -33,6 +33,7 @@ export const Navigation: React.FC = () => {
           console.log('✅ Пользователь загружен:', userInfo);
         } catch (error) {
           console.error('❌ Ошибка загрузки пользователя:', error);
+          console.log('🧹 Очищаем недействительный токен');
           localStorage.removeItem('token');
           clearUser();
         }
