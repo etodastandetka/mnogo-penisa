@@ -16,10 +16,27 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 }) => {
   const [quantity, setQuantity] = React.useState(1);
   const addToCart = useCartStore(state => state.addItem);
+  const modalRef = React.useRef<HTMLDivElement>(null);
+
+  // Автоматический скролл к началу модального окна при открытии
+  React.useEffect(() => {
+    if (modalRef.current) {
+      modalRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
+  }, []);
 
   const handleAddToCart = () => {
     addToCart(product, quantity);
     onClose();
+  };
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
   };
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
@@ -49,15 +66,18 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const imageUrl = getImageUrl();
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-2 sm:p-4 overflow-y-auto"
+      onClick={handleBackdropClick}
+    >
+      <div ref={modalRef} className="bg-white rounded-xl shadow-2xl w-full max-w-2xl my-2 sm:my-4 overflow-y-auto max-h-[95vh]">
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between rounded-t-xl">
           <h2 className="text-xl font-bold text-gray-900 truncate">
             {product.name}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-2 -m-2 touch-manipulation"
           >
             <X className="w-6 h-6" />
           </button>
@@ -65,12 +85,12 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
         <div className="p-6 space-y-6">
           {/* Изображение товара */}
-          <div className="w-full h-64 md:h-80 bg-gray-100 rounded-lg overflow-hidden">
+          <div className="w-full h-48 sm:h-64 md:h-80 bg-gray-100 rounded-lg overflow-hidden">
             {imageUrl ? (
               <img
                 src={imageUrl}
                 alt={product.name}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
                 loading="lazy"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
