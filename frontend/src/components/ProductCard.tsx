@@ -40,8 +40,10 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
       // Приоритет: мобильное фото везде, затем основное как fallback
       if (product.mobile_image_url && product.mobile_image_url !== 'null' && product.mobile_image_url !== '') {
         imageUrl = product.mobile_image_url;
+        console.log('📱 Используем мобильное фото для товара:', product.name, imageUrl);
       } else if (product.image_url && product.image_url !== 'null' && product.image_url !== '') {
         imageUrl = product.image_url;
+        console.log('🖥️ Используем основное фото для товара:', product.name, imageUrl);
       }
       
       // Если есть изображение - используем его
@@ -52,6 +54,10 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
         }
       }
       
+      console.log('⚠️ Нет изображения для товара:', product.name, {
+        mobile_image_url: product.mobile_image_url,
+        image_url: product.image_url
+      });
       return null; // Нет изображения - покажем эмодзи
     } catch (error) {
       console.error('❌ Ошибка получения URL изображения:', error);
@@ -117,19 +123,19 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
   return (
     <>
     <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 h-full flex flex-col border border-gray-200 bg-white touch-manipulation">
-      <div className="relative overflow-hidden rounded-t-xl bg-gray-100 touch-manipulation h-56 sm:h-48 md:h-64 lg:h-72">
+      <div className="relative overflow-hidden rounded-t-xl bg-gray-100 touch-manipulation h-56 sm:h-48 md:h-56">
         {imageUrl && !imageError ? (
           <>
             {/* Изображение */}
             <LazyImage
               src={imageUrl}
               alt={product.name}
-              className="w-full h-56 sm:h-48 md:h-64 lg:h-72 object-cover group-hover:scale-110 transition-all duration-300"
+              className="w-full h-56 sm:h-48 md:h-56 object-contain group-hover:scale-110 transition-all duration-300"
             />
             
             {/* Fallback для ошибок изображения */}
             {imageError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 h-56 sm:h-48 md:h-64 lg:h-72">
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
                 <div className="text-center">
                   <div className="text-4xl sm:text-5xl md:text-6xl mb-2 emoji-font">
                     {getCategoryEmoji(product.category)}
@@ -141,7 +147,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
           </>
         ) : (
           /* Нет изображения - показываем эмодзи */
-          <div className="w-full h-56 sm:h-48 md:h-64 lg:h-72 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+          <div className="w-full h-56 sm:h-48 md:h-56 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
             <div className="text-center">
               <div className="text-4xl sm:text-5xl md:text-6xl mb-2 emoji-font">
                 {getCategoryEmoji(product.category)}

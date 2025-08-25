@@ -224,8 +224,8 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
             
-            {/* Customer Reviews - Right Side (Hidden on Mobile) */}
-              <div className="hidden lg:block space-y-6">
+            {/* Customer Reviews - Right Side */}
+              <div className="space-y-6">
               <h2 className="text-3xl font-bold text-white text-center mb-8">Отзывы наших клиентов</h2>
               {randomReviews.map((review, index) => (
                 <div
@@ -282,7 +282,7 @@ export const LandingPage: React.FC = () => {
               >
                 <div className="relative overflow-hidden rounded-t-2xl">
                   <LazyImage 
-                    src={product.image_url || ''} 
+                    src={product.mobile_image_url || product.image_url || ''} 
                     alt={product.name}
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
                   />
@@ -443,49 +443,6 @@ export const LandingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Customer Reviews Section (Mobile) */}
-      <div className="lg:hidden bg-gradient-to-br from-orange-500 to-red-600 py-16 relative">
-        {/* Background Decorations */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-10 left-10 w-4 h-4 bg-white/20 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-10 right-10 w-3 h-3 bg-white/20 rounded-full animate-bounce"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-white/20 rounded-full animate-ping"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">Отзывы наших клиентов</h2>
-            <p className="text-orange-100 text-lg">
-              Что говорят о нас довольные клиенты
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            {randomReviews.map((review, index) => (
-              <div
-                key={review.name}
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="bg-orange-500 rounded-full w-12 h-12 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                    {review.name.charAt(0)}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-white text-lg mb-2">{review.name}</h3>
-                    <div className="flex gap-1 mb-3">
-                      {[...Array(review.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                    <p className="text-orange-100 leading-relaxed">{review.text}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-6">
@@ -500,7 +457,7 @@ export const LandingPage: React.FC = () => {
               <h3 className="text-xl font-semibold mb-4 text-orange-400">Контакты</h3>
               <div className="space-y-2 text-gray-400">
                 <p>Телефон: +996 (709) 611-043</p>
-                <p>Email: info@mnogo-rolly.kg</p>
+                <p>Email: info@mnogo-rolly.online</p>
                 <p>Адрес: г. Бишкек, ул. Ахунбаева, 182 Б</p>
               </div>
             </div>

@@ -46,7 +46,7 @@ export const FixedCart: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0">
                     <img
-                      src={item.product.image_url || '/placeholder-product.jpg'}
+                      src={item.product.mobile_image_url || item.product.image_url || '/placeholder-product.jpg'}
                       alt={item.product.name}
                       className="w-12 h-12 object-cover rounded-lg"
                     />

@@ -57,7 +57,7 @@ export const Cart: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0">
                     <img
-                      src={item.product.image_url || '/placeholder-product.jpg'}
+                      src={item.product.mobile_image_url || item.product.image_url || '/placeholder-product.jpg'}
                       alt={item.product.name}
                       className="w-16 h-16 object-cover rounded-lg"
                     />

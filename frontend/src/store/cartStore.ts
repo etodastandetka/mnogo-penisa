@@ -7,6 +7,7 @@ export interface CartItem {
     name: string;
     price: number;
     image_url?: string;
+    mobile_image_url?: string;
   };
   quantity: number;
 }
@@ -48,7 +49,8 @@ export const useCartStore = create<CartStore>()(
                 id: product.id,
                 name: product.name,
                 price: product.price,
-                image_url: product.image_url
+                image_url: product.image_url,
+                mobile_image_url: product.mobile_image_url
               },
               quantity
             };

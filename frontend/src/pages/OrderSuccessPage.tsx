@@ -156,8 +156,8 @@ const OrderSuccessPage: React.FC = () => {
               Свяжитесь с нами любым удобным способом
             </p>
             <div className="flex justify-center gap-4 text-sm text-gray-500">
-              <span>📞 +996 (709) 611-043</span>
-              <span>📧 info@mnogo-rolly.online</span>
+              <span>📞 +996 XXX XXX XXX</span>
+              <span>📧 info@mnogo-rolly.kg</span>
             </div>
           </div>
         </div>
