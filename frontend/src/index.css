@@ -52,40 +52,139 @@
   z-index: 9997 !important;
 }
 
-/* Предотвращение белых экранов на мобильных */
-@media (max-width: 768px) {
-  body {
-    min-height: 100vh;
+/* Универсальные стили для всех устройств */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  color: #000000;
+  overflow-x: hidden;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Принудительное отображение корневого элемента */
+#root {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #ffffff;
+}
+
+.App {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+/* Универсальные стили для всех мобильных устройств */
+@media (max-width: 1200px) { 
+  html { font-size: 15px; }
+}
+
+@media (max-width: 768px) { 
+  html { font-size: 14px; }
+  body { 
+    -webkit-overflow-scrolling: touch;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+@media (max-width: 480px) { 
+  html { font-size: 13px; }
+}
+
+/* Специальные исправления для iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  body { 
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  input, textarea, select { 
+    -webkit-user-select: text;
+    -webkit-touch-callout: default;
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  
+  button {
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  
+  /* Принудительное отображение на iOS */
+  html, body, #root, .App {
     background-color: #ffffff !important;
-    overflow-x: hidden;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Специальные исправления для Android */
+@supports (-webkit-appearance: none) and (not (-webkit-touch-callout: none)) {
+  body {
     -webkit-overflow-scrolling: touch;
   }
-  
-  #root {
-    min-height: 100vh;
-    background-color: #ffffff !important;
-  }
-  
-  .App {
-    min-height: 100vh;
-    background-color: #ffffff !important;
-  }
-  
-  /* Принудительное отображение контента */
-  .min-h-screen {
-    min-height: 100vh !important;
-  }
-  
-  /* Fallback для изображений */
-  img {
-    max-width: 100% !important;
-    height: auto !important;
-  }
-  
-  /* Предотвращение скрытия контента */
-  .hidden {
-    display: none !important;
-  }
+}
+
+/* Специальные исправления для планшетов */
+@media (min-width: 768px) and (max-width: 1024px) {
+  html { font-size: 15px; }
+}
+
+/* Предотвращение белых экранов */
+.App, .app, [data-reactroot], #root {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+/* Fallback для изображений */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Исправления для всех браузеров */
+* {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Принудительное отображение контента */
+.min-h-screen {
+  min-height: 100vh !important;
+}
+
+/* Предотвращение скрытия контента */
+.hidden {
+  display: none !important;
 }
 
 /* Специальные исправления для iOS Safari */

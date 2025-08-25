@@ -38,10 +38,29 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  // Обработка ошибок React
+  React.useEffect(() => {
+    const handleError = (error: ErrorEvent) => {
+      console.error('🚨 React App Error:', error);
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <div className="App">
+        <div 
+          className="App"
+          style={{
+            minHeight: '100vh',
+            backgroundColor: '#ffffff',
+            display: 'block',
+            visibility: 'visible',
+            opacity: 1
+          }}
+        >
           <Routes>
           <Route path="/" element={<PageWithNavigation><LandingPage /></PageWithNavigation>} />
           <Route path="/menu" element={
