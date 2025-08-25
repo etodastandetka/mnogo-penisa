@@ -90,6 +90,16 @@ export const Navigation: React.FC = () => {
           <div className="hidden md:flex items-center space-x-4">
             <button
               onClick={() => {
+                console.log('🔘 Клик по кнопке Главная');
+                handleNavigation('/');
+              }}
+              className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Главная
+            </button>
+            
+            <button
+              onClick={() => {
                 console.log('🔘 Клик по кнопке Меню');
                 handleNavigation('/menu');
               }}
@@ -175,8 +185,18 @@ export const Navigation: React.FC = () => {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
             <button
               onClick={() => {
-                console.log('📱 Мобильное меню: клик по Меню');
+                console.log('📱 Мобильное меню: клик по Главная');
                 handleNavigation('/');
+              }}
+              className="text-gray-700 hover:text-orange-600 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
+            >
+              Главная
+            </button>
+            
+            <button
+              onClick={() => {
+                console.log('📱 Мобильное меню: клик по Меню');
+                handleNavigation('/menu');
               }}
               className="text-gray-700 hover:text-orange-600 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
             >
