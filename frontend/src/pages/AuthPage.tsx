@@ -17,13 +17,16 @@ const AuthPage: React.FC = () => {
       const response = await login(credentials);
       
       console.log('🔧 Login response:', response);
+      console.log('🔧 Response type:', typeof response);
+      console.log('🔧 Response keys:', Object.keys(response || {}));
       
       if (!response) {
         throw new Error('Неверный ответ от сервера');
       }
       
       // Проверяем разные варианты ответа
-      const accessToken = response.access_token;
+      const responseAny = response as any;
+      const accessToken = response.access_token || responseAny.token || responseAny.accessToken;
       const userData = response.user || response;
       
       if (!accessToken) {
@@ -64,12 +67,15 @@ const AuthPage: React.FC = () => {
       const response = await register(userData);
       
       console.log('🔧 Register response:', response);
+      console.log('🔧 Response type:', typeof response);
+      console.log('🔧 Response keys:', Object.keys(response || {}));
       
       if (!response) {
         throw new Error('Неверный ответ от сервера');
       }
       
-      const accessToken = response.access_token;
+      const responseAny = response as any;
+      const accessToken = response.access_token || responseAny.token || responseAny.accessToken;
       const userInfo = response.user || response;
       
       if (!accessToken) {
