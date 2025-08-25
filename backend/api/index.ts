@@ -1937,18 +1937,14 @@ app.post('/api/auth/register', async (req, res) => {
             );
 
             res.json({
-              success: true,
-              message: 'Пользователь успешно зарегистрирован',
-              data: {
-                user: {
-                  id: user.id,
-                  name: user.name,
-                  email: user.email,
-                  phone: user.phone,
-                  address: user.address,
-                  isAdmin: user.is_admin === 1
-                },
-                token
+              access_token: token,
+              user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                address: user.address,
+                isAdmin: user.is_admin === 1
               }
             });
           });
@@ -2010,18 +2006,14 @@ app.post('/api/auth/login', async (req, res) => {
       );
 
       const responseData = {
-        success: true,
-        message: 'Вход выполнен успешно',
-        data: {
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            address: user.address,
-            isAdmin: user.is_admin === 1
-          },
-          token
+        access_token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          address: user.address,
+          isAdmin: user.is_admin === 1
         }
       };
       
