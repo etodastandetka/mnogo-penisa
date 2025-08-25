@@ -89,28 +89,42 @@ export const LandingPage: React.FC = () => {
     {
       name: 'Роллы',
       icon: '🍣',
-      count: products.filter(p => p.category === 'Роллы').length || 25,
+      count: products.filter(p => p.category === 'rolls').length || 25,
       bgImage: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop',
       description: 'Свежие роллы с лососем, тунцом и авокадо'
     },
     {
       name: 'Пицца',
       icon: '🍕',
-      count: products.filter(p => p.category === 'Пицца').length || 18,
+      count: products.filter(p => p.category === 'pizza').length || 18,
       bgImage: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop',
       description: 'Итальянская пицца с моцареллой и пепперони'
     },
     {
-      name: 'Суши',
+      name: 'Сеты',
       icon: '🍱',
-      count: products.filter(p => p.category === 'Суши').length || 32,
+      count: products.filter(p => p.category === 'sets').length || 12,
       bgImage: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop',
-      description: 'Классические суши с рисом и рыбой'
+      description: 'Готовые наборы для компании'
+    },
+    {
+      name: 'Закуски',
+      icon: '🍟',
+      count: products.filter(p => p.category === 'snacks').length || 8,
+      bgImage: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+      description: 'Вкусные закуски и снэки'
+    },
+    {
+      name: 'Крылья',
+      icon: '🍗',
+      count: products.filter(p => p.category === 'wings').length || 6,
+      bgImage: 'https://images.unsplash.com/photo-1567620832904-9fc6debc209f?w=400&h=300&fit=crop',
+      description: 'Хрустящие куриные крылышки'
     },
     {
       name: 'Напитки',
       icon: '🥤',
-      count: products.filter(p => p.category === 'Напитки').length || 15,
+      count: products.filter(p => p.category === 'drinks').length || 15,
       bgImage: 'https://images.unsplash.com/photo-1546173159-315724a31696?w=400&h=300&fit=crop',
       description: 'Освежающие напитки и соки'
     }
@@ -325,7 +339,7 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-8">
             {categories.map((category, index) => (
               <div
                 key={category.name}

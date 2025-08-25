@@ -6,6 +6,8 @@ export const getCategoryName = (category: string): string => {
     'sauces': 'Соусы',
     'drinks': 'Напитки',
     'sets': 'Сеты',
+    'snacks': 'Закуски',
+    'wings': 'Крылья',
     'desserts': 'Десерты',
     'appetizers': 'Закуски'
   };
@@ -19,6 +21,8 @@ export const getCategoryEmoji = (category: string): string => {
     'sauces': '🥫',
     'drinks': '🥤',
     'sets': '🍱',
+    'snacks': '🍟',
+    'wings': '🍗',
     'desserts': '🍰',
     'appetizers': '🥗'
   };
@@ -31,10 +35,12 @@ export const getCategorySortOrder = (category: string): number => {
     'rolls': 1,
     'pizza': 2,
     'sets': 3,
-    'appetizers': 4,
-    'desserts': 5,
-    'sauces': 6,
-    'drinks': 7
+    'snacks': 4,
+    'wings': 5,
+    'appetizers': 6,
+    'desserts': 7,
+    'sauces': 8,
+    'drinks': 9
   };
   return sortOrder[category] || 999;
 };
