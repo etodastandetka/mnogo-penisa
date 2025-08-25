@@ -6,7 +6,7 @@ interface LazyImageProps {
   className?: string;
   placeholder?: string;
   onLoad?: () => void;
-  onError?: () => void;
+  onError?: (e?: React.SyntheticEvent<HTMLImageElement, Event>) => void;
 }
 
 export const LazyImage: React.FC<LazyImageProps> = ({
@@ -22,6 +22,14 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
+    // На мобильных устройствах загружаем изображения сразу
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile && imgRef.current) {
+      imgRef.current.src = src;
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -32,7 +40,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
         });
       },
       {
-        rootMargin: '50px',
+        rootMargin: '100px',
         threshold: 0.1
       }
     );
@@ -49,9 +57,9 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     onLoad?.();
   };
 
-  const handleError = () => {
+  const handleError = (e?: React.SyntheticEvent<HTMLImageElement, Event>) => {
     setHasError(true);
-    onError?.();
+    onError?.(e);
   };
 
   return (

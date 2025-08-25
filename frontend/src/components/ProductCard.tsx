@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Card, CardContent } from './ui/Card';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
@@ -74,7 +74,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
     }
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const handleImageError = (e?: React.SyntheticEvent<HTMLImageElement, Event>) => {
     setImageError(true);
     console.log('⚠️ Ошибка загрузки изображения для товара:', product.name);
   };
@@ -96,6 +96,21 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
   }, [removeItem, updateQuantity, product.id]);
 
   const imageUrl = useMemo(() => getImageUrl(), [product.mobile_image_url, product.image_url]);
+  
+  // Принудительная загрузка изображений на мобильных устройствах
+  useEffect(() => {
+    if (imageUrl && window.innerWidth <= 768) {
+      const img = new Image();
+      img.src = imageUrl;
+      img.onload = () => {
+        console.log('✅ Изображение предзагружено для мобильного:', product.name);
+      };
+      img.onerror = () => {
+        console.log('⚠️ Ошибка предзагрузки изображения для мобильного:', product.name);
+        setImageError(true);
+      };
+    }
+  }, [imageUrl, product.name]);
   
   // Функция для получения эмодзи по категории
   const getCategoryEmoji = useCallback((category: string) => {
@@ -130,17 +145,18 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
             <LazyImage
               src={imageUrl}
               alt={product.name}
-              className="w-full h-56 sm:h-48 md:h-56 object-contain group-hover:scale-110 transition-all duration-300"
+              className="w-full h-56 sm:h-48 md:h-56 object-cover group-hover:scale-110 transition-all duration-300"
+              onError={handleImageError}
             />
             
             {/* Fallback для ошибок изображения */}
             {imageError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 h-56 sm:h-48 md:h-56">
                 <div className="text-center">
                   <div className="text-4xl sm:text-5xl md:text-6xl mb-2 emoji-font">
                     {getCategoryEmoji(product.category)}
                   </div>
-                  <p className="text-xs text-gray-500 px-2 hidden sm:block">Изображение недоступно</p>
+                  <p className="text-xs text-gray-500 px-2">Изображение недоступно</p>
                 </div>
               </div>
             )}
@@ -152,7 +168,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
               <div className="text-4xl sm:text-5xl md:text-6xl mb-2 emoji-font">
                 {getCategoryEmoji(product.category)}
               </div>
-              <p className="text-xs text-gray-500 px-2 hidden sm:block">Нет фото</p>
+              <p className="text-xs text-gray-500 px-2">Нет фото</p>
             </div>
           </div>
         )}
