@@ -7,6 +7,7 @@ interface PageWithNavigationProps {
 }
 
 export const PageWithNavigation: React.FC<PageWithNavigationProps> = ({ children }) => {
+  console.log('🔧 PageWithNavigation рендерится');
   return (
     <>
       <Navigation />

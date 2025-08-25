@@ -71,8 +71,10 @@ export const Navigation: React.FC = () => {
     closeMenu();
   };
 
+  console.log('🔧 Navigation рендерится, пользователь:', user);
+  console.log('🔧 Navigation рендерится, пользователь:', user);
   return (
-    <nav className="bg-white shadow-lg">
+    <nav className="bg-white shadow-lg relative z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Логотип */}

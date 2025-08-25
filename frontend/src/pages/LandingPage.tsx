@@ -156,7 +156,7 @@ export const LandingPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-500 to-red-600 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-orange-500 to-red-600 relative overflow-hidden pt-16">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 right-20 w-6 h-6 bg-orange-300/20 rounded-full animate-pulse"></div>
