@@ -317,15 +317,26 @@ const AdminProductsPage: React.FC = () => {
   };
 
   const handleSaveEdit = async () => {
-    if (!editingProduct) return;
+    if (!editingProduct) {
+      console.error('❌ Нет товара для редактирования');
+      return;
+    }
 
     try {
-      console.log('Отправляем данные для обновления:', editForm);
+      console.log('🔄 Начинаем обновление товара:', editingProduct.id);
+      console.log('📝 Данные формы:', editForm);
+      
+      // Валидация данных
+      if (!editForm.name || !editForm.description || !editForm.price || !editForm.category) {
+        alert('Пожалуйста, заполните все обязательные поля');
+        return;
+      }
       
       // Если выбрано новое изображение, конвертируем в base64
       let imageUrl = editingProduct.image_url; // Сохраняем текущее изображение по умолчанию
       if (selectedImage) {
         try {
+          console.log('🖼️ Конвертируем новое изображение в base64...');
           // Конвертируем изображение в base64
           const reader = new FileReader();
           const base64Promise = new Promise<string>((resolve, reject) => {
@@ -336,9 +347,9 @@ const AdminProductsPage: React.FC = () => {
           reader.readAsDataURL(selectedImage);
           imageUrl = await base64Promise;
           
-          console.log('Новое фото конвертировано в base64, размер:', imageUrl.length);
+          console.log('✅ Новое фото конвертировано в base64, размер:', imageUrl.length);
         } catch (err) {
-          console.error('Ошибка конвертации фото:', err);
+          console.error('❌ Ошибка конвертации фото:', err);
           alert('Ошибка при обработке фото. Попробуйте еще раз.');
           return;
         }
@@ -346,18 +357,24 @@ const AdminProductsPage: React.FC = () => {
       
       // Создаем объект с данными для обновления
       const updateData = {
-        ...editForm,
-        image_url: imageUrl
+        name: editForm.name,
+        description: editForm.description,
+        price: editForm.price,
+        category: editForm.category,
+        image_url: imageUrl,
+        mobile_image_url: editForm.mobile_image_url || '',
+        is_available: editForm.is_available
       };
       
-      console.log('Отправляем данные для обновления:', updateData);
+      console.log('📤 Отправляем данные для обновления:', updateData);
       
-      await updateProduct(String(editingProduct.id), updateData);
+      const result = await updateProduct(String(editingProduct.id), updateData);
+      console.log('✅ Ответ от сервера:', result);
       
       // Обновляем список товаров
       const updatedProducts = products.map(p => 
         p.id === editingProduct.id 
-          ? { ...p, ...editForm, image_url: imageUrl }
+          ? { ...p, ...updateData }
           : p
       );
       setProducts(updatedProducts);
@@ -367,9 +384,10 @@ const AdminProductsPage: React.FC = () => {
       setSelectedImage(null);
       setImagePreview('');
       alert('Товар успешно обновлен!');
-    } catch (err) {
-      console.error('Ошибка обновления товара:', err);
-      alert('Ошибка при обновлении товара');
+    } catch (err: any) {
+      console.error('❌ Ошибка обновления товара:', err);
+      const errorMessage = err.message || 'Неизвестная ошибка при обновлении товара';
+      alert(`Ошибка при обновлении товара: ${errorMessage}`);
     }
   };
 

@@ -145,11 +145,27 @@ export const createProduct = async (productData: any): Promise<any> => {
 
 export const updateProduct = async (id: string, productData: any): Promise<any> => {
   try {
+    console.log('📤 API: Отправляем запрос на обновление товара:', { id, productData });
     const response = await apiClient.put(`/admin/products/${id}`, productData);
+    console.log('✅ API: Ответ от сервера:', response.data);
     return response.data;
   } catch (error: any) {
-    console.error('❌ Ошибка обновления товара:', error);
-    throw new Error(error.response?.data?.message || 'Ошибка обновления товара');
+    console.error('❌ API: Ошибка обновления товара:', error);
+    console.error('❌ API: Детали ошибки:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    
+    if (error.response?.status === 404) {
+      throw new Error('Товар не найден');
+    } else if (error.response?.status === 400) {
+      throw new Error(error.response?.data?.message || 'Неверные данные товара');
+    } else if (error.response?.status === 500) {
+      throw new Error('Ошибка сервера при обновлении товара');
+    } else {
+      throw new Error(error.response?.data?.message || 'Ошибка обновления товара');
+    }
   }
 };
 

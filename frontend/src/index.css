@@ -56,18 +56,19 @@
 @media (max-width: 768px) {
   body {
     min-height: 100vh;
-    background-color: #f9fafb !important;
+    background-color: #ffffff !important;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
   
   #root {
     min-height: 100vh;
-    background-color: #f9fafb !important;
+    background-color: #ffffff !important;
   }
   
   .App {
     min-height: 100vh;
-    background-color: #f9fafb !important;
+    background-color: #ffffff !important;
   }
   
   /* Принудительное отображение контента */
@@ -85,11 +86,46 @@
   .hidden {
     display: none !important;
   }
+}
+
+/* Специальные исправления для iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  body {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
   
-  /* Улучшенная видимость текста - убираем принудительный черный цвет */
-  /* p, h1, h2, h3, h4, h5, h6 {
-    color: #111827 !important;
-  } */
+  input, textarea, select {
+    -webkit-user-select: text;
+    -webkit-touch-callout: default;
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  
+  button {
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  
+  /* Исправление для iOS Safari - предотвращение белых экранов */
+  html, body {
+    background-color: #ffffff !important;
+  }
+  
+  /* Исправление для iOS Safari - принудительное отображение */
+  .App, #root {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Исправление для iOS Safari - предотвращение скрытия */
+  * {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
 }
 
 /* Скрытие скроллбара для мобильных устройств */

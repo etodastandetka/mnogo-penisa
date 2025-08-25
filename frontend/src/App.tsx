@@ -7,6 +7,7 @@ import { ImageDebugger } from './components/ImageDebugger';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PageWithNavigation } from './components/PageWithNavigation';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
 
 // Ленивая загрузка страниц для лучшей производительности
@@ -24,7 +25,7 @@ const AdminOrdersPage = lazy(() => import('./pages/AdminOrdersPage'));
 const AdminProductsPage = lazy(() => import('./pages/AdminProductsPage'));
 const AdminAnalyticsPage = lazy(() => import('./pages/AdminAnalyticsPage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
-const AdminReceiptsPage = lazy(() => import('./pages/AdminReceiptsPage'));
+
 
 // Простой клиент для React Query без сложных настроек
 const queryClient = new QueryClient({
@@ -38,9 +39,10 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="App">
-        <Routes>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <div className="App">
+          <Routes>
           <Route path="/" element={<PageWithNavigation><LandingPage /></PageWithNavigation>} />
           <Route path="/menu" element={
             <PageWithNavigation>
@@ -139,13 +141,7 @@ function App() {
               </Suspense>
             </ProtectedRoute>
           } />
-          <Route path="/admin/receipts" element={
-            <ProtectedRoute requireAdmin={true}>
-              <Suspense fallback={<LoadingSpinner />}>
-                <AdminReceiptsPage />
-              </Suspense>
-            </ProtectedRoute>
-          } />
+
         </Routes>
         
         {/* Уведомления */}
@@ -162,6 +158,7 @@ function App() {
         />
       </div>
     </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
