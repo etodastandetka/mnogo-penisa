@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import { getUserOrders } from '../api/orders';
+import { getUserInfo } from '../api/user';
 import { 
   Menu, 
   X, 
@@ -16,9 +17,30 @@ import { Button } from './ui/Button';
 export const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeOrders, setActiveOrders] = useState(0);
-  const { user, clearUser } = useUserStore();
+  const { user, setUser, clearUser } = useUserStore();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Автоматически загружаем информацию о пользователе при загрузке компонента
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      const token = localStorage.getItem('token');
+      if (token && !user) {
+        try {
+          console.log('🔧 Загружаем информацию о пользователе...');
+          const userInfo = await getUserInfo();
+          setUser(userInfo);
+          console.log('✅ Пользователь загружен:', userInfo);
+        } catch (error) {
+          console.error('❌ Ошибка загрузки пользователя:', error);
+          localStorage.removeItem('token');
+          clearUser();
+        }
+      }
+    };
+
+    loadUserInfo();
+  }, [user, setUser, clearUser]);
 
   useEffect(() => {
     const checkActiveOrders = async () => {

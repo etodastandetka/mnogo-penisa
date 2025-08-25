@@ -16,12 +16,22 @@ const AuthPage: React.FC = () => {
       setError(null);
       const response = await login(credentials);
       
+      console.log('🔧 Login response:', response);
+      
+      if (!response || !response.access_token) {
+        throw new Error('Неверный ответ от сервера');
+      }
+      
+      if (!response.user || !response.user.id) {
+        throw new Error('Данные пользователя не получены');
+      }
+      
       localStorage.setItem('token', response.access_token);
       setUser({
         id: response.user.id.toString(),
-        name: response.user.name,
+        name: response.user.name || 'Пользователь',
         phone: response.user.phone || '',
-        email: response.user.email
+        email: response.user.email || ''
       });
       
       // Перенаправляем на главную страницу
