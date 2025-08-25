@@ -115,10 +115,11 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
   // Функция для получения эмодзи по категории
   const getCategoryEmoji = useCallback((category: string) => {
     const emojiMap: { [key: string]: string } = {
-      'rolls': '🍣',
-      'pizza': '🍕', 
-      
-      'drinks': '🥤',
+              'rolls': '🍣',
+        'pizza': '🍕', 
+        'wings': '🍗',
+        'snacks': '🍟',
+        'drinks': '🥤',
       'sauces': '🥫',
       'sets': '🍱'
     };

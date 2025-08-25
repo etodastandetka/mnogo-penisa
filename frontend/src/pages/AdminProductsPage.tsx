@@ -23,7 +23,8 @@ const getCategoryDisplayName = (category: string): string => {
     'sets': 'Сеты',
     'drinks': 'Напитки',
     'sauces': 'Соусы',
-    
+    'snacks': 'Снэки',
+    'wings': 'Крылья',
     'pizza': 'Пицца'
   };
   return categoryNames[category] || category;
@@ -554,6 +555,8 @@ const AdminProductsPage: React.FC = () => {
                   <option value="sets">Сеты</option>
                   <option value="drinks">Напитки</option>
                   <option value="sauces">Соусы</option>
+                  <option value="snacks">Снэки</option>
+                  <option value="wings">Крылья</option>
                   <option value="pizza">Пицца</option>
                 </select>
               </div>
@@ -742,6 +745,8 @@ const AdminProductsPage: React.FC = () => {
                     <option value="sets">Сеты</option>
                     <option value="drinks">Напитки</option>
                     <option value="sauces">Соусы</option>
+                    <option value="snacks">Снэки</option>
+                    <option value="wings">Крылья</option>
                     <option value="pizza">Пицца</option>
                   </select>
                 </div>
@@ -966,6 +971,8 @@ const AdminProductsPage: React.FC = () => {
                     <option value="sets">Сеты</option>
                     <option value="drinks">Напитки</option>
                     <option value="sauces">Соусы</option>
+                    <option value="snacks">Снэки</option>
+                    <option value="wings">Крылья</option>
                     <option value="pizza">Пицца</option>
                   </select>
                 </div>
