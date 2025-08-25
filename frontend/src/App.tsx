@@ -18,6 +18,7 @@ const ContactPage = lazy(() => import('./pages/ContactPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const CartPage = lazy(() => import('./pages/CartPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // Админ страницы
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'));
@@ -159,6 +160,13 @@ function App() {
                 <AdminSettingsPage />
               </Suspense>
             </ProtectedRoute>
+          } />
+
+          {/* 404 страница - должна быть последней */}
+          <Route path="*" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <NotFoundPage />
+            </Suspense>
           } />
 
         </Routes>
