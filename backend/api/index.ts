@@ -1274,7 +1274,7 @@ app.get('/api/admin/orders/:id', authenticateToken, requireAdmin, (req, res) => 
 });
 
 app.get('/api/admin/orders', authenticateToken, requireAdmin, (req, res) => {
-  const { status, page = 1, limit = 50 } = req.query;
+  const { status, page = 1, limit = 100000 } = req.query;
   const offset = (Number(page) - 1) * Number(limit);
   
   // Упрощенный запрос без GROUP_CONCAT для лучшей совместимости
@@ -1549,41 +1549,61 @@ app.put('/api/admin/products/:id', authenticateToken, requireAdmin, (req, res) =
   const { id } = req.params;
   const { name, description, price, category, isPopular, isAvailable, is_available, image_url, mobile_image_url } = req.body;
   
-  console.log('🔄 UPDATE PRODUCT:', { id, name, mobile_image_url, image_url });
+  console.log('🔄 UPDATE PRODUCT:', { id, name, description, price, category, mobile_image_url, image_url });
   
-
-  
-  if (!name || !price) {
-    return res.status(400).json({ message: 'Название и цена обязательны' });
+  // Валидация данных
+  if (!name || !description || !price || !category) {
+    console.error('❌ Валидация не пройдена:', { name, description, price, category });
+    return res.status(400).json({ message: 'Название, описание, цена и категория обязательны' });
   }
 
-  // Используем переданное изображение (base64 или URL)
-  const imageUrl = image_url || '';
-  
-  // Определяем статус доступности
-  const isAvailableValue = isAvailable !== undefined ? isAvailable : is_available !== undefined ? is_available : true;
-  const isPopularValue = isPopular !== undefined ? isPopular : false;
+  // Проверяем, существует ли товар
+  db.get('SELECT id FROM products WHERE id = ?', [id], (err, row) => {
+    if (err) {
+      console.error('❌ Ошибка проверки существования товара:', err);
+      return res.status(500).json({ message: 'Ошибка проверки товара' });
+    }
+    
+    if (!row) {
+      console.error('❌ Товар не найден:', id);
+      return res.status(404).json({ message: 'Товар не найден' });
+    }
 
+    // Используем переданное изображение (base64 или URL)
+    const imageUrl = image_url || '';
+    
+    // Определяем статус доступности
+    const isAvailableValue = isAvailable !== undefined ? isAvailable : is_available !== undefined ? is_available : true;
+    const isPopularValue = isPopular !== undefined ? isPopular : false;
 
+    console.log('📝 Обновляем товар с данными:', {
+      name, description, price, category, imageUrl, 
+      mobile_image_url: mobile_image_url || '',
+      isAvailable: isAvailableValue,
+      isPopular: isPopularValue
+    });
 
-  // Обновляем товар
+    // Обновляем товар
     db.run(`
       UPDATE products 
       SET name = ?, description = ?, price = ?, image_url = ?, mobile_image_url = ?, category = ?, is_popular = ?, is_available = ?
       WHERE id = ?
-  `, [name, description, price, imageUrl, mobile_image_url || '', category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0, id], function(err) {
+    `, [name, description, price, imageUrl, mobile_image_url || '', category, isPopularValue ? 1 : 0, isAvailableValue ? 1 : 0, id], function(err) {
       if (err) {
-      console.error('Ошибка обновления товара:', err);
-        return res.status(500).json({ message: 'Ошибка обновления товара' });
+        console.error('❌ Ошибка обновления товара:', err);
+        return res.status(500).json({ message: 'Ошибка обновления товара в базе данных' });
       }
-    
-
+      
+      console.log('✅ Товар успешно обновлен, affected rows:', this.changes);
       
       res.json({
+        success: true,
         message: 'Товар обновлен успешно',
-        imageUrl
+        imageUrl,
+        productId: id
       });
     });
+  });
 });
 
 // Удаление товара
