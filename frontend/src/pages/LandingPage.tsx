@@ -457,7 +457,7 @@ export const LandingPage: React.FC = () => {
               <h3 className="text-xl font-semibold mb-4 text-orange-400">Контакты</h3>
               <div className="space-y-2 text-gray-400">
                 <p>Телефон: +996 (709) 611-043</p>
-                <p>Email: info@mnogo-rolly.online</p>
+                <p>Email: info@mnogo-rolly.kg</p>
                 <p>Адрес: г. Бишкек, ул. Ахунбаева, 182 Б</p>
               </div>
             </div>
