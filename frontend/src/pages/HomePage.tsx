@@ -173,32 +173,37 @@ export const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Products Grid */}
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Товары не найдены</h3>
-            <p className="text-gray-600 mb-6">
-              {searchQuery ? `По запросу "${searchQuery}" ничего не найдено` : 'В данной категории пока нет товаров'}
-            </p>
-            <Button onClick={handleRetry} className="bg-orange-600 hover:bg-orange-700 mobile-btn">
-              Попробовать снова
-            </Button>
+      {/* Main Content with Products and Cart */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Products Grid */}
+          <div className="flex-1">
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-6xl mb-4">🔍</div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Товары не найдены</h3>
+                <p className="text-gray-600 mb-6">
+                  {searchQuery ? `По запросу "${searchQuery}" ничего не найдено` : 'В данной категории пока нет товаров'}
+                </p>
+                <Button onClick={handleRetry} className="bg-orange-600 hover:bg-orange-700 mobile-btn">
+                  Попробовать снова
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 product-grid">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 product-grid">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* Cart in line with products */}
-      <div className="lg:block">
-        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
-          <FixedCart />
+          {/* Cart Sidebar */}
+          <div className="lg:w-80 lg:flex-shrink-0">
+            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden sticky top-4">
+              <FixedCart />
+            </div>
+          </div>
         </div>
       </div>
     </div>
