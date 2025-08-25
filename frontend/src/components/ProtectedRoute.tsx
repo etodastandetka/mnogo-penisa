@@ -11,6 +11,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requir
   const navigate = useNavigate();
   const { user, isAdmin, fetchUserInfo, isLoading } = useUserStore();
 
+  console.log('🔒 ProtectedRoute:', { user, isAdmin, isLoading, requireAdmin });
+
 
 
   useEffect(() => {
