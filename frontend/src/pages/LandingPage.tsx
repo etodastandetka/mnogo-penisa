@@ -107,20 +107,7 @@ export const LandingPage: React.FC = () => {
       bgImage: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop',
       description: 'Готовые наборы для компании'
     },
-    {
-      name: 'Закуски',
-      icon: '🍟',
-      count: products.filter(p => p.category === 'snacks').length || 8,
-      bgImage: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
-      description: 'Вкусные закуски и снэки'
-    },
-    {
-      name: 'Крылья',
-      icon: '🍗',
-      count: products.filter(p => p.category === 'wings').length || 6,
-      bgImage: 'https://images.unsplash.com/photo-1567620832904-9fc6debc209f?w=400&h=300&fit=crop',
-      description: 'Хрустящие куриные крылышки'
-    },
+
     {
       name: 'Напитки',
       icon: '🥤',

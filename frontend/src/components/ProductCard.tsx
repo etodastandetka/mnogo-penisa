@@ -117,8 +117,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
     const emojiMap: { [key: string]: string } = {
       'rolls': '🍣',
       'pizza': '🍕', 
-      'wings': '🍗',
-      'snacks': '🍟',
+      
       'drinks': '🥤',
       'sauces': '🥫',
       'sets': '🍱'
