@@ -12,22 +12,17 @@ const AuthPage: React.FC = () => {
 
   const handleLogin = async (credentials: { email: string; password: string }) => {
     try {
+
       setLoading(true);
       setError(null);
       const response = await login(credentials);
-      
-      console.log('🔧 Login response:', response);
-      console.log('🔧 Response type:', typeof response);
-      console.log('🔧 Response keys:', Object.keys(response || {}));
       
       if (!response) {
         throw new Error('Неверный ответ от сервера');
       }
       
-      // Проверяем разные варианты ответа
-      const responseAny = response as any;
-      const accessToken = response.access_token || responseAny.token || responseAny.accessToken;
-      const userData = response.user || response;
+      const accessToken = response.access_token;
+      const userData = response.user;
       
       if (!accessToken) {
         throw new Error('Токен не получен');
@@ -49,6 +44,7 @@ const AuthPage: React.FC = () => {
       window.location.href = '/';
     } catch (err: any) {
       console.error('❌ Ошибка входа:', err);
+
       setError(err.message || 'Ошибка входа');
     } finally {
       setLoading(false);
@@ -62,21 +58,17 @@ const AuthPage: React.FC = () => {
     password: string;
   }) => {
     try {
+
       setLoading(true);
       setError(null);
       const response = await register(userData);
-      
-      console.log('🔧 Register response:', response);
-      console.log('🔧 Response type:', typeof response);
-      console.log('🔧 Response keys:', Object.keys(response || {}));
       
       if (!response) {
         throw new Error('Неверный ответ от сервера');
       }
       
-      const responseAny = response as any;
-      const accessToken = response.access_token || responseAny.token || responseAny.accessToken;
-      const userInfo = response.user || response;
+      const accessToken = response.access_token;
+      const userInfo = response.user;
       
       if (!accessToken) {
         throw new Error('Токен не получен');

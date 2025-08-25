@@ -28,10 +28,6 @@ export interface NormalizedAuthResponse {
 export const login = async (credentials: LoginRequest): Promise<NormalizedAuthResponse> => {
   try {
     const response = await apiClient.post('/auth/login', credentials);
-    console.log('🔧 Raw API response:', response);
-    console.log('🔧 Response data:', response.data);
-    console.log('🔧 Response data type:', typeof response.data);
-    console.log('🔧 Response data keys:', Object.keys(response.data || {}));
     return response.data;
   } catch (error: any) {
     console.error('❌ Ошибка входа:', error);
@@ -51,10 +47,6 @@ export const login = async (credentials: LoginRequest): Promise<NormalizedAuthRe
 export const register = async (userData: RegisterRequest): Promise<NormalizedAuthResponse> => {
   try {
     const response = await apiClient.post('/auth/register', userData);
-    console.log('🔧 Raw API response:', response);
-    console.log('🔧 Response data:', response.data);
-    console.log('🔧 Response data type:', typeof response.data);
-    console.log('🔧 Response data keys:', Object.keys(response.data || {}));
     return response.data;
   } catch (error: any) {
     console.error('❌ Ошибка регистрации:', error);

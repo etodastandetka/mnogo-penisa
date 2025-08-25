@@ -29,10 +29,16 @@ const apiClient = axios.create({
 // Интерцептор для запросов
 apiClient.interceptors.request.use(
   (config) => {
+    console.log('🔧 Отправляем запрос:', config.method?.toUpperCase(), config.url);
+    console.log('🔧 Данные запроса:', config.data);
+    
     // Добавляем токен если есть
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('🔧 Токен добавлен в заголовки');
+    } else {
+      console.log('🔧 Токен не найден в localStorage');
     }
 
     return config;
