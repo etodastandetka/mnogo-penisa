@@ -101,6 +101,21 @@ export const Navigation: React.FC = () => {
   
   return (
     <nav className="bg-white shadow-lg relative z-50">
+      <style>
+        {`
+          @media (max-width: 767px) {
+            .header-nav { display: none !important; }
+            .burger-menu { display: flex !important; }
+            .mobile-menu { display: block !important; }
+          }
+          
+          @media (min-width: 768px) {
+            .header-nav { display: flex !important; }
+            .burger-menu { display: none !important; }
+            .mobile-menu { display: none !important; }
+          }
+        `}
+      </style>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Логотип */}
@@ -115,7 +130,7 @@ export const Navigation: React.FC = () => {
           </div>
 
                       {/* Десктопное меню */}
-            <div className="hidden lg:flex items-center space-x-4">
+            <div className="header-nav hidden md:flex items-center space-x-4">
             <button
               onClick={() => {
                 console.log('🔘 Клик по кнопке Главная');
@@ -196,7 +211,7 @@ export const Navigation: React.FC = () => {
           </div>
 
                       {/* Мобильное меню кнопка */}
-            <div className="lg:hidden flex items-center">
+            <div className="burger-menu md:hidden flex items-center">
             <button
               onClick={toggleMenu}
               className="text-gray-700 hover:text-orange-600 p-2 rounded-md"
@@ -209,7 +224,7 @@ export const Navigation: React.FC = () => {
 
               {/* Мобильное меню */}
         {isOpen && (
-          <div className="lg:hidden">
+          <div className="mobile-menu md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
             <button
               onClick={() => {
