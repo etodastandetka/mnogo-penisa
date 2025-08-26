@@ -10,7 +10,7 @@ import path from 'path';
 import multer from 'multer';
 import fs from 'fs';
 import https from 'https';
-import { sendNewOrderNotification, sendStatusUpdateNotification, getBotInfo } from '../src/telegramBot';
+import { sendNewOrderNotification, sendStatusUpdateNotification, getBotInfo, registerTelegramUser, getUserOrders, getUserOrder } from '../src/telegramBot';
 
 // Типы для базы данных
 interface StatsResult {
@@ -2795,6 +2795,181 @@ app.post('/api/shifts/close', authenticateToken, requireAdmin, (req: any, res) =
   });
 });
 
+// Telegram webhook endpoint
+app.post('/telegram-webhook', express.raw({ type: 'application/json' }), async (req: any, res) => {
+  try {
+    const update = req.body;
+    console.log('🤖 TELEGRAM: Получен webhook:', update);
+    
+    if (update.message) {
+      const { message } = update;
+      const chatId = message.chat.id;
+      const user = message.from;
+      const text = message.text;
+      
+      // Регистрируем пользователя
+      await registerTelegramUser(
+        user.id,
+        user.username || '',
+        user.first_name || '',
+        user.last_name || ''
+      );
+      
+      // Обрабатываем команды
+      if (text === '/start') {
+        const welcomeMessage = `
+🍕 Добро пожаловать в бот заказов "Много Пениса"!
+
+📋 Доступные команды:
+/orders - Посмотреть мои заказы
+/order <номер> - Информация о заказе
+/help - Помощь
+
+💡 Чтобы узнать статус заказа, напишите его номер или используйте команду /order <номер>
+        `;
+        
+        // Отправляем сообщение через бота
+        const { bot } = require('../src/telegramBot');
+        if (bot) {
+          bot.sendMessage(chatId, welcomeMessage);
+        }
+      } else if (text === '/orders') {
+        try {
+          const orders = await getUserOrders(user.id);
+          
+          if (orders.length === 0) {
+            const { bot } = require('../src/telegramBot');
+            if (bot) {
+              bot.sendMessage(chatId, 'У вас пока нет заказов. Сделайте первый заказ на сайте! 🛒');
+            }
+          } else {
+            let message = '📋 Ваши последние заказы:\n\n';
+            orders.forEach(order => {
+              const status = getStatusEmoji(order.status);
+              const date = new Date(order.created_at).toLocaleDateString('ru-RU');
+              message += `${status} Заказ #${order.id}\n`;
+              message += `💰 Сумма: ${order.total_amount} ₽\n`;
+              message += `📅 Дата: ${date}\n`;
+              message += `📍 Адрес: ${order.delivery_address || 'Не указан'}\n`;
+              message += `📊 Статус: ${getStatusText(order.status)}\n\n`;
+            });
+            
+            message += '💡 Для детальной информации используйте: /order <номер>';
+            
+            const { bot } = require('../src/telegramBot');
+            if (bot) {
+              bot.sendMessage(chatId, message);
+            }
+          }
+        } catch (error) {
+          console.error('Ошибка при получении заказов:', error);
+          const { bot } = require('../src/telegramBot');
+          if (bot) {
+            bot.sendMessage(chatId, 'Произошла ошибка при получении заказов.');
+          }
+        }
+      } else if (text === '/help') {
+        const helpMessage = `
+🔧 Помощь по боту
+
+📋 Основные команды:
+/start - Начать работу с ботом
+/orders - Посмотреть мои заказы
+/order <номер> - Информация о заказе
+/help - Показать эту справку
+
+💡 Примеры использования:
+• /order 123 - посмотреть заказ №123
+• /orders - список всех заказов
+
+🌐 Сайт: https://your-domain.com
+        `;
+        
+        const { bot } = require('../src/telegramBot');
+        if (bot) {
+          bot.sendMessage(chatId, helpMessage);
+        }
+      } else if (text && /^\d+$/.test(text)) {
+        // Обработка номера заказа
+                 try {
+           const orderId = parseInt(text);
+           const order = await getUserOrder(user.id, orderId.toString());
+          
+          if (!order) {
+            const { bot } = require('../src/telegramBot');
+            if (bot) {
+              bot.sendMessage(chatId, 'Заказ не найден или у вас нет к нему доступа.');
+            }
+          } else {
+            const status = getStatusEmoji(order.status);
+            const date = new Date(order.created_at).toLocaleDateString('ru-RU');
+            const time = new Date(order.created_at).toLocaleTimeString('ru-RU');
+            
+            let message = `${status} Заказ #${order.id}\n\n`;
+            message += `📅 Дата: ${date} в ${time}\n`;
+            message += `💰 Сумма: ${order.total_amount} ₽\n`;
+            message += `📍 Адрес: ${order.delivery_address || 'Не указан'}\n`;
+            message += `📱 Телефон: ${order.phone || 'Не указан'}\n`;
+            message += `📊 Статус: ${getStatusText(order.status)}\n\n`;
+            
+            if (order.items) {
+              message += `🛒 Товары:\n${order.items}\n\n`;
+            }
+            
+            message += `📝 Комментарий: ${order.comment || 'Нет комментария'}`;
+            
+            const { bot } = require('../src/telegramBot');
+            if (bot) {
+              bot.sendMessage(chatId, message);
+            }
+          }
+        } catch (error) {
+          console.error('Ошибка при получении заказа:', error);
+          const { bot } = require('../src/telegramBot');
+          if (bot) {
+            bot.sendMessage(chatId, 'Произошла ошибка. Попробуйте позже.');
+          }
+        }
+      } else if (text && !text.startsWith('/')) {
+        const { bot } = require('../src/telegramBot');
+        if (bot) {
+          bot.sendMessage(chatId, 'Отправьте номер заказа или используйте команду /help для справки.');
+        }
+      }
+    }
+    
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    console.error('❌ TELEGRAM: Ошибка обработки webhook:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Вспомогательные функции для Telegram
+function getStatusEmoji(status: string): string {
+  const statusMap: { [key: string]: string } = {
+    'pending': '⏳',
+    'confirmed': '✅',
+    'preparing': '👨‍🍳',
+    'ready': '🚚',
+    'delivered': '🎉',
+    'cancelled': '❌'
+  };
+  return statusMap[status] || '❓';
+}
+
+function getStatusText(status: string): string {
+  const statusMap: { [key: string]: string } = {
+    'pending': 'Ожидает подтверждения',
+    'confirmed': 'Подтвержден',
+    'preparing': 'Готовится',
+    'ready': 'Готов к доставке',
+    'delivered': 'Доставлен',
+    'cancelled': 'Отменен'
+  };
+  return statusMap[status] || 'Неизвестно';
+}
+
 // Получить историю смен
 app.get('/api/shifts/history', authenticateToken, requireAdmin, (req: any, res) => {
   console.log('🕐 SHIFTS: Получен запрос на получение истории смен');
@@ -2805,7 +2980,7 @@ app.get('/api/shifts/history', authenticateToken, requireAdmin, (req: any, res) 
            u2.name as closed_by_name
     FROM shifts s
     LEFT JOIN users u1 ON s.opened_by = u1.id
-    LEFT JOIN users u2 ON s.closed_by = u2.id
+    LEFT JOIN users u2 ON s.closed_by = u1.id
     ORDER BY s.opened_at DESC
     LIMIT 50
   `, (err, shifts) => {

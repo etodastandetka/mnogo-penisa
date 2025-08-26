@@ -149,6 +149,54 @@ const OrderSuccessPage: React.FC = () => {
             </Button>
           </div>
 
+          {/* Telegram бот */}
+          <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-800">
+                🤖 Telegram бот
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <p className="text-blue-700">
+                  Отслеживайте статус заказа в реальном времени через наш Telegram бот!
+                </p>
+                <div className="bg-white p-3 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-blue-600 font-semibold">📱 Напишите боту:</span>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500">•</span>
+                      <span className="font-mono bg-blue-100 px-2 py-1 rounded">/start</span>
+                      <span className="text-gray-600">- начать работу с ботом</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500">•</span>
+                      <span className="font-mono bg-blue-100 px-2 py-1 rounded">/orders</span>
+                      <span className="text-gray-600">- посмотреть ваши заказы</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500">•</span>
+                      <span className="font-mono bg-blue-100 px-2 py-1 rounded">/order {orderId}</span>
+                      <span className="text-gray-600">- детали заказа</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <a
+                    href="https://t.me/your_bot_username"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                  >
+                    🚀 Открыть бота
+                  </a>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Контактная информация */}
           <div className="text-center mt-8 p-4 bg-white rounded-lg shadow-sm">
             <h3 className="font-semibold text-gray-800 mb-2">Остались вопросы?</h3>
