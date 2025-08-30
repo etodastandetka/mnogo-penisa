@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import telebot
-import sqlite3
+import requests
 import os
 import json
 from datetime import datetime
@@ -17,42 +17,26 @@ WEBHOOK_URL = 'https://mnogo-rolly.kg/telegram-webhook'
 # Инициализация бота
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# Путь к базе данных
-DB_PATH = 'database.sqlite'
+# API конфигурация
+API_BASE_URL = 'https://mnogo-rolly.kg/api'
+LOCAL_API_URL = 'http://127.0.0.1:3000/api'
 
 def init_database():
     """Инициализация базы данных"""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
+    print("🔧 Проверка подключения к API...")
     
-    # Создаем таблицу пользователей Telegram
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS telegram_users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            telegram_id INTEGER UNIQUE NOT NULL,
-            username TEXT,
-            first_name TEXT,
-            last_name TEXT,
-            phone TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
-    # Создаем таблицу связи заказов с пользователями
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS telegram_orders (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            telegram_id INTEGER NOT NULL,
-            order_id INTEGER NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (telegram_id) REFERENCES telegram_users (telegram_id),
-            FOREIGN KEY (order_id) REFERENCES orders (id)
-        )
-    ''')
-    
-    conn.commit()
-    conn.close()
-    print("✅ База данных инициализирована")
+    try:
+        # Пробуем подключиться к API
+        response = requests.get(f"{API_BASE_URL}/products", timeout=5)
+        if response.status_code == 200:
+            print(f"✅ API доступен: {API_BASE_URL}")
+            return True
+        else:
+            print(f"⚠️ API недоступен (статус: {response.status_code})")
+            return False
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Ошибка подключения к API: {e}")
+        return False
 
 def get_status_emoji(status):
     """Получить эмодзи для статуса"""
@@ -118,49 +102,54 @@ def orders_command(message):
     chat_id = message.chat.id
     user_id = message.from_user.id
     
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
     try:
-        # Получаем заказы пользователя
-        cursor.execute('''
-            SELECT o.id, o.status, o.total_amount, o.created_at, o.delivery_address
-            FROM orders o
-            JOIN telegram_orders t_orders ON o.id = t_orders.order_id
-            WHERE t_orders.telegram_id = ?
-            ORDER BY o.created_at DESC
-            LIMIT 10
-        ''', (user_id,))
+        # Получаем заказы через API
+        response = requests.get(f"{API_BASE_URL}/orders", timeout=10)
         
-        orders = cursor.fetchall()
-        
-        if not orders:
-            bot.send_message(chat_id, 'У вас пока нет заказов. Сделайте первый заказ на сайте! 🛒')
-            return
-        
-        message_text = '📋 Ваши последние заказы:\n\n'
-        
-        for order in orders:
-            order_id, status, total_amount, created_at, delivery_address = order
-            status_emoji = get_status_emoji(status)
-            status_text = get_status_text(status)
-            date = datetime.fromisoformat(created_at).strftime('%d.%m.%Y')
+        if response.status_code == 200:
+            orders = response.json()
             
-            message_text += f"{status_emoji} Заказ #{order_id}\n"
-            message_text += f"💰 Сумма: {total_amount} ₽\n"
-            message_text += f"📅 Дата: {date}\n"
-            message_text += f"📍 Адрес: {delivery_address or 'Не указан'}\n"
-            message_text += f"📊 Статус: {status_text}\n\n"
-        
-        message_text += '💡 Для детальной информации используйте: /order <номер>'
-        bot.send_message(chat_id, message_text)
-        
-    except Exception as e:
+            if not orders or len(orders) == 0:
+                bot.send_message(chat_id, 'У вас пока нет заказов. Сделайте первый заказ на сайте! 🛒')
+                return
+            
+            message_text = '📋 Ваши последние заказы:\n\n'
+            
+            # Показываем последние 5 заказов
+            for order in orders[:5]:
+                order_id = order.get('id', 'N/A')
+                status = order.get('status', 'pending')
+                total_amount = order.get('total_amount', 0)
+                created_at = order.get('created_at', '')
+                delivery_address = order.get('delivery_address', 'Не указан')
+                
+                status_emoji = get_status_emoji(status)
+                status_text = get_status_text(status)
+                
+                # Форматируем дату
+                try:
+                    date = datetime.fromisoformat(created_at.replace('Z', '+00:00')).strftime('%d.%m.%Y')
+                except:
+                    date = 'Дата не указана'
+                
+                message_text += f"{status_emoji} Заказ #{order_id}\n"
+                message_text += f"💰 Сумма: {total_amount} ₽\n"
+                message_text += f"📅 Дата: {date}\n"
+                message_text += f"📍 Адрес: {delivery_address}\n"
+                message_text += f"📊 Статус: {status_text}\n\n"
+            
+            message_text += '💡 Для детальной информации используйте: /order <номер>'
+            bot.send_message(chat_id, message_text)
+            
+        else:
+            bot.send_message(chat_id, f'❌ Ошибка получения заказов (статус: {response.status_code})')
+            
+    except requests.exceptions.RequestException as e:
         print(f"❌ Ошибка при получении заказов: {e}")
-        bot.send_message(chat_id, 'Произошла ошибка при получении заказов.')
-    
-    finally:
-        conn.close()
+        bot.send_message(chat_id, 'Произошла ошибка при получении заказов. Попробуйте позже.')
+    except Exception as e:
+        print(f"❌ Неожиданная ошибка: {e}")
+        bot.send_message(chat_id, 'Произошла неожиданная ошибка.')
 
 @bot.message_handler(commands=['order'])
 def order_detail_command(message):
@@ -180,52 +169,57 @@ def order_detail_command(message):
         bot.send_message(chat_id, 'Номер заказа должен быть числом')
         return
     
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
     try:
-        # Получаем детали заказа
-        cursor.execute('''
-            SELECT o.*, GROUP_CONCAT(oi.quantity || 'x ' || p.name) as items
-            FROM orders o
-            LEFT JOIN order_items oi ON o.id = oi.order_id
-            LEFT JOIN products p ON oi.product_id = p.id
-            JOIN telegram_orders t_orders ON o.id = t_orders.order_id
-            WHERE o.id = ? AND t_orders.telegram_id = ?
-            GROUP BY o.id
-        ''', (order_id, user_id))
+        # Получаем детали заказа через API
+        response = requests.get(f"{API_BASE_URL}/orders/{order_id}", timeout=10)
         
-        order = cursor.fetchone()
-        
-        if not order:
-            bot.send_message(chat_id, 'Заказ не найден или у вас нет к нему доступа.')
-            return
-        
-        # Формируем сообщение с деталями заказа
-        status_emoji = get_status_emoji(order[6])  # status
-        status_text = get_status_text(order[6])
-        date = datetime.fromisoformat(order[8]).strftime('%d.%m.%Y %H:%M')  # created_at
-        
-        message_text = f"{status_emoji} Заказ #{order[0]}\n\n"
-        message_text += f"📅 Дата: {date}\n"
-        message_text += f"💰 Сумма: {order[5]} ₽\n"  # total_amount
-        message_text += f"📍 Адрес: {order[4] or 'Не указан'}\n"  # delivery_address
-        message_text += f"📱 Телефон: {order[3] or 'Не указан'}\n"  # customer_phone
-        message_text += f"📊 Статус: {status_text}\n\n"
-        
-        if order[-1]:  # items
-            message_text += f"🛒 Товары:\n{order[-1]}\n\n"
-        
-        message_text += f"📝 Комментарий: {order[7] or 'Нет комментария'}"  # notes
-        
-        bot.send_message(chat_id, message_text)
-        
-    except Exception as e:
+        if response.status_code == 200:
+            order = response.json()
+            
+            # Формируем сообщение с деталями заказа
+            status_emoji = get_status_emoji(order.get('status', 'pending'))
+            status_text = get_status_text(order.get('status', 'pending'))
+            
+            # Форматируем дату
+            try:
+                created_at = order.get('created_at', '')
+                date = datetime.fromisoformat(created_at.replace('Z', '+00:00')).strftime('%d.%m.%Y %H:%M')
+            except:
+                date = 'Дата не указана'
+            
+            message_text = f"{status_emoji} Заказ #{order.get('id', 'N/A')}\n\n"
+            message_text += f"📅 Дата: {date}\n"
+            message_text += f"💰 Сумма: {order.get('total_amount', 0)} ₽\n"
+            message_text += f"📍 Адрес: {order.get('delivery_address', 'Не указан')}\n"
+            message_text += f"📱 Телефон: {order.get('customer_phone', 'Не указан')}\n"
+            message_text += f"📊 Статус: {status_text}\n\n"
+            
+            # Добавляем товары если есть
+            items = order.get('items', [])
+            if items:
+                message_text += "🛒 Товары:\n"
+                for item in items:
+                    if isinstance(item, dict):
+                        message_text += f"• {item.get('quantity', 1)}x {item.get('name', 'Товар')} - {item.get('price', 0)} ₽\n"
+                    else:
+                        message_text += f"• {item}\n"
+                message_text += "\n"
+            
+            message_text += f"📝 Комментарий: {order.get('notes', 'Нет комментария')}"
+            
+            bot.send_message(chat_id, message_text)
+            
+        elif response.status_code == 404:
+            bot.send_message(chat_id, 'Заказ не найден.')
+        else:
+            bot.send_message(chat_id, f'❌ Ошибка получения заказа (статус: {response.status_code})')
+            
+    except requests.exceptions.RequestException as e:
         print(f"❌ Ошибка при получении заказа: {e}")
-        bot.send_message(chat_id, 'Произошла ошибка при получении заказа.')
-    
-    finally:
-        conn.close()
+        bot.send_message(chat_id, 'Произошла ошибка при получении заказа. Попробуйте позже.')
+    except Exception as e:
+        print(f"❌ Неожиданная ошибка: {e}")
+        bot.send_message(chat_id, 'Произошла неожиданная ошибка.')
 
 @bot.message_handler(commands=['help'])
 def help_command(message):
@@ -277,6 +271,55 @@ def test_command(message):
     except Exception as e:
         bot.send_message(chat_id, f"❌ Ошибка отправки теста: {e}")
         print(f"❌ Ошибка тестовой команды: {e}")
+
+@bot.message_handler(commands=['dbinfo'])
+def dbinfo_command(message):
+    """Информация о базе данных"""
+    chat_id = message.chat.id
+    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        # Получаем список таблиц
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cursor.fetchall()
+        
+        # Получаем количество записей в каждой таблице
+        table_info = []
+        for table in tables:
+            table_name = table[0]
+            cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+            count = cursor.fetchone()[0]
+            table_info.append(f"• {table_name}: {count} записей")
+        
+        # Получаем информацию о пользователе
+        user_id = message.from_user.id
+        cursor.execute("SELECT COUNT(*) FROM telegram_users WHERE telegram_id = ?", (user_id,))
+        user_count = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM telegram_orders WHERE telegram_id = ?", (user_id,))
+        orders_count = cursor.fetchone()[0]
+        
+        message_text = f"""
+🗄️ Информация о базе данных:
+
+📋 Таблицы:
+{chr(10).join(table_info)}
+
+👤 Ваши данные:
+• Зарегистрирован: {'Да' if user_count > 0 else 'Нет'}
+• Связанных заказов: {orders_count}
+
+💡 Используйте /test для проверки уведомлений
+        """
+        
+        bot.send_message(chat_id, message_text.strip())
+        conn.close()
+        
+    except Exception as e:
+        bot.send_message(chat_id, f"❌ Ошибка получения информации о БД: {e}")
+        print(f"❌ Ошибка команды dbinfo: {e}")
 
 @bot.message_handler(func=lambda message: True)
 def handle_text_message(message):
