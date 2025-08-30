@@ -20,6 +20,7 @@ const TELEGRAM_ADMIN_GROUP_ID = '-1002728692510';
 async function sendTelegramNotification(orderData: any): Promise<void> {
   try {
     console.log('🤖 Отправляем уведомление в Telegram о заказе:', orderData.orderNumber);
+    console.log('📋 Данные заказа:', JSON.stringify(orderData, null, 2));
     
     // Формируем список товаров
     let itemsText = "";
@@ -65,6 +66,11 @@ ${itemsText}
 ⏰ Время заказа: ${currentTime} время бишкек
     `.trim();
     
+    console.log('📤 Отправляем запрос к Telegram API...');
+    console.log('🔑 Токен:', TELEGRAM_BOT_TOKEN.substring(0, 20) + '...');
+    console.log('👥 ID группы:', TELEGRAM_ADMIN_GROUP_ID);
+    console.log('💬 Сообщение:', message.substring(0, 100) + '...');
+    
     // Отправляем через Telegram Bot API
     const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
@@ -78,11 +84,16 @@ ${itemsText}
       })
     });
     
+    console.log('📡 Ответ от Telegram API:', response.status, response.statusText);
+    
     if (!response.ok) {
       const errorData = await response.json() as any;
+      console.error('❌ Telegram API error:', errorData);
       throw new Error(`Telegram API error: ${errorData.description || 'Unknown error'}`);
     }
     
+    const responseData = await response.json();
+    console.log('✅ Ответ Telegram API:', responseData);
     console.log('✅ Уведомление о заказе отправлено в Telegram успешно');
     
   } catch (error) {
@@ -921,8 +932,10 @@ app.post('/api/orders/guest', (req: any, res) => {
           }
 
           if (itemsAdded === totalItems) {
+            console.log('📦 Все товары добавлены, отправляем уведомление в Telegram...');
+            
             // Отправляем уведомление в Telegram через Bot API
-            sendTelegramNotification({
+            const orderData = {
               id: orderId,
               orderNumber,
               customerName: customer.name,
@@ -932,7 +945,13 @@ app.post('/api/orders/guest', (req: any, res) => {
               status: 'pending',
               createdAt: new Date().toISOString(),
               items: items
-            } as any).catch(console.error);
+            };
+            
+            console.log('📤 Данные для уведомления:', JSON.stringify(orderData, null, 2));
+            
+            sendTelegramNotification(orderData).catch((error) => {
+              console.error('❌ Ошибка отправки уведомления:', error);
+            });
 
             res.json({
               success: true,
