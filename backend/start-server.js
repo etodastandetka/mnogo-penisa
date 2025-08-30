@@ -7,7 +7,7 @@ console.log('🔒 Порт: 3001 (HTTPS)');
 console.log('🌐 URL: https://147.45.141.113:3001');
 
 // Запускаем сервер
-const server = spawn('node', ['api/index.js'], {
+const server = spawn('node', ['dist/api/index.js'], {
   cwd: __dirname,
   stdio: 'inherit',
   env: { ...process.env, NODE_ENV: 'production' }

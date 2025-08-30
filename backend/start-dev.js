@@ -7,7 +7,7 @@ console.log('🔒 Порт: 3444');
 console.log('🌐 URL: https://147.45.141.113:3444');
 
 // Запускаем сервер напрямую
-const server = spawn('node', ['start-server.js'], {
+const server = spawn('node', ['dist/api/index.js'], {
   cwd: __dirname,
   stdio: 'inherit',
   env: { ...process.env, NODE_ENV: 'development' }
