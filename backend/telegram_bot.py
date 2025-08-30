@@ -76,11 +76,9 @@ def start_command(message):
 
 👋 Привет, {user.first_name}!
 
-📋 Доступные команды:
-/order <номер> - Информация о заказе
-/help - Помощь
+💡 Напишите номер заказа, чтобы узнать его статус и детали.
 
-💡 Чтобы узнать статус заказа, напишите его номер или используйте команду /order <номер>
+📋 Пример: просто напишите "123" или "456"
     """
     
     bot.send_message(chat_id, welcome_message.strip())
@@ -177,16 +175,16 @@ def help_command(message):
 
 📋 Основные команды:
 /start - Начать работу с ботом
-/order <номер> - Информация о заказе
 /help - Показать эту справку
 /test - Тест уведомления в админ-группу
+/status - Тест уведомления об изменении статуса
 
-💡 Примеры использования:
-• /order 123 - посмотреть заказ №123
-• /test - проверить уведомления
+💡 Как использовать:
+• Просто напишите номер заказа (например: "123")
+• Бот покажет детали и статус заказа
+• При изменении статуса вы получите уведомление
 
 🌐 Сайт: https://mnogo-rolly.online
-📞 Поддержка: @admin_username
     """
     
     bot.send_message(chat_id, help_text.strip())
@@ -217,6 +215,19 @@ def test_command(message):
         bot.send_message(chat_id, f"❌ Ошибка отправки теста: {e}")
         print(f"❌ Ошибка тестовой команды: {e}")
 
+@bot.message_handler(commands=['status'])
+def test_status_change(message):
+    """Тестовая команда для проверки уведомлений об изменении статуса"""
+    chat_id = message.chat.id
+    
+    try:
+        # Тестируем уведомление об изменении статуса
+        notify_client_status_change(123, 'preparing', '+996700123456')
+        bot.send_message(chat_id, "✅ Тестовое уведомление об изменении статуса отправлено!")
+    except Exception as e:
+        bot.send_message(chat_id, f"❌ Ошибка отправки теста статуса: {e}")
+        print(f"❌ Ошибка тестовой команды статуса: {e}")
+
 
 
 
@@ -239,6 +250,7 @@ def handle_text_message(message):
                 'Content-Type': 'application/json'
             }
             
+            print(f"🔍 Пользователь {user_id} запросил заказ #{order_id}")
             response = requests.get(f"{API_BASE_URL}/admin/orders/{order_id}", headers=headers, timeout=10)
             
             if response.status_code == 200:
@@ -255,17 +267,17 @@ def handle_text_message(message):
                 except:
                     date = 'Дата не указана'
                 
-                message_text = f"{status_emoji} Заказ #{order.get('id', 'N/A')}\n\n"
-                message_text += f"📅 Дата: {date}\n"
-                message_text += f"💰 Сумма: {order.get('total_amount', 0)} сом\n"
-                message_text += f"📍 Адрес: {order.get('delivery_address', 'Не указан')}\n"
-                message_text += f"📱 Телефон: {order.get('customer_phone', 'Не указан')}\n"
-                message_text += f"📊 Статус: {status_text}\n\n"
+                message_text = f"{status_emoji} <b>Заказ #{order.get('id', 'N/A')}</b>\n\n"
+                message_text += f"📅 <b>Дата:</b> {date}\n"
+                message_text += f"💰 <b>Сумма:</b> {order.get('total_amount', 0)} сом\n"
+                message_text += f"📍 <b>Адрес:</b> {order.get('delivery_address', 'Не указан')}\n"
+                message_text += f"📱 <b>Телефон:</b> {order.get('customer_phone', 'Не указан')}\n"
+                message_text += f"📊 <b>Статус:</b> {status_text}\n\n"
                 
                 # Добавляем товары если есть
                 items = order.get('items', [])
                 if items:
-                    message_text += "🛒 Товары:\n"
+                    message_text += "🛒 <b>Товары:</b>\n"
                     for item in items:
                         if isinstance(item, dict):
                             message_text += f"• {item.get('quantity', 1)}x {item.get('name', 'Товар')} - {item.get('price', 0)} сом\n"
@@ -273,20 +285,56 @@ def handle_text_message(message):
                             message_text += f"• {item}\n"
                     message_text += "\n"
                 
-                message_text += f"📝 Комментарий: {order.get('notes', 'Нет комментария')}"
+                message_text += f"📝 <b>Комментарий:</b> {order.get('notes', 'Нет комментария')}\n\n"
+                message_text += "💡 <i>При изменении статуса заказа вы получите уведомление!</i>"
                 
-                bot.send_message(chat_id, message_text)
+                bot.send_message(chat_id, message_text, parse_mode='HTML')
                 
             elif response.status_code == 404:
-                bot.send_message(chat_id, 'Заказ не найден.')
+                bot.send_message(chat_id, '❌ Заказ не найден. Проверьте номер заказа.')
             else:
                 bot.send_message(chat_id, f'❌ Ошибка получения заказа (статус: {response.status_code})')
                 
         except Exception as e:
             print(f"❌ Ошибка при получении заказа: {e}")
-            bot.send_message(chat_id, 'Произошла ошибка при получении заказа.')
+            bot.send_message(chat_id, '❌ Произошла ошибка при получении заказа. Попробуйте позже.')
     else:
-        bot.send_message(chat_id, 'Отправьте номер заказа или используйте команду /help для справки.')
+        bot.send_message(chat_id, '💡 Напишите номер заказа (например: "123") или используйте /help для справки.')
+
+def notify_client_status_change(order_id, new_status, customer_phone):
+    """Уведомление клиента об изменении статуса заказа"""
+    try:
+        # Получаем детали заказа для уведомления
+        headers = {
+            'Authorization': f'Bearer {ADMIN_TOKEN}',
+            'Content-Type': 'application/json'
+        }
+        
+        response = requests.get(f"{API_BASE_URL}/admin/orders/{order_id}", headers=headers, timeout=10)
+        if response.status_code != 200:
+            print(f"❌ Не удалось получить детали заказа {order_id} для уведомления")
+            return
+        
+        order = response.json()
+        status_emoji = get_status_emoji(new_status)
+        status_text = get_status_text(new_status)
+        
+        # Формируем сообщение для клиента
+        message = f"""
+🔄 <b>Статус заказа изменен!</b>
+
+📋 <b>Заказ #{order_id}</b>
+{status_emoji} <b>Новый статус:</b> {status_text}
+
+💡 <i>Для получения полной информации о заказе напишите его номер: {order_id}</i>
+        """
+        
+        # Отправляем уведомление в группу (клиент увидит там)
+        bot.send_message(ADMIN_GROUP_ID, message.strip(), parse_mode='HTML')
+        print(f"✅ Уведомление об изменении статуса заказа #{order_id} отправлено")
+        
+    except Exception as e:
+        print(f"❌ Ошибка отправки уведомления клиенту: {e}")
 
 def notify_admins_new_order(order_data):
     """Уведомление админов о новом заказе"""
