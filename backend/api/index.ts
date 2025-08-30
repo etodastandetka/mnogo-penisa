@@ -12,37 +12,37 @@ import fs from 'fs';
 import https from 'https';
 import { sendNewOrderNotification, sendStatusUpdateNotification, getBotInfo, registerTelegramUser, getUserOrders, getUserOrder } from '../src/telegramBot';
 
-// Telegram Bot конфигурация
-const TELEGRAM_BOT_TOKEN = '8336008623:AAHWO3vRgVceBeJvjMVaPBdZMkNTBB-MHCc';
-const TELEGRAM_ADMIN_GROUP_ID = '-1002728692510';
-
-// ПРИНУДИТЕЛЬНЫЙ ТЕСТ - отправляем сообщение при запуске сервера
-console.log('🚀 СЕРВЕР ЗАПУСКАЕТСЯ! ТЕСТИРУЕМ TELEGRAM API...');
-console.log('🔑 Токен бота:', TELEGRAM_BOT_TOKEN);
-console.log('👥 ID группы:', TELEGRAM_ADMIN_GROUP_ID);
-
-// ПРИНУДИТЕЛЬНО ОТПРАВЛЯЕМ ТЕСТОВОЕ СООБЩЕНИЕ ПРИ ЗАПУСКЕ!
-setTimeout(() => {
-  console.log('🧪 ОТПРАВЛЯЕМ ТЕСТОВОЕ СООБЩЕНИЕ В TELEGRAM...');
-  sendTelegramNotification({
-    orderNumber: 'TEST-001',
-    customerName: 'ТЕСТОВЫЙ КЛИЕНТ',
-    customerPhone: '+996700123456',
-    deliveryAddress: 'ТЕСТОВЫЙ АДРЕС',
-    totalAmount: 1000,
-    items: [{ product: { name: 'ТЕСТОВЫЙ ТОВАР', price: 1000 }, quantity: 1 }]
-  }).then(() => {
-    console.log('✅ ТЕСТОВОЕ СООБЩЕНИЕ ОТПРАВЛЕНО УСПЕШНО!');
-  }).catch((error) => {
-    console.error('❌ ОШИБКА ОТПРАВКИ ТЕСТОВОГО СООБЩЕНИЯ:', error);
-  });
-}, 5000); // Через 5 секунд после запуска
+// Telegram Bot конфигурация - теперь настройки берутся из базы данных
+console.log('🚀 СЕРВЕР ЗАПУСКАЕТСЯ! Telegram настройки загружаются из базы данных...');
 
 // Функция для отправки уведомлений через Telegram Bot API
 async function sendTelegramNotification(orderData: any): Promise<void> {
   try {
     console.log('🤖 Отправляем уведомление в Telegram о заказе:', orderData.orderNumber);
     console.log('📋 Данные заказа:', JSON.stringify(orderData, null, 2));
+
+    // Получаем настройки Telegram из базы данных
+    const telegramSettings = await new Promise((resolve, reject) => {
+      db.get('SELECT enabled, bot_token, chat_id FROM telegram_settings ORDER BY id DESC LIMIT 1', (err: any, result: any) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(result);
+      });
+    });
+
+    if (!telegramSettings || !(telegramSettings as any).enabled) {
+      console.log('⚠️ Telegram уведомления отключены или настройки не найдены');
+      return;
+    }
+
+    const { bot_token, chat_id } = telegramSettings as any;
+    
+    if (!bot_token || !chat_id) {
+      console.log('⚠️ Токен бота или ID чата не настроены');
+      return;
+    }
     
     // Формируем список товаров
     let itemsText = "";
@@ -89,15 +89,15 @@ ${itemsText}
     `.trim();
     
     console.log('📤 Отправляем запрос к Telegram API...');
-    console.log('🔑 Токен:', TELEGRAM_BOT_TOKEN.substring(0, 20) + '...');
-    console.log('👥 ID группы:', TELEGRAM_ADMIN_GROUP_ID);
+    console.log('🔑 Токен:', bot_token.substring(0, 20) + '...');
+    console.log('👥 ID группы:', chat_id);
     console.log('💬 Сообщение:', message.substring(0, 100) + '...');
     
     // Отправляем через Telegram Bot API используя https модуль
     const https = require('https');
     
     const postData = JSON.stringify({
-      chat_id: TELEGRAM_ADMIN_GROUP_ID,
+      chat_id: chat_id,
       text: message,
       parse_mode: 'HTML'
     });
@@ -105,7 +105,7 @@ ${itemsText}
     const options = {
       hostname: 'api.telegram.org',
       port: 443,
-      path: `/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      path: `/bot${bot_token}/sendMessage`,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -456,6 +456,28 @@ const initDatabase = () => {
       if (result.count === 0) {
         db.run(`INSERT INTO bank_settings (bank_name, bank_link) VALUES (?, ?)`, 
           ['MBank', 'https://app.mbank.kg/qr#00020101021132440012c2c.mbank.kg01020210129965000867861302125204999953034175908YBRAI%20S.630462d0']);
+      }
+    });
+
+    // Таблица Telegram настроек
+    db.run(`CREATE TABLE IF NOT EXISTS telegram_settings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      enabled INTEGER DEFAULT 0,
+      bot_token TEXT,
+      chat_id TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Добавляем начальные Telegram настройки если таблица пустая
+    db.get('SELECT COUNT(*) as count FROM telegram_settings', (err: any, result: any) => {
+      if (err) {
+        return;
+      }
+      
+      if (result.count === 0) {
+        db.run(`INSERT INTO telegram_settings (enabled, bot_token, chat_id) VALUES (?, ?, ?)`, 
+          [0, '', '']);
       }
     });
 
@@ -2344,6 +2366,54 @@ app.post('/api/bank-settings', (req, res) => {
     res.json({
       success: true,
       message: 'Настройки сохранены',
+      id: this.lastID
+    });
+  });
+});
+
+// API для Telegram настроек
+app.get('/api/telegram-settings', (req, res) => {
+  db.get('SELECT enabled, bot_token, chat_id FROM telegram_settings ORDER BY id DESC LIMIT 1', (err, result: any) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: 'Ошибка загрузки настроек'
+      });
+    }
+    
+    res.json({
+      success: true,
+      enabled: result ? result.enabled === 1 : false,
+      bot_token: result ? result.bot_token : '',
+      chat_id: result ? result.chat_id : ''
+    });
+  });
+});
+
+app.post('/api/telegram-settings', (req, res) => {
+  const { enabled, bot_token, chat_id } = req.body;
+  
+  if (enabled === undefined || !bot_token || !chat_id) {
+    return res.status(400).json({
+      success: false,
+      message: 'Все поля обязательны'
+    });
+  }
+  
+  db.run(`
+    INSERT INTO telegram_settings (enabled, bot_token, chat_id, updated_at) 
+    VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+  `, [enabled ? 1 : 0, bot_token, chat_id], function(err) {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: 'Ошибка сохранения'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Telegram настройки сохранены',
       id: this.lastID
     });
   });
