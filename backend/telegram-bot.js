@@ -2,10 +2,10 @@ const TelegramBot = require('node-telegram-bot-api');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// Конфигурация бота
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
-const ADMIN_GROUP_ID = process.env.TELEGRAM_ADMIN_GROUP_ID || 'YOUR_ADMIN_GROUP_ID_HERE';
-const WEBHOOK_URL = process.env.TELEGRAM_WEBHOOK_URL || 'https://your-domain.com/telegram-webhook';
+// Конфигурация бота (захардкожено)
+const BOT_TOKEN = '8336008623:AAHWO3vRgVceBeJvjMVaPBdZMkNTBB-MHCc';
+const ADMIN_GROUP_ID = '-1002728692510';
+const WEBHOOK_URL = 'https://mnogo-rolly.kg/telegram-webhook';
 
 // Инициализация бота
 const bot = new TelegramBot(BOT_TOKEN, { polling: false });

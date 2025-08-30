@@ -5,9 +5,9 @@ import path from 'path';
 
 config();
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_ADMIN_GROUP_ID = process.env.TELEGRAM_ADMIN_GROUP_ID;
-const TELEGRAM_WEBHOOK_URL = process.env.TELEGRAM_WEBHOOK_URL;
+const TELEGRAM_BOT_TOKEN = '8336008623:AAHWO3vRgVceBeJvjMVaPBdZMkNTBB-MHCc';
+const TELEGRAM_ADMIN_GROUP_ID = '-1002728692510';
+const TELEGRAM_WEBHOOK_URL = 'https://mnogo-rolly.kg/telegram-webhook';
 
 let bot: TelegramBot | null = null;
 
