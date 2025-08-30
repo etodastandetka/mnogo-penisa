@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { bot } = require('./src/telegramBot');
+const { bot } = require('./telegram-bot');
 
 console.log('🤖 Запуск Telegram бота...');
 
