@@ -72,24 +72,32 @@ interface Order {
 
 export async function sendNewOrderNotification(order: Order): Promise<void> {
   console.log('🤖 Попытка отправить уведомление о заказе:', order.orderNumber);
-  console.log('🤖 Бот инициализирован:', !!bot);
-  console.log('🤖 ID группы админов:', TELEGRAM_ADMIN_GROUP_ID);
   
-  if (!bot || !TELEGRAM_ADMIN_GROUP_ID) {
-    console.log('❌ Бот не инициализирован или ID группы не указан');
-    return;
-  }
-
   try {
+    // Отправляем уведомление через Telegram Bot API
     const message = formatOrderMessage(order);
     console.log('🤖 Отправляем сообщение в группу:', message.substring(0, 100) + '...');
     
-    await bot.sendMessage(TELEGRAM_ADMIN_GROUP_ID, message, {
-      parse_mode: 'HTML',
-      disable_web_page_preview: true
+    // Используем fetch для отправки через Telegram Bot API
+    const telegramResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_ADMIN_GROUP_ID,
+        text: message,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true
+      })
     });
     
-    console.log('✅ Уведомление о заказе отправлено успешно');
+    if (!telegramResponse.ok) {
+      const errorData = await telegramResponse.json();
+      throw new Error(`Telegram API error: ${errorData.description}`);
+    }
+    
+    console.log('✅ Уведомление о заказе отправлено успешно через Telegram API');
     
     // Связываем заказ с пользователем Telegram по телефону
     await linkOrderWithTelegramUser(order.orderNumber, order.customerPhone);
@@ -99,16 +107,29 @@ export async function sendNewOrderNotification(order: Order): Promise<void> {
 }
 
 export async function sendStatusUpdateNotification(order: any, oldStatus: string): Promise<void> {
-  if (!bot || !TELEGRAM_ADMIN_GROUP_ID) {
-    return;
-  }
-
   try {
     const message = formatStatusUpdateMessage(order, oldStatus);
-    await bot.sendMessage(TELEGRAM_ADMIN_GROUP_ID, message, {
-      parse_mode: 'HTML',
-      disable_web_page_preview: true
+    
+    // Используем fetch для отправки через Telegram Bot API
+    const telegramResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_ADMIN_GROUP_ID,
+        text: message,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true
+      })
     });
+    
+    if (!telegramResponse.ok) {
+      const errorData = await telegramResponse.json();
+      throw new Error(`Telegram API error: ${errorData.description}`);
+    }
+    
+    console.log('✅ Уведомление об изменении статуса отправлено успешно через Telegram API');
     
     // Уведомляем клиента об изменении статуса
     await notifyClientAboutStatusChange(order.orderNumber, order.status);
