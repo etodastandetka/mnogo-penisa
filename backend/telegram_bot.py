@@ -22,7 +22,7 @@ API_BASE_URL = 'https://mnogo-rolly.online/api'
 LOCAL_API_URL = 'http://127.0.0.1:3000/api'
 
 # Токен админа (получите через get-admin-token.py)
-ADMIN_TOKEN = 'YOUR_ADMIN_TOKEN_HERE'  # Замените на реальный токен
+ADMIN_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjY3LCJlbWFpbCI6ImFkbWluQG1ub2dvLXJvbGx5LnJ1IiwiaWF0IjoxNzU2NTQ5NDc1LCJleHAiOjE3NTcxNTQyNzV9.6-bsKgZNwFFqzJAVIpNSmGtMt2hSpf2tx2TFejmcfXQ'
 
 def init_database():
     """Инициализация базы данных"""
@@ -71,25 +71,13 @@ def start_command(message):
     chat_id = message.chat.id
     user = message.from_user
     
-    # Сохраняем пользователя в БД
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        INSERT OR IGNORE INTO telegram_users (telegram_id, username, first_name, last_name)
-        VALUES (?, ?, ?, ?)
-    ''', (user.id, user.username, user.first_name, user.last_name))
-    
-    conn.commit()
-    conn.close()
-    
     welcome_message = f"""
 🍕 Добро пожаловать в бот заказов "Много Пениса"!
 
 👋 Привет, {user.first_name}!
 
 📋 Доступные команды:
-/orders - Посмотреть мои заказы
+/orders - Посмотреть все заказы
 /order <номер> - Информация о заказе
 /help - Помощь
 
@@ -252,7 +240,6 @@ def help_command(message):
 /order <номер> - Информация о заказе
 /help - Показать эту справку
 /test - Тест уведомления в админ-группу
-/monitor - Включить мониторинг новых заказов
 
 💡 Примеры использования:
 • /order 123 - посмотреть заказ №123
@@ -291,88 +278,9 @@ def test_command(message):
         bot.send_message(chat_id, f"❌ Ошибка отправки теста: {e}")
         print(f"❌ Ошибка тестовой команды: {e}")
 
-@bot.message_handler(commands=['monitor'])
-def monitor_command(message):
-    """Включение мониторинга новых заказов"""
-    chat_id = message.chat.id
-    
-    try:
-        # Получаем последние заказы для проверки
-        headers = {
-            'Authorization': f'Bearer {ADMIN_TOKEN}',
-            'Content-Type': 'application/json'
-        }
-        
-        response = requests.get(f"{API_BASE_URL}/admin/orders", headers=headers, timeout=10)
-        
-        if response.status_code == 200:
-            orders = response.json()
-            
-            if orders:
-                # Берем самый последний заказ
-                latest_order = orders[0]
-                
-                # Отправляем уведомление о последнем заказе
-                notify_admins_new_order(latest_order)
-                
-                bot.send_message(chat_id, f"✅ Мониторинг активен! Последний заказ #{latest_order.get('id', 'N/A')} отправлен в группу.")
-            else:
-                bot.send_message(chat_id, "📋 Заказов пока нет. Мониторинг будет работать автоматически при появлении новых заказов.")
-        else:
-            bot.send_message(chat_id, f"❌ Ошибка получения заказов (статус: {response.status_code})")
-            
-    except Exception as e:
-        print(f"❌ Ошибка команды мониторинга: {e}")
-        bot.send_message(chat_id, "❌ Произошла ошибка при включении мониторинга.")
 
-@bot.message_handler(commands=['dbinfo'])
-def dbinfo_command(message):
-    """Информация о базе данных"""
-    chat_id = message.chat.id
-    
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        
-        # Получаем список таблиц
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        tables = cursor.fetchall()
-        
-        # Получаем количество записей в каждой таблице
-        table_info = []
-        for table in tables:
-            table_name = table[0]
-            cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
-            count = cursor.fetchone()[0]
-            table_info.append(f"• {table_name}: {count} записей")
-        
-        # Получаем информацию о пользователе
-        user_id = message.from_user.id
-        cursor.execute("SELECT COUNT(*) FROM telegram_users WHERE telegram_id = ?", (user_id,))
-        user_count = cursor.fetchone()[0]
-        
-        cursor.execute("SELECT COUNT(*) FROM telegram_orders WHERE telegram_id = ?", (user_id,))
-        orders_count = cursor.fetchone()[0]
-        
-        message_text = f"""
-🗄️ Информация о базе данных:
 
-📋 Таблицы:
-{chr(10).join(table_info)}
 
-👤 Ваши данные:
-• Зарегистрирован: {'Да' if user_count > 0 else 'Нет'}
-• Связанных заказов: {orders_count}
-
-💡 Используйте /test для проверки уведомлений
-        """
-        
-        bot.send_message(chat_id, message_text.strip())
-        conn.close()
-        
-    except Exception as e:
-        bot.send_message(chat_id, f"❌ Ошибка получения информации о БД: {e}")
-        print(f"❌ Ошибка команды dbinfo: {e}")
 
 @bot.message_handler(func=lambda message: True)
 def handle_text_message(message):
@@ -385,52 +293,59 @@ def handle_text_message(message):
     if text.isdigit():
         order_id = int(text)
         
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        
         try:
-            # Получаем детали заказа
-            cursor.execute('''
-                SELECT o.*, GROUP_CONCAT(oi.quantity || 'x ' || p.name) as items
-                FROM orders o
-                LEFT JOIN order_items oi ON o.id = oi.order_id
-                LEFT JOIN products p ON oi.product_id = p.id
-                JOIN telegram_orders t_orders ON o.id = t_orders.order_id
-                WHERE o.id = ? AND t_orders.telegram_id = ?
-                GROUP BY o.id
-            ''', (order_id, user_id))
+            # Получаем детали заказа через API с токеном админа
+            headers = {
+                'Authorization': f'Bearer {ADMIN_TOKEN}',
+                'Content-Type': 'application/json'
+            }
             
-            order = cursor.fetchone()
+            response = requests.get(f"{API_BASE_URL}/admin/orders/{order_id}", headers=headers, timeout=10)
             
-            if not order:
-                bot.send_message(chat_id, 'Заказ не найден или у вас нет к нему доступа.')
-                return
-            
-            # Формируем сообщение с деталями заказа
-            status_emoji = get_status_emoji(order[6])  # status
-            status_text = get_status_text(order[6])
-            date = datetime.fromisoformat(order[8]).strftime('%d.%m.%Y %H:%M')  # created_at
-            
-            message_text = f"{status_emoji} Заказ #{order[0]}\n\n"
-            message_text += f"📅 Дата: {date}\n"
-            message_text += f"💰 Сумма: {order[5]} ₽\n"  # total_amount
-            message_text += f"📍 Адрес: {order[4] or 'Не указан'}\n"  # delivery_address
-            message_text += f"📱 Телефон: {order[3] or 'Не указан'}\n"  # customer_phone
-            message_text += f"📊 Статус: {status_text}\n\n"
-            
-            if order[-1]:  # items
-                message_text += f"🛒 Товары:\n{order[-1]}\n\n"
-            
-            message_text += f"📝 Комментарий: {order[7] or 'Нет комментария'}"  # notes
-            
-            bot.send_message(chat_id, message_text)
-            
+            if response.status_code == 200:
+                order = response.json()
+                
+                # Формируем сообщение с деталями заказа
+                status_emoji = get_status_emoji(order.get('status', 'pending'))
+                status_text = get_status_text(order.get('status', 'pending'))
+                
+                # Форматируем дату
+                try:
+                    created_at = order.get('created_at', '')
+                    date = datetime.fromisoformat(created_at.replace('Z', '+00:00')).strftime('%d.%m.%Y %H:%M')
+                except:
+                    date = 'Дата не указана'
+                
+                message_text = f"{status_emoji} Заказ #{order.get('id', 'N/A')}\n\n"
+                message_text += f"📅 Дата: {date}\n"
+                message_text += f"💰 Сумма: {order.get('total_amount', 0)} сом\n"
+                message_text += f"📍 Адрес: {order.get('delivery_address', 'Не указан')}\n"
+                message_text += f"📱 Телефон: {order.get('customer_phone', 'Не указан')}\n"
+                message_text += f"📊 Статус: {status_text}\n\n"
+                
+                # Добавляем товары если есть
+                items = order.get('items', [])
+                if items:
+                    message_text += "🛒 Товары:\n"
+                    for item in items:
+                        if isinstance(item, dict):
+                            message_text += f"• {item.get('quantity', 1)}x {item.get('name', 'Товар')} - {item.get('price', 0)} сом\n"
+                        else:
+                            message_text += f"• {item}\n"
+                    message_text += "\n"
+                
+                message_text += f"📝 Комментарий: {order.get('notes', 'Нет комментария')}"
+                
+                bot.send_message(chat_id, message_text)
+                
+            elif response.status_code == 404:
+                bot.send_message(chat_id, 'Заказ не найден.')
+            else:
+                bot.send_message(chat_id, f'❌ Ошибка получения заказа (статус: {response.status_code})')
+                
         except Exception as e:
             print(f"❌ Ошибка при получении заказа: {e}")
             bot.send_message(chat_id, 'Произошла ошибка при получении заказа.')
-        
-        finally:
-            conn.close()
     else:
         bot.send_message(chat_id, 'Отправьте номер заказа или используйте команду /help для справки.')
 
@@ -482,55 +397,7 @@ def notify_admins_new_order(order_data):
         import traceback
         traceback.print_exc()
 
-def notify_client_status_change(order_id, new_status, client_telegram_id):
-    """Уведомление клиента об изменении статуса заказа"""
-    try:
-        status_emoji = get_status_emoji(new_status)
-        status_text = get_status_text(new_status)
-        
-        message = f"""
-{status_emoji} Статус заказа #{order_id} изменен!
 
-📊 Новый статус: {status_text}
-
-🔄 Для обновления информации используйте: /order {order_id}
-        """
-        
-        bot.send_message(client_telegram_id, message.strip())
-        print(f"✅ Уведомление об изменении статуса заказа #{order_id} отправлено клиенту {client_telegram_id}")
-        
-    except Exception as e:
-        print(f"❌ Ошибка отправки уведомления клиенту: {e}")
-
-def link_order_with_telegram_user(order_id, phone):
-    """Связывание заказа с пользователем Telegram по телефону"""
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        
-        # Ищем пользователя по телефону
-        cursor.execute('SELECT telegram_id FROM telegram_users WHERE phone = ?', (phone,))
-        user = cursor.fetchone()
-        
-        if user:
-            telegram_id = user[0]
-            
-            # Связываем заказ с пользователем
-            cursor.execute('''
-                INSERT OR IGNORE INTO telegram_orders (telegram_id, order_id)
-                VALUES (?, ?)
-            ''', (telegram_id, order_id))
-            
-            conn.commit()
-            print(f"✅ Заказ {order_id} связан с пользователем Telegram {telegram_id}")
-            
-            # Уведомляем клиента о новом заказе
-            notify_client_status_change(order_id, 'pending', telegram_id)
-        
-        conn.close()
-        
-    except Exception as e:
-        print(f"❌ Ошибка связывания заказа: {e}")
 
 def start_bot():
     """Запуск бота"""
