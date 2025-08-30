@@ -77,7 +77,6 @@ def start_command(message):
 👋 Привет, {user.first_name}!
 
 📋 Доступные команды:
-/orders - Посмотреть все заказы
 /order <номер> - Информация о заказе
 /help - Помощь
 
@@ -87,65 +86,7 @@ def start_command(message):
     bot.send_message(chat_id, welcome_message.strip())
     print(f"👤 Пользователь {user.id} ({user.username}) начал работу с ботом")
 
-@bot.message_handler(commands=['orders'])
-def orders_command(message):
-    """Обработка команды /orders"""
-    chat_id = message.chat.id
-    user_id = message.from_user.id
-    
-    try:
-        # Получаем заказы через API с токеном админа
-        headers = {
-            'Authorization': f'Bearer {ADMIN_TOKEN}',
-            'Content-Type': 'application/json'
-        }
-        
-        response = requests.get(f"{API_BASE_URL}/admin/orders", headers=headers, timeout=10)
-        
-        if response.status_code == 200:
-            orders = response.json()
-            
-            if not orders or len(orders) == 0:
-                bot.send_message(chat_id, 'У вас пока нет заказов. Сделайте первый заказ на сайте! 🛒')
-                return
-            
-            message_text = '📋 Ваши последние заказы:\n\n'
-            
-            # Показываем последние 5 заказов
-            for order in orders[:5]:
-                order_id = order.get('id', 'N/A')
-                status = order.get('status', 'pending')
-                total_amount = order.get('total_amount', 0)
-                created_at = order.get('created_at', '')
-                delivery_address = order.get('delivery_address', 'Не указан')
-                
-                status_emoji = get_status_emoji(status)
-                status_text = get_status_text(status)
-                
-                # Форматируем дату
-                try:
-                    date = datetime.fromisoformat(created_at.replace('Z', '+00:00')).strftime('%d.%m.%Y')
-                except:
-                    date = 'Дата не указана'
-                
-                message_text += f"{status_emoji} Заказ #{order_id}\n"
-                message_text += f"💰 Сумма: {total_amount} ₽\n"
-                message_text += f"📅 Дата: {date}\n"
-                message_text += f"📍 Адрес: {delivery_address}\n"
-                message_text += f"📊 Статус: {status_text}\n\n"
-            
-            message_text += '💡 Для детальной информации используйте: /order <номер>'
-            bot.send_message(chat_id, message_text)
-            
-        else:
-            bot.send_message(chat_id, f'❌ Ошибка получения заказов (статус: {response.status_code})')
-            
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Ошибка при получении заказов: {e}")
-        bot.send_message(chat_id, 'Произошла ошибка при получении заказов. Попробуйте позже.')
-    except Exception as e:
-        print(f"❌ Неожиданная ошибка: {e}")
-        bot.send_message(chat_id, 'Произошла неожиданная ошибка.')
+
 
 @bot.message_handler(commands=['order'])
 def order_detail_command(message):
@@ -236,14 +177,12 @@ def help_command(message):
 
 📋 Основные команды:
 /start - Начать работу с ботом
-/orders - Посмотреть все заказы
 /order <номер> - Информация о заказе
 /help - Показать эту справку
 /test - Тест уведомления в админ-группу
 
 💡 Примеры использования:
 • /order 123 - посмотреть заказ №123
-• /orders - список всех заказов
 • /test - проверить уведомления
 
 🌐 Сайт: https://mnogo-rolly.online
