@@ -14,13 +14,15 @@ let bot: TelegramBot | null = null;
 if (TELEGRAM_BOT_TOKEN) {
   bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
   
-  // Установка webhook если указан URL
-  if (TELEGRAM_WEBHOOK_URL) {
+  // Установка webhook если указан URL и мы не в режиме разработки
+  if (TELEGRAM_WEBHOOK_URL && process.env.NODE_ENV === 'production') {
     bot.setWebHook(TELEGRAM_WEBHOOK_URL).then(() => {
       console.log('✅ Telegram webhook установлен:', TELEGRAM_WEBHOOK_URL);
     }).catch(error => {
       console.error('❌ Ошибка установки webhook:', error);
     });
+  } else if (process.env.NODE_ENV === 'development') {
+    console.log('🔄 Режим разработки: webhook не устанавливается');
   }
 }
 
