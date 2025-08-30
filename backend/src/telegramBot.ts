@@ -71,21 +71,30 @@ interface Order {
 }
 
 export async function sendNewOrderNotification(order: Order): Promise<void> {
+  console.log('🤖 Попытка отправить уведомление о заказе:', order.orderNumber);
+  console.log('🤖 Бот инициализирован:', !!bot);
+  console.log('🤖 ID группы админов:', TELEGRAM_ADMIN_GROUP_ID);
+  
   if (!bot || !TELEGRAM_ADMIN_GROUP_ID) {
+    console.log('❌ Бот не инициализирован или ID группы не указан');
     return;
   }
 
   try {
     const message = formatOrderMessage(order);
+    console.log('🤖 Отправляем сообщение в группу:', message.substring(0, 100) + '...');
+    
     await bot.sendMessage(TELEGRAM_ADMIN_GROUP_ID, message, {
       parse_mode: 'HTML',
       disable_web_page_preview: true
     });
     
+    console.log('✅ Уведомление о заказе отправлено успешно');
+    
     // Связываем заказ с пользователем Telegram по телефону
     await linkOrderWithTelegramUser(order.orderNumber, order.customerPhone);
   } catch (error) {
-    console.error('Ошибка отправки уведомления о новом заказе:', error);
+    console.error('❌ Ошибка отправки уведомления о новом заказе:', error);
   }
 }
 
