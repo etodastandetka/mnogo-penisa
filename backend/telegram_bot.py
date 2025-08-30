@@ -126,8 +126,8 @@ def orders_command(message):
         cursor.execute('''
             SELECT o.id, o.status, o.total_amount, o.created_at, o.delivery_address
             FROM orders o
-            JOIN telegram_orders to ON o.id = to.order_id
-            WHERE to.telegram_id = ?
+            JOIN telegram_orders t_orders ON o.id = t_orders.order_id
+            WHERE t_orders.telegram_id = ?
             ORDER BY o.created_at DESC
             LIMIT 10
         ''', (user_id,))
@@ -190,8 +190,8 @@ def order_detail_command(message):
             FROM orders o
             LEFT JOIN order_items oi ON o.id = oi.order_id
             LEFT JOIN products p ON oi.product_id = p.id
-            JOIN telegram_orders to ON o.id = to.order_id
-            WHERE o.id = ? AND to.telegram_id = ?
+            JOIN telegram_orders t_orders ON o.id = t_orders.order_id
+            WHERE o.id = ? AND t_orders.telegram_id = ?
             GROUP BY o.id
         ''', (order_id, user_id))
         
@@ -240,6 +240,7 @@ def help_command(message):
 /orders - Посмотреть мои заказы
 /order <номер> - Информация о заказе
 /help - Показать эту справку
+/test - Тест уведомления в админ-группу
 
 💡 Примеры использования:
 • /order 123 - посмотреть заказ №123
@@ -250,6 +251,32 @@ def help_command(message):
     """
     
     bot.send_message(chat_id, help_text.strip())
+
+@bot.message_handler(commands=['test'])
+def test_command(message):
+    """Тестовая команда для проверки уведомлений"""
+    chat_id = message.chat.id
+    
+    # Тестовые данные заказа
+    test_order = {
+        'order_number': 'TEST-123',
+        'customer_name': 'Тестовый клиент',
+        'customer_phone': '+79001234567',
+        'delivery_address': 'Тестовый адрес',
+        'total_amount': 1500,
+        'notes': 'Тестовый заказ',
+        'items': [
+            {'name': 'Тестовый ролл', 'quantity': 2, 'price': 750}
+        ]
+    }
+    
+    try:
+        # Отправляем тестовое уведомление в админ-группу
+        notify_admins_new_order(test_order)
+        bot.send_message(chat_id, "✅ Тестовое уведомление отправлено в админ-группу!")
+    except Exception as e:
+        bot.send_message(chat_id, f"❌ Ошибка отправки теста: {e}")
+        print(f"❌ Ошибка тестовой команды: {e}")
 
 @bot.message_handler(func=lambda message: True)
 def handle_text_message(message):
@@ -272,8 +299,8 @@ def handle_text_message(message):
                 FROM orders o
                 LEFT JOIN order_items oi ON o.id = oi.order_id
                 LEFT JOIN products p ON oi.product_id = p.id
-                JOIN telegram_orders to ON o.id = to.order_id
-                WHERE o.id = ? AND to.telegram_id = ?
+                JOIN telegram_orders t_orders ON o.id = t_orders.order_id
+                WHERE o.id = ? AND t_orders.telegram_id = ?
                 GROUP BY o.id
             ''', (order_id, user_id))
             
@@ -314,26 +341,41 @@ def handle_text_message(message):
 def notify_admins_new_order(order_data):
     """Уведомление админов о новом заказе"""
     try:
+        print(f"🤖 Попытка отправить уведомление о заказе: {order_data}")
+        
+        # Формируем список товаров
+        items_text = ""
+        if 'items' in order_data and order_data['items']:
+            for item in order_data['items']:
+                if isinstance(item, dict):
+                    items_text += f"• {item.get('quantity', 1)}x {item.get('name', 'Товар')} - {item.get('price', 0)} ₽\n"
+                else:
+                    items_text += f"• {item}\n"
+        else:
+            items_text = "Товары не указаны"
+        
         message = f"""
-🆕 Новый заказ #{order_data['order_number']}!
+🆕 Новый заказ #{order_data.get('order_number', 'N/A')}!
 
-👤 Клиент: {order_data['customer_name']}
-📱 Телефон: {order_data['customer_phone']}
-📍 Адрес: {order_data['delivery_address']}
-💰 Сумма: {order_data['total_amount']} ₽
+👤 Клиент: {order_data.get('customer_name', 'Не указан')}
+📱 Телефон: {order_data.get('customer_phone', 'Не указан')}
+📍 Адрес: {order_data.get('delivery_address', 'Не указан')}
+💰 Сумма: {order_data.get('total_amount', 0)} ₽
 📝 Комментарий: {order_data.get('notes', 'Нет')}
 
 🛒 Товары:
-{chr(10).join([f"• {item['quantity']}x {item['name']} - {item['price']} ₽" for item in order_data['items']])}
+{items_text}
 
 ⏰ Время: {datetime.now().strftime('%d.%m.%Y %H:%M')}
         """
         
         bot.send_message(ADMIN_GROUP_ID, message.strip())
-        print(f"✅ Уведомление о заказе #{order_data['order_number']} отправлено в админ-группу")
+        print(f"✅ Уведомление о заказе #{order_data.get('order_number', 'N/A')} отправлено в админ-группу")
         
     except Exception as e:
         print(f"❌ Ошибка отправки уведомления админам: {e}")
+        import traceback
+        traceback.print_exc()
 
 def notify_client_status_change(order_id, new_status, client_telegram_id):
     """Уведомление клиента об изменении статуса заказа"""
