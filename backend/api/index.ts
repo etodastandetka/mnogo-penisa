@@ -979,9 +979,13 @@ app.post('/api/orders/guest', (req: any, res) => {
             };
             
             console.log('📤 Данные для уведомления:', JSON.stringify(orderData, null, 2));
+            console.log('🚀 ВЫЗЫВАЕМ ФУНКЦИЮ sendTelegramNotification!');
             
-            sendTelegramNotification(orderData).catch((error) => {
-              console.error('❌ Ошибка отправки уведомления:', error);
+            // Принудительно вызываем функцию
+            sendTelegramNotification(orderData).then(() => {
+              console.log('✅ Функция sendTelegramNotification выполнена успешно!');
+            }).catch((error) => {
+              console.error('❌ Ошибка в sendTelegramNotification:', error);
             });
 
             res.json({
