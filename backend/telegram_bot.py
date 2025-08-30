@@ -12,13 +12,13 @@ import time
 # Конфигурация бота (захардкожено)
 BOT_TOKEN = '8336008623:AAHWO3vRgVceBeJvjMVaPBdZMkNTBB-MHCc'
 ADMIN_GROUP_ID = -1002728692510
-WEBHOOK_URL = 'https://mnogo-rolly.kg/telegram-webhook'
+WEBHOOK_URL = 'https://mnogo-rolly.online/telegram-webhook'
 
 # Инициализация бота
 bot = telebot.TeleBot(BOT_TOKEN)
 
 # API конфигурация
-API_BASE_URL = 'https://mnogo-rolly.kg/api'
+API_BASE_URL = 'https://mnogo-rolly.online/api'
 LOCAL_API_URL = 'http://127.0.0.1:3000/api'
 
 def init_database():
@@ -240,7 +240,7 @@ def help_command(message):
 • /order 123 - посмотреть заказ №123
 • /orders - список всех заказов
 
-🌐 Сайт: https://mnogo-rolly.kg
+🌐 Сайт: https://mnogo-rolly.online
 📞 Поддержка: @admin_username
     """
     
