@@ -248,14 +248,16 @@ def help_command(message):
 
 📋 Основные команды:
 /start - Начать работу с ботом
-/orders - Посмотреть мои заказы
+/orders - Посмотреть все заказы
 /order <номер> - Информация о заказе
 /help - Показать эту справку
 /test - Тест уведомления в админ-группу
+/monitor - Включить мониторинг новых заказов
 
 💡 Примеры использования:
 • /order 123 - посмотреть заказ №123
 • /orders - список всех заказов
+• /test - проверить уведомления
 
 🌐 Сайт: https://mnogo-rolly.online
 📞 Поддержка: @admin_username
@@ -268,16 +270,16 @@ def test_command(message):
     """Тестовая команда для проверки уведомлений"""
     chat_id = message.chat.id
     
-    # Тестовые данные заказа
+    # Тестовые данные заказа (как в реальном заказе)
     test_order = {
-        'order_number': 'TEST-123',
+        'order_number': 'MR-1755448995603-999',
         'customer_name': 'Тестовый клиент',
-        'customer_phone': '+79001234567',
-        'delivery_address': 'Тестовый адрес',
-        'total_amount': 1500,
-        'notes': 'Тестовый заказ',
+        'customer_phone': '+996700123456',
+        'delivery_address': 'Тестовый адрес, Бишкек',
+        'total_amount': 2500,
         'items': [
-            {'name': 'Тестовый ролл', 'quantity': 2, 'price': 750}
+            {'name': 'Ролл Калифорния', 'quantity': 2, 'price': 800},
+            {'name': 'Ролл Филадельфия', 'quantity': 1, 'price': 900}
         ]
     }
     
@@ -288,6 +290,40 @@ def test_command(message):
     except Exception as e:
         bot.send_message(chat_id, f"❌ Ошибка отправки теста: {e}")
         print(f"❌ Ошибка тестовой команды: {e}")
+
+@bot.message_handler(commands=['monitor'])
+def monitor_command(message):
+    """Включение мониторинга новых заказов"""
+    chat_id = message.chat.id
+    
+    try:
+        # Получаем последние заказы для проверки
+        headers = {
+            'Authorization': f'Bearer {ADMIN_TOKEN}',
+            'Content-Type': 'application/json'
+        }
+        
+        response = requests.get(f"{API_BASE_URL}/admin/orders", headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            orders = response.json()
+            
+            if orders:
+                # Берем самый последний заказ
+                latest_order = orders[0]
+                
+                # Отправляем уведомление о последнем заказе
+                notify_admins_new_order(latest_order)
+                
+                bot.send_message(chat_id, f"✅ Мониторинг активен! Последний заказ #{latest_order.get('id', 'N/A')} отправлен в группу.")
+            else:
+                bot.send_message(chat_id, "📋 Заказов пока нет. Мониторинг будет работать автоматически при появлении новых заказов.")
+        else:
+            bot.send_message(chat_id, f"❌ Ошибка получения заказов (статус: {response.status_code})")
+            
+    except Exception as e:
+        print(f"❌ Ошибка команды мониторинга: {e}")
+        bot.send_message(chat_id, "❌ Произошла ошибка при включении мониторинга.")
 
 @bot.message_handler(commands=['dbinfo'])
 def dbinfo_command(message):
@@ -408,25 +444,34 @@ def notify_admins_new_order(order_data):
         if 'items' in order_data and order_data['items']:
             for item in order_data['items']:
                 if isinstance(item, dict):
-                    items_text += f"• {item.get('quantity', 1)}x {item.get('name', 'Товар')} - {item.get('price', 0)} ₽\n"
+                    name = item.get('name', 'Товар')
+                    quantity = item.get('quantity', 1)
+                    price = item.get('price', 0)
+                    items_text += f"• {name} x{quantity} - {price} сом\n"
                 else:
                     items_text += f"• {item}\n"
         else:
             items_text = "Товары не указаны"
         
+        # Получаем текущее время в Бишкеке (UTC+6)
+        from datetime import timezone, timedelta
+        bishkek_tz = timezone(timedelta(hours=6))
+        current_time = datetime.now(bishkek_tz).strftime('%d.%m.%Y, %H:%M')
+        
         message = f"""
-🆕 Новый заказ #{order_data.get('order_number', 'N/A')}!
+🆕 Новый заказ!
 
+📋 Заказ #{order_data.get('order_number', 'N/A')}
 👤 Клиент: {order_data.get('customer_name', 'Не указан')}
-📱 Телефон: {order_data.get('customer_phone', 'Не указан')}
+📞 Телефон: {order_data.get('customer_phone', 'Не указан')}
 📍 Адрес: {order_data.get('delivery_address', 'Не указан')}
-💰 Сумма: {order_data.get('total_amount', 0)} ₽
-📝 Комментарий: {order_data.get('notes', 'Нет')}
+💰 Сумма: {order_data.get('total_amount', 0)} сом
+⏳ Статус: Ожидает оплаты
 
 🛒 Товары:
 {items_text}
 
-⏰ Время: {datetime.now().strftime('%d.%m.%Y %H:%M')}
+⏰ Время заказа: {current_time} время бишкек
         """
         
         bot.send_message(ADMIN_GROUP_ID, message.strip())
