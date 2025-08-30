@@ -199,7 +199,7 @@ async function notifyClientAboutStatusChange(orderId: string, newStatus: string)
       FROM telegram_orders to
       JOIN orders o ON to.order_id = o.id
       WHERE to.order_id = ?
-    `, [orderId], (err, result) => {
+    `, [orderId], (err, result: any) => {
       if (err || !result) {
         console.log('Не удалось найти пользователя для заказа:', orderId);
         return;
@@ -226,7 +226,7 @@ ${status} Статус заказа #${orderId} изменен!
 // Функция для связывания заказа с пользователем Telegram
 async function linkOrderWithTelegramUser(orderId: string, phone: string): Promise<void> {
   try {
-    db.get('SELECT telegram_id FROM telegram_users WHERE phone = ?', [phone], (err, user) => {
+    db.get('SELECT telegram_id FROM telegram_users WHERE phone = ?', [phone], (err, user: any) => {
       if (err || !user) {
         console.log('Пользователь с телефоном', phone, 'не найден в Telegram');
         return;
