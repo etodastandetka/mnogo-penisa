@@ -16,6 +16,28 @@ import { sendNewOrderNotification, sendStatusUpdateNotification, getBotInfo, reg
 const TELEGRAM_BOT_TOKEN = '8336008623:AAHWO3vRgVceBeJvjMVaPBdZMkNTBB-MHCc';
 const TELEGRAM_ADMIN_GROUP_ID = '-1002728692510';
 
+// ПРИНУДИТЕЛЬНЫЙ ТЕСТ - отправляем сообщение при запуске сервера
+console.log('🚀 СЕРВЕР ЗАПУСКАЕТСЯ! ТЕСТИРУЕМ TELEGRAM API...');
+console.log('🔑 Токен бота:', TELEGRAM_BOT_TOKEN);
+console.log('👥 ID группы:', TELEGRAM_ADMIN_GROUP_ID);
+
+// ПРИНУДИТЕЛЬНО ОТПРАВЛЯЕМ ТЕСТОВОЕ СООБЩЕНИЕ ПРИ ЗАПУСКЕ!
+setTimeout(() => {
+  console.log('🧪 ОТПРАВЛЯЕМ ТЕСТОВОЕ СООБЩЕНИЕ В TELEGRAM...');
+  sendTelegramNotification({
+    orderNumber: 'TEST-001',
+    customerName: 'ТЕСТОВЫЙ КЛИЕНТ',
+    customerPhone: '+996700123456',
+    deliveryAddress: 'ТЕСТОВЫЙ АДРЕС',
+    totalAmount: 1000,
+    items: [{ product: { name: 'ТЕСТОВЫЙ ТОВАР', price: 1000 }, quantity: 1 }]
+  }).then(() => {
+    console.log('✅ ТЕСТОВОЕ СООБЩЕНИЕ ОТПРАВЛЕНО УСПЕШНО!');
+  }).catch((error) => {
+    console.error('❌ ОШИБКА ОТПРАВКИ ТЕСТОВОГО СООБЩЕНИЯ:', error);
+  });
+}, 5000); // Через 5 секунд после запуска
+
 // Функция для отправки уведомлений через Telegram Bot API
 async function sendTelegramNotification(orderData: any): Promise<void> {
   try {
