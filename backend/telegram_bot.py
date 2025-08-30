@@ -21,6 +21,9 @@ bot = telebot.TeleBot(BOT_TOKEN)
 API_BASE_URL = 'https://mnogo-rolly.online/api'
 LOCAL_API_URL = 'http://127.0.0.1:3000/api'
 
+# Токен админа (получите через get-admin-token.py)
+ADMIN_TOKEN = 'YOUR_ADMIN_TOKEN_HERE'  # Замените на реальный токен
+
 def init_database():
     """Инициализация базы данных"""
     print("🔧 Проверка подключения к API...")
@@ -103,8 +106,13 @@ def orders_command(message):
     user_id = message.from_user.id
     
     try:
-        # Получаем заказы через API
-        response = requests.get(f"{API_BASE_URL}/orders", timeout=10)
+        # Получаем заказы через API с токеном админа
+        headers = {
+            'Authorization': f'Bearer {ADMIN_TOKEN}',
+            'Content-Type': 'application/json'
+        }
+        
+        response = requests.get(f"{API_BASE_URL}/admin/orders", headers=headers, timeout=10)
         
         if response.status_code == 200:
             orders = response.json()
@@ -170,8 +178,17 @@ def order_detail_command(message):
         return
     
     try:
-        # Получаем детали заказа через API
-        response = requests.get(f"{API_BASE_URL}/orders/{order_id}", timeout=10)
+        # Получаем детали заказа через API с токеном админа
+        headers = {
+            'Authorization': f'Bearer {ADMIN_TOKEN}',
+            'Content-Type': 'application/json'
+        }
+        
+        print(f"🔍 Запрос к API: {API_BASE_URL}/admin/orders/{order_id}")
+        response = requests.get(f"{API_BASE_URL}/admin/orders/{order_id}", headers=headers, timeout=10)
+        
+        print(f"📡 Ответ API: статус {response.status_code}")
+        print(f"📄 Тело ответа: {response.text[:200]}...")
         
         if response.status_code == 200:
             order = response.json()
