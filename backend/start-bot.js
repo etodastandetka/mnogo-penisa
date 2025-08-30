@@ -37,4 +37,4 @@ process.on('unhandledRejection', (reason, promise) => {
 
 console.log('💡 Для остановки бота нажмите Ctrl+C');
 console.log('📱 Бот работает в режиме webhook');
-console.log('🌐 Webhook URL:', process.env.TELEGRAM_WEBHOOK_URL || 'Не установлен');
+console.log('🌐 Webhook URL: https://mnogo-rolly.kg/telegram-webhook');
