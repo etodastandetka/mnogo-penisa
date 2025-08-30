@@ -12,6 +12,84 @@ import fs from 'fs';
 import https from 'https';
 import { sendNewOrderNotification, sendStatusUpdateNotification, getBotInfo, registerTelegramUser, getUserOrders, getUserOrder } from '../src/telegramBot';
 
+// Telegram Bot конфигурация
+const TELEGRAM_BOT_TOKEN = '8336008623:AAHWO3vRgVceBeJvjMVaPBdZMkNTBB-MHCc';
+const TELEGRAM_ADMIN_GROUP_ID = '-1002728692510';
+
+// Функция для отправки уведомлений через Telegram Bot API
+async function sendTelegramNotification(orderData: any): Promise<void> {
+  try {
+    console.log('🤖 Отправляем уведомление в Telegram о заказе:', orderData.orderNumber);
+    
+    // Формируем список товаров
+    let itemsText = "";
+    if (orderData.items && orderData.items.length > 0) {
+      for (const item of orderData.items) {
+        if (typeof item === 'object' && item.product) {
+          itemsText += `• ${item.product.name || 'Товар'} x${item.quantity} - ${item.product.price} сом\n`;
+        } else if (typeof item === 'object' && item.name) {
+          itemsText += `• ${item.name} x${item.quantity} - ${item.price} сом\n`;
+        } else {
+          itemsText += `• ${item}\n`;
+        }
+      }
+    } else {
+      itemsText = "Товары не указаны";
+    }
+    
+    // Получаем текущее время в Бишкеке (UTC+6)
+    const bishkekTime = new Date();
+    bishkekTime.setHours(bishkekTime.getHours() + 6);
+    const currentTime = bishkekTime.toLocaleString('ru-RU', {
+      timeZone: 'Asia/Bishkek',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    const message = `
+🆕 Новый заказ!
+
+📋 Заказ #${orderData.orderNumber}
+👤 Клиент: ${orderData.customerName}
+📞 Телефон: ${orderData.customerPhone}
+📍 Адрес: ${orderData.deliveryAddress || 'Не указан'}
+💰 Сумма: ${orderData.totalAmount} сом
+⏳ Статус: Ожидает оплаты
+
+🛒 Товары:
+${itemsText}
+
+⏰ Время заказа: ${currentTime} время бишкек
+    `.trim();
+    
+    // Отправляем через Telegram Bot API
+    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_ADMIN_GROUP_ID,
+        text: message,
+        parse_mode: 'HTML'
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json() as any;
+      throw new Error(`Telegram API error: ${errorData.description || 'Unknown error'}`);
+    }
+    
+    console.log('✅ Уведомление о заказе отправлено в Telegram успешно');
+    
+  } catch (error) {
+    console.error('❌ Ошибка отправки уведомления в Telegram:', error);
+  }
+}
+
 // Типы для базы данных
 interface StatsResult {
   total_orders: number;
@@ -843,8 +921,8 @@ app.post('/api/orders/guest', (req: any, res) => {
           }
 
           if (itemsAdded === totalItems) {
-            // Отправляем уведомление в Telegram
-            sendNewOrderNotification({
+            // Отправляем уведомление в Telegram через Bot API
+            sendTelegramNotification({
               id: orderId,
               orderNumber,
               customerName: customer.name,
