@@ -477,7 +477,7 @@ const initDatabase = () => {
       
       if (result.count === 0) {
         db.run(`INSERT INTO telegram_settings (enabled, bot_token, chat_id) VALUES (?, ?, ?)`, 
-          [0, '', '']);
+          [1, '8336008623:AAHWO3vRgVceBeJvjMVaPBdZMkNTBB-MHCc', '-1002728692510']);
       }
     });
 
