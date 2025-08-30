@@ -71,17 +71,48 @@ ${itemsText}
     console.log('👥 ID группы:', TELEGRAM_ADMIN_GROUP_ID);
     console.log('💬 Сообщение:', message.substring(0, 100) + '...');
     
-    // Отправляем через Telegram Bot API
-    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    // Отправляем через Telegram Bot API используя https модуль
+    const https = require('https');
+    
+    const postData = JSON.stringify({
+      chat_id: TELEGRAM_ADMIN_GROUP_ID,
+      text: message,
+      parse_mode: 'HTML'
+    });
+    
+    const options = {
+      hostname: 'api.telegram.org',
+      port: 443,
+      path: `/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_ADMIN_GROUP_ID,
-        text: message,
-        parse_mode: 'HTML'
-      })
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+    
+    const response: any = await new Promise((resolve, reject) => {
+      const req = https.request(options, (res: any) => {
+        let data = '';
+        res.on('data', (chunk: any) => {
+          data += chunk;
+        });
+        res.on('end', () => {
+          resolve({
+            status: res.statusCode,
+            statusText: res.statusMessage,
+            ok: res.statusCode >= 200 && res.statusCode < 300,
+            json: () => Promise.resolve(JSON.parse(data))
+          });
+        });
+      });
+      
+      req.on('error', (error: any) => {
+        reject(error);
+      });
+      
+      req.write(postData);
+      req.end();
     });
     
     console.log('📡 Ответ от Telegram API:', response.status, response.statusText);
