@@ -315,7 +315,7 @@ def notify_admins_new_order(order_data):
         message = f"""
 🆕 Новый заказ!
 
-📋 Заказ #{order_data.get('order_number', 'N/A')}
+📋 Заказ #{order_data.get('id', 'N/A')}
 👤 Клиент: {order_data.get('customer_name', 'Не указан')}
 📞 Телефон: {order_data.get('customer_phone', 'Не указан')}
 📍 Адрес: {order_data.get('delivery_address', 'Не указан')}
@@ -329,12 +329,48 @@ def notify_admins_new_order(order_data):
         """
         
         bot.send_message(ADMIN_GROUP_ID, message.strip())
-        print(f"✅ Уведомление о заказе #{order_data.get('order_number', 'N/A')} отправлено в админ-группу")
+        print(f"✅ Уведомление о заказе #{order_data.get('id', 'N/A')} отправлено в админ-группу")
         
     except Exception as e:
         print(f"❌ Ошибка отправки уведомления админам: {e}")
         import traceback
         traceback.print_exc()
+
+def notify_new_order_webhook():
+    """Webhook для мгновенного уведомления о новом заказе"""
+    print("🔗 Webhook для новых заказов готов")
+
+# Добавляем HTTP endpoint для получения уведомлений
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/telegram-webhook/new-order', methods=['POST'])
+def new_order_webhook():
+    """Endpoint для получения уведомлений о новых заказах"""
+    try:
+        order_data = request.json
+        
+        if order_data:
+            print(f"🆕 Получен новый заказ через webhook: {order_data}")
+            
+            # Отправляем уведомление в группу
+            notify_admins_new_order(order_data)
+            
+            return jsonify({"status": "success", "message": "Уведомление отправлено"}), 200
+        else:
+            return jsonify({"status": "error", "message": "Данные заказа не получены"}), 400
+            
+    except Exception as e:
+        print(f"❌ Ошибка webhook: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+def start_webhook_server():
+    """Запуск webhook сервера"""
+    try:
+        app.run(host='0.0.0.0', port=5001, debug=False)
+    except Exception as e:
+        print(f"❌ Ошибка запуска webhook сервера: {e}")
 
 
 
@@ -344,6 +380,11 @@ def start_bot():
     
     # Инициализируем базу данных
     init_database()
+    
+    # Запускаем webhook сервер в отдельном потоке
+    webhook_thread = threading.Thread(target=start_webhook_server, daemon=True)
+    webhook_thread.start()
+    print("🔗 Webhook сервер запущен на порту 5001")
     
     # Устанавливаем webhook в production
     if os.getenv('NODE_ENV') == 'production':
