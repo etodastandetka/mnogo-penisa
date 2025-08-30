@@ -93,7 +93,7 @@ export async function sendNewOrderNotification(order: Order): Promise<void> {
     });
     
     if (!telegramResponse.ok) {
-      const errorData = await telegramResponse.json();
+      const errorData = await telegramResponse.json() as any;
       throw new Error(`Telegram API error: ${errorData.description}`);
     }
     
@@ -125,7 +125,7 @@ export async function sendStatusUpdateNotification(order: any, oldStatus: string
     });
     
     if (!telegramResponse.ok) {
-      const errorData = await telegramResponse.json();
+      const errorData = await telegramResponse.json() as any;
       throw new Error(`Telegram API error: ${errorData.description}`);
     }
     
