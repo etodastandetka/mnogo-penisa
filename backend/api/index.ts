@@ -11,6 +11,7 @@ import multer from 'multer';
 import fs from 'fs';
 import https from 'https';
 import { sendNewOrderNotification, sendStatusUpdateNotification, getBotInfo, registerTelegramUser, getUserOrders, getUserOrder } from '../src/telegramBot';
+import paymentRoutes from './paymentRoutes';
 
 // Telegram Bot конфигурация - теперь настройки берутся из базы данных
 console.log('🚀 СЕРВЕР ЗАПУСКАЕТСЯ! Telegram настройки загружаются из базы данных...');
@@ -240,6 +241,9 @@ app.use((req, res, next) => {
 app.options('*', cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Подключаем роуты для платежей FreedomPay
+app.use('/api/payments', paymentRoutes);
 
 // Статическая папка для загруженных файлов
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {

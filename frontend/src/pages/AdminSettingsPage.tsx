@@ -45,8 +45,9 @@ const AdminSettingsPage: React.FC = () => {
       return;
     }
 
-    // Загружаем банковские настройки
+    // Загружаем все настройки
     loadBankSettings();
+    loadTelegramSettings();
   }, [user, isAdmin, navigate]);
 
   const loadBankSettings = async () => {
@@ -58,6 +59,24 @@ const AdminSettingsPage: React.FC = () => {
         bank: {
           ...prev.bank,
           bankLink: data.bank_link || 'https://app.mbank.kg/qr#'
+        }
+      }));
+    } catch (error) {
+      // Игнорируем ошибку
+    }
+  };
+
+  const loadTelegramSettings = async () => {
+    try {
+      const response = await client.get('/telegram-settings');
+      const data = response.data;
+      setSettings(prev => ({
+        ...prev,
+        telegram: {
+          ...prev.telegram,
+          enabled: data.enabled || false,
+          botToken: data.bot_token || '',
+          chatId: data.chat_id || ''
         }
       }));
     } catch (error) {
@@ -79,18 +98,26 @@ const AdminSettingsPage: React.FC = () => {
     setSaving(true);
     
     try {
-      // Отправляем настройки на сервер
-      const response = await client.post('/bank-settings', {
+      // Отправляем банковские настройки на сервер
+      const bankResponse = await client.post('/bank-settings', {
         bank_name: 'MBank',
         bank_link: settings.bank.bankLink
       });
 
-      if (response.status === 200) {
-        alert('Настройки успешно сохранены!');
+      // Отправляем Telegram настройки на сервер
+      const telegramResponse = await client.post('/telegram-settings', {
+        enabled: settings.telegram.enabled,
+        bot_token: settings.telegram.botToken,
+        chat_id: settings.telegram.chatId
+      });
+
+      if (bankResponse.status === 200 && telegramResponse.status === 200) {
+        alert('Все настройки успешно сохранены!');
       } else {
-        alert('Ошибка сохранения');
+        alert('Ошибка сохранения некоторых настроек');
       }
     } catch (error) {
+      console.error('Ошибка сохранения:', error);
       alert('Ошибка соединения с сервером');
     } finally {
       setSaving(false);

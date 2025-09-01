@@ -6,8 +6,9 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { PaymentMethod } from '../types';
 import { createOrder } from '../api/orders';
-import { PaymentMethod as PaymentMethodComponent } from '../components/PaymentMethod';
+import { FreedomPayCheckout } from '../components/FreedomPayCheckout';
 import { apiClient } from '../api/client';
+import { Card } from '../components/ui/Card';
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,8 +32,38 @@ const CheckoutPage: React.FC = () => {
       return;
     }
 
-    // Показываем компонент оплаты сразу при отправке формы
-    setShowPaymentComponent(true);
+    try {
+      setLoading(true);
+      
+      // Создаем заказ
+      const orderData = {
+        items: items.map(item => ({
+          product: {
+            id: item.product.id,
+            price: item.product.price
+          },
+          quantity: item.quantity
+        })),
+        customer: customerData,
+        total: getTotal(),
+        paymentMethod: selectedPaymentMethod,
+        notes: customerData.notes
+      };
+
+      const result = await createOrder(orderData);
+      
+      if (!result || !result.orderId) {
+        throw new Error('Не удалось получить ID заказа');
+      }
+      
+      setOrderId(result.orderId);
+      setShowPaymentComponent(true);
+    } catch (error: any) {
+      console.error('Ошибка создания заказа:', error);
+      alert('Ошибка создания заказа: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -50,36 +81,12 @@ const CheckoutPage: React.FC = () => {
     try {
       setLoading(true);
       
-      // Сначала создаем заказ
-      const orderData = {
-        items: items.map(item => ({
-          product: {
-            id: item.product.id,
-            price: item.product.price
-          },
-          quantity: item.quantity
-        })),
-        customer: customerData,
-        total: getTotal(),
-        paymentMethod: selectedPaymentMethod,
-        notes: customerData.notes
-      };
-
-      const result = await createOrder(orderData);
-      
-      // Проверяем, что заказ создан успешно
-      if (!result || !result.orderId) {
-        throw new Error('Не удалось получить ID заказа');
-      }
-      
-      setOrderId(result.orderId);
-
-      // Затем отправляем данные о платеже
+      // Отправляем данные о платеже
       const formData = new FormData();
-      formData.append('orderId', result.orderId.toString());
+      formData.append('orderId', orderId!.toString());
       formData.append('paymentMethod', paymentData.method);
       formData.append('amount', paymentData.amount.toString());
-      formData.append('note', paymentData.note);
+      formData.append('note', paymentData.note || '');
       
       if (paymentData.receipt) {
         formData.append('receiptFile', paymentData.receipt);
@@ -93,7 +100,7 @@ const CheckoutPage: React.FC = () => {
 
       // Очищаем корзину и перенаправляем на страницу успеха
       clearCart();
-      navigate(`/order-success/${result.orderId}`);
+      navigate(`/order-success/${orderId}`);
     } catch (error: any) {
       console.error('Ошибка сохранения чека:', error);
       alert('Ошибка сохранения чека: ' + error.message);
@@ -105,24 +112,24 @@ const CheckoutPage: React.FC = () => {
   const getPaymentMethodName = (method: PaymentMethod): string => {
     switch (method) {
       case PaymentMethod.CASH:
-        return 'Наличными';
+        return 'Наличные';
       case PaymentMethod.CARD:
-        return 'Картой';
-      case PaymentMethod.QR:
-        return 'QR-код';
+        return 'Банковская карта';
+      case PaymentMethod.BANK_TRANSFER:
+        return 'Банковский перевод';
       default:
-        return 'Неизвестно';
+        return 'Не указан';
     }
   };
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Корзина пуста</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Корзина пуста</h1>
           <p className="text-gray-600 mb-6">Добавьте товары в корзину для оформления заказа</p>
-          <Button onClick={() => navigate('/')} variant="primary">
-            Перейти к меню
+          <Button onClick={() => navigate('/')} className="bg-blue-600 hover:bg-blue-700">
+            Вернуться к покупкам
           </Button>
         </div>
       </div>
@@ -130,153 +137,160 @@ const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Заголовок */}
-          <div className="flex items-center mb-8">
-            <Button
-              onClick={() => navigate('/')}
-              variant="ghost"
-              className="mr-4"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <h1 className="text-3xl font-bold text-gray-800">Оформление заказа</h1>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto py-8 px-4">
+        {/* Заголовок */}
+        <div className="flex items-center mb-8">
+          <button
+            onClick={() => navigate('/cart')}
+            className="mr-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <h1 className="text-3xl font-bold text-gray-900">Оформление заказа</h1>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Форма заказа */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Форма заказа */}
+          <div className="lg:col-span-2">
+            <Card className="p-6">
               <h2 className="text-xl font-semibold mb-6">Данные для доставки</h2>
               
               <form onSubmit={handleSubmit} className="space-y-4">
-                <Input
-                  label="Имя *"
-                  value={customerData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  required
-                />
-                
-                <Input
-                  label="Телефон *"
-                  type="tel"
-                  value={customerData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  required
-                />
-                
-                <Input
-                  label="Адрес доставки *"
-                  value={customerData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  required
-                />
-                
-                <Input
-                  label="Примечания"
-                  value={customerData.notes}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Имя * <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    value={customerData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder="Ваше имя"
+                    required
+                  />
+                </div>
 
-                {/* Способ оплаты */}
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Телефон * <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="tel"
+                    value={customerData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    placeholder="+996 XXX XXX XXX"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Адрес доставки * <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    value={customerData.address}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    placeholder="Улица, дом, квартира"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Дополнительные заметки
+                  </label>
+                  <textarea
+                    value={customerData.notes}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    placeholder="Особенности доставки, пожелания..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Способ оплаты
                   </label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-2">
                     {Object.values(PaymentMethod).map((method) => (
-                      <button
-                        key={method}
-                        type="button"
-                        onClick={() => handlePaymentMethodChange(method)}
-                        className={`p-3 rounded-lg border-2 transition-colors ${
-                          selectedPaymentMethod === method
-                            ? 'border-orange-500 bg-orange-50 text-orange-700'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
+                      <label key={method} className="flex items-center">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value={method}
+                          checked={selectedPaymentMethod === method}
+                          onChange={() => handlePaymentMethodChange(method)}
+                          className="mr-2"
+                        />
                         {getPaymentMethodName(method)}
-                      </button>
+                      </label>
                     ))}
                   </div>
                 </div>
 
                 <Button
                   type="submit"
-                  variant="primary"
-                  loading={loading}
-                  className="w-full"
                   disabled={loading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg"
                 >
                   {loading ? 'Создание заказа...' : 'Оформить заказ'}
                 </Button>
               </form>
-            </div>
+            </Card>
+          </div>
 
-            {/* Сводка заказа */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-6">Ваш заказ</h2>
+          {/* Корзина */}
+          <div className="lg:col-span-1">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Ваш заказ</h2>
               
-              <div className="space-y-4">
+              <div className="space-y-4 mb-6">
                 {items.map((item) => (
-                  <div key={item.product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div key={item.product.id} className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                        <span className="text-orange-600 font-semibold">
-                          {item.quantity}
-                        </span>
-                      </div>
+                      <img
+                        src={item.product.image || '/placeholder.jpg'}
+                        alt={item.product.name}
+                        className="w-12 h-12 object-cover rounded"
+                      />
                       <div>
-                        <h3 className="font-medium text-gray-800">{item.product.name}</h3>
-                        <p className="text-sm text-gray-600">{item.product.price} ₽</p>
+                        <p className="font-medium">{item.product.name}</p>
+                        <p className="text-sm text-gray-500">
+                          {item.product.price} сом × {item.quantity}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-gray-800">
-                        {item.product.price * item.quantity} ₽
-                      </p>
-                    </div>
+                    <p className="font-semibold">{item.product.price * item.quantity} сом</p>
                   </div>
                 ))}
               </div>
-
-              <div className="border-t pt-4 mt-6">
+              
+              <div className="border-t pt-4">
                 <div className="flex justify-between items-center text-lg font-semibold">
                   <span>Итого:</span>
-                  <span className="text-orange-600">{getTotal()} ₽</span>
+                  <span>{getTotal()} сом</span>
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
       </div>
 
-      {/* Компонент оплаты */}
-      {showPaymentComponent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold">Оплата заказа</h2>
-                <button
-                  onClick={() => setShowPaymentComponent(false)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
-                >
-                  ×
-                </button>
-              </div>
-              <PaymentMethodComponent
-                totalAmount={getTotal()}
-                onPaymentComplete={handlePaymentComplete}
-              />
-            </div>
-          </div>
-        </div>
+      {/* Компонент оплаты FreedomPay */}
+      {showPaymentComponent && orderId && (
+        <FreedomPayCheckout
+          totalAmount={getTotal()}
+          orderId={orderId}
+          onPaymentComplete={handlePaymentComplete}
+          onClose={() => setShowPaymentComponent(false)}
+        />
       )}
     </div>
   );
 };
 
 export default CheckoutPage;
+
 

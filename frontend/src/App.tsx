@@ -14,6 +14,8 @@ import './index.css';
 const HomePage = lazy(() => import('./pages/HomePage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'));
+const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage'));
+const PaymentFailurePage = lazy(() => import('./pages/PaymentFailurePage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
@@ -91,6 +93,16 @@ function App() {
                 <OrderSuccessPage />
               </Suspense>
             </PageWithNavigation>
+          } />
+          <Route path="/payment/success" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <PaymentSuccessPage />
+            </Suspense>
+          } />
+          <Route path="/payment/failure" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <PaymentFailurePage />
+            </Suspense>
           } />
           <Route path="/auth" element={
             <Suspense fallback={<LoadingSpinner />}>

@@ -19,6 +19,7 @@
   "dependencies": {
     "@types/multer": "^2.0.0",
     "@types/node-telegram-bot-api": "^0.64.10",
+    "axios": "^1.6.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
