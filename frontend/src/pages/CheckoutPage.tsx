@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
-import { ArrowLeft, Plus, Minus, Trash2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { PaymentMethod } from '../types';
 import { createOrder } from '../api/orders';
-import { FreedomPayCheckout } from '../components/FreedomPayCheckout';
-import { apiClient } from '../api/client';
+import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import { Card } from '../components/ui/Card';
 
 const CheckoutPage: React.FC = () => {
@@ -20,7 +18,6 @@ const CheckoutPage: React.FC = () => {
     address: '',
     notes: ''
   });
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [showPaymentComponent, setShowPaymentComponent] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
 
@@ -46,7 +43,7 @@ const CheckoutPage: React.FC = () => {
         })),
         customer: customerData,
         total: getTotal(),
-        paymentMethod: selectedPaymentMethod,
+        paymentMethod: 'pending', // Будет определен при выборе способа оплаты
         notes: customerData.notes
       };
 
@@ -73,54 +70,29 @@ const CheckoutPage: React.FC = () => {
     }));
   };
 
-  const handlePaymentMethodChange = (method: PaymentMethod) => {
-    setSelectedPaymentMethod(method);
-  };
-
   const handlePaymentComplete = async (paymentData: any) => {
     try {
       setLoading(true);
       
-      // Отправляем данные о платеже
-      const formData = new FormData();
-      formData.append('orderId', orderId!.toString());
-      formData.append('paymentMethod', paymentData.method);
-      formData.append('amount', paymentData.amount.toString());
-      formData.append('note', paymentData.note || '');
-      
-      if (paymentData.receipt) {
-        formData.append('receiptFile', paymentData.receipt);
-      }
-
-      const response = await apiClient.post('/receipts', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
       // Очищаем корзину и перенаправляем на страницу успеха
       clearCart();
-      navigate(`/order-success/${orderId}`);
+      navigate(`/order-success/${orderId}`, {
+        state: {
+          paymentMethod: paymentData.paymentMethod,
+          amount: paymentData.amount,
+          cashAmount: paymentData.cashAmount,
+          changeAmount: paymentData.changeAmount
+        }
+      });
     } catch (error: any) {
-      console.error('Ошибка сохранения чека:', error);
-      alert('Ошибка сохранения чека: ' + error.message);
+      console.error('Ошибка завершения заказа:', error);
+      alert('Ошибка завершения заказа: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const getPaymentMethodName = (method: PaymentMethod): string => {
-    switch (method) {
-      case PaymentMethod.CASH:
-        return 'Наличные';
-      case PaymentMethod.CARD:
-        return 'Банковская карта';
-      case PaymentMethod.BANK_TRANSFER:
-        return 'Банковский перевод';
-      default:
-        return 'Не указан';
-    }
-  };
+
 
   if (items.length === 0) {
     return (
@@ -209,26 +181,7 @@ const CheckoutPage: React.FC = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Способ оплаты
-                  </label>
-                  <div className="space-y-2">
-                    {Object.values(PaymentMethod).map((method) => (
-                      <label key={method} className="flex items-center">
-                        <input
-                          type="radio"
-                          name="paymentMethod"
-                          value={method}
-                          checked={selectedPaymentMethod === method}
-                          onChange={() => handlePaymentMethodChange(method)}
-                          className="mr-2"
-                        />
-                        {getPaymentMethodName(method)}
-                      </label>
-                    ))}
-                  </div>
-                </div>
+
 
                 <Button
                   type="submit"
@@ -278,14 +231,19 @@ const CheckoutPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Компонент оплаты FreedomPay */}
+      {/* Компонент выбора способа оплаты */}
       {showPaymentComponent && orderId && (
-        <FreedomPayCheckout
-          totalAmount={getTotal()}
-          orderId={orderId}
-          onPaymentComplete={handlePaymentComplete}
-          onClose={() => setShowPaymentComponent(false)}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <PaymentMethodSelector
+                orderId={orderId.toString()}
+                amount={getTotal()}
+                onPaymentComplete={handlePaymentComplete}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

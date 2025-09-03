@@ -8,41 +8,58 @@ const router = express.Router();
 const dbPath = path.join(__dirname, '../data/mnogo_rolly.db');
 const db = new sqlite3.Database(dbPath);
 
+// Импортируем сервис QR-платежей
+const { qrPaymentService } = require('./qrPaymentService');
+
 // Middleware для логирования
 const logPaymentRequest = (req, res, next) => {
-  console.log('💰 FreedomPay: Входящий запрос', {
+  console.log('💰 Payment: Входящий запрос', {
     method: req.method,
     url: req.url,
     body: req.body,
-    query: req.query,
-    headers: req.headers
+    query: req.query
   });
   next();
 };
 
-// Применяем логирование ко всем роутам
 router.use(logPaymentRequest);
 
 /**
- * Инициализация платежа
- * POST /api/payments/freedompay/init
+ * Получение списка доступных банков для QR-платежей
+ * GET /api/payments/banks
  */
-router.post('/freedompay/init', async (req, res) => {
+router.get('/banks', (req, res) => {
   try {
-    const { orderId, amount, description } = req.body;
+    const banks = qrPaymentService.getAvailableBanks();
+    
+    res.json({
+      success: true,
+      banks
+    });
+  } catch (error) {
+    console.error('❌ Ошибка получения списка банков:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Ошибка получения списка банков'
+    });
+  }
+});
+
+/**
+ * Генерация QR-кода для оплаты
+ * POST /api/payments/qr/generate
+ */
+router.post('/qr/generate', async (req, res) => {
+  try {
+    const { orderId, amount, bank = 'mbank' } = req.body;
 
     // Валидация входных данных
-    if (!orderId || !amount || !description) {
+    const validation = qrPaymentService.validateOrderData({ orderId, amount });
+    if (!validation.isValid) {
       return res.status(400).json({
         success: false,
-        message: 'Отсутствуют обязательные поля: orderId, amount, description'
-      });
-    }
-
-    if (amount <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Сумма должна быть больше нуля'
+        message: 'Ошибка валидации данных',
+        errors: validation.errors
       });
     }
 
@@ -72,107 +89,26 @@ router.post('/freedompay/init', async (req, res) => {
       });
     }
 
-    // Формируем URL для перенаправления (боевой режим)
-    const baseUrl = 'https://mnogo-rolly.online';
-    const urls = {
-      successUrl: `${baseUrl}/payment/success`,
-      failureUrl: `${baseUrl}/payment/failure`,
-      resultUrl: `${baseUrl}/api/payments/freedompay/result`,
-      checkUrl: `${baseUrl}/api/payments/freedompay/check`
-    };
-
-    // Инициализируем реальный платеж в FreedomPay
-    const { freedomPayService } = require('./freedompay');
-    const paymentResult = await freedomPayService.initPayment({
+    // Генерируем QR-код
+    const qrResult = qrPaymentService.generateQRCode({
       orderId: orderId.toString(),
-      amount: parseFloat(amount),
-      description,
-      ...urls
-    });
+      amount: parseFloat(amount)
+    }, bank);
 
-    if (paymentResult.pg_status === 'ok' && paymentResult.pg_redirect_url) {
-      // Сохраняем информацию о платеже в базу
-      await new Promise((resolve, reject) => {
-        db.run(
-          `INSERT INTO payment_transactions (
-            order_id, payment_id, amount, status, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))`,
-          [orderId, paymentResult.pg_payment_id, amount, 'pending'],
-          (err) => {
-            if (err) reject(err);
-            else resolve(true);
-          }
-        );
-      });
-
-      // Обновляем статус заказа
-      await new Promise((resolve, reject) => {
-        db.run(
-          'UPDATE orders SET payment_status = ? WHERE id = ?',
-          ['processing', orderId],
-          (err) => {
-            if (err) reject(err);
-            else resolve(true);
-          }
-        );
-      });
-
-      return res.json({
-        success: true,
-        paymentUrl: paymentResult.pg_redirect_url,
-        paymentId: paymentResult.pg_payment_id,
-        message: 'Платеж инициализирован успешно'
-      });
-    } else {
-      // Логируем ошибку
-      console.error('❌ FreedomPay: Ошибка инициализации', paymentResult);
-      
+    if (!qrResult.success) {
       return res.status(400).json({
         success: false,
-        message: paymentResult.pg_error_description || 'Ошибка инициализации платежа',
-        errorCode: paymentResult.pg_error_code
+        message: qrResult.error
       });
     }
-  } catch (error) {
-    console.error('❌ FreedomPay: Ошибка инициализации платежа', error);
-    
-    return res.status(500).json({
-      success: false,
-      message: 'Внутренняя ошибка сервера',
-      error: error.message
-    });
-  }
-});
 
-/**
- * Обработка результата платежа (webhook от FreedomPay)
- * POST /api/payments/freedompay/result
- */
-router.post('/freedompay/result', async (req, res) => {
-  try {
-    console.log('💰 FreedomPay: Получено уведомление о результате платежа', req.body);
-
-    // Для тестирования принимаем любые данные
-    const result = {
-      isValid: true,
-      orderId: req.body.pg_order_id || 'test_order',
-      paymentId: req.body.pg_payment_id || 'test_payment',
-      amount: parseFloat(req.body.pg_amount) || 0,
-      currency: req.body.pg_currency || 'KGS',
-      isSuccess: req.body.pg_result === '1',
-      errorCode: req.body.pg_error_code,
-      errorDescription: req.body.pg_error_description
-    };
-
-    console.log('💰 FreedomPay: Обработка результата платежа', result);
-
-    // Обновляем транзакцию в базе
+    // Сохраняем информацию о платеже в базу
     await new Promise((resolve, reject) => {
       db.run(
-        `UPDATE payment_transactions 
-         SET status = ?, updated_at = datetime('now')
-         WHERE order_id = ?`,
-        [result.isSuccess ? 'completed' : 'failed', result.orderId],
+        `INSERT INTO payment_transactions (
+          order_id, payment_id, amount, status, payment_method, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+        [orderId, `qr_${orderId}_${Date.now()}`, amount, 'pending', 'qr'],
         (err) => {
           if (err) reject(err);
           else resolve(true);
@@ -181,15 +117,10 @@ router.post('/freedompay/result', async (req, res) => {
     });
 
     // Обновляем статус заказа
-    const newOrderStatus = result.isSuccess ? 'paid' : 'payment_failed';
-    const newPaymentStatus = result.isSuccess ? 'paid' : 'failed';
-
     await new Promise((resolve, reject) => {
       db.run(
-        `UPDATE orders 
-         SET status = ?, payment_status = ?, updated_at = datetime('now')
-         WHERE id = ?`,
-        [newOrderStatus, newPaymentStatus, result.orderId],
+        'UPDATE orders SET payment_status = ? WHERE id = ?',
+        ['processing', orderId],
         (err) => {
           if (err) reject(err);
           else resolve(true);
@@ -197,26 +128,32 @@ router.post('/freedompay/result', async (req, res) => {
       );
     });
 
-    // Логируем результат
-    console.log(`✅ FreedomPay: Платеж ${result.isSuccess ? 'успешен' : 'неуспешен'} для заказа ${result.orderId}`);
+    res.json({
+      success: true,
+      qrUrl: qrResult.qrUrl,
+      bank: qrResult.bank,
+      orderId: qrResult.orderId,
+      amount: qrResult.amount,
+      message: 'QR-код сгенерирован успешно'
+    });
 
-    // Отправляем ответ FreedomPay
-    res.json({ result: 'OK' });
   } catch (error) {
-    console.error('❌ FreedomPay: Ошибка обработки результата платежа', error);
-    res.status(500).json({ error: 'INTERNAL_ERROR' });
+    console.error('❌ Ошибка генерации QR-кода:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Внутренняя ошибка сервера',
+      error: error.message
+    });
   }
 });
 
 /**
- * Проверка возможности приема платежа
- * POST /api/payments/freedompay/check
+ * Подтверждение оплаты (для QR и наличных)
+ * POST /api/payments/confirm
  */
-router.post('/freedompay/check', async (req, res) => {
+router.post('/confirm', async (req, res) => {
   try {
-    const { orderId, amount } = req.body;
-
-    console.log('🔍 FreedomPay: Проверка возможности приема платежа', { orderId, amount });
+    const { orderId, paymentMethod, cashAmount, changeAmount } = req.body;
 
     // Проверяем существование заказа
     const order = await new Promise((resolve, reject) => {
@@ -231,31 +168,82 @@ router.post('/freedompay/check', async (req, res) => {
     });
 
     if (!order) {
-      return res.json({ result: 'REJECTED', reason: 'ORDER_NOT_FOUND' });
+      return res.status(404).json({
+        success: false,
+        message: 'Заказ не найден'
+      });
     }
 
-    if (order.status !== 'pending') {
-      return res.json({ result: 'REJECTED', reason: 'ORDER_ALREADY_PROCESSED' });
+    // Обновляем транзакцию
+    await new Promise((resolve, reject) => {
+      db.run(
+        `UPDATE payment_transactions 
+         SET status = ?, updated_at = datetime('now')
+         WHERE order_id = ?`,
+        ['completed', orderId],
+        (err) => {
+          if (err) reject(err);
+          else resolve(true);
+        }
+      );
+    });
+
+    // Обновляем статус заказа
+    await new Promise((resolve, reject) => {
+      db.run(
+        `UPDATE orders 
+         SET status = ?, payment_status = ?, updated_at = datetime('now')
+         WHERE id = ?`,
+        ['paid', 'paid', orderId],
+        (err) => {
+          if (err) reject(err);
+          else resolve(true);
+        }
+      );
+    });
+
+    // Если наличные, сохраняем информацию о сдаче
+    if (paymentMethod === 'cash' && cashAmount && changeAmount) {
+      await new Promise((resolve, reject) => {
+        db.run(
+          `UPDATE payment_transactions 
+           SET cash_amount = ?, change_amount = ?, updated_at = datetime('now')
+           WHERE order_id = ?`,
+          [cashAmount, changeAmount, orderId],
+          (err) => {
+            if (err) reject(err);
+            else resolve(true);
+          }
+        );
+      });
     }
 
-    if (Math.abs(order.total_amount - amount) > 0.01) {
-      return res.json({ result: 'REJECTED', reason: 'AMOUNT_MISMATCH' });
-    }
+    console.log(`✅ Платеж подтвержден для заказа ${orderId}, метод: ${paymentMethod}`);
 
-    // Для тестирования всегда разрешаем
-    console.log('✅ FreedomPay: Платеж разрешен для заказа', orderId);
-    return res.json({ result: 'OK' });
+    res.json({
+      success: true,
+      message: 'Платеж подтвержден успешно',
+      orderId,
+      paymentMethod,
+      cashAmount,
+      changeAmount
+    });
+
   } catch (error) {
-    console.error('❌ FreedomPay: Ошибка проверки платежа', error);
-    return res.json({ result: 'REJECTED', reason: 'INTERNAL_ERROR' });
+    console.error('❌ Ошибка подтверждения платежа:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Внутренняя ошибка сервера',
+      error: error.message
+    });
   }
 });
 
 /**
  * Получение статуса платежа
- * GET /api/payments/freedompay/status/:orderId
+ * GET /api/payments/status/:orderId
  */
-router.get('/freedompay/status/:orderId', async (req, res) => {
+router.get('/status/:orderId', async (req, res) => {
   try {
     const { orderId } = req.params;
 
@@ -280,23 +268,25 @@ router.get('/freedompay/status/:orderId', async (req, res) => {
       });
     }
 
-    return res.json({
+    res.json({
       success: true,
       data: {
         orderId: transaction.order_id,
         paymentId: transaction.payment_id,
         amount: transaction.amount,
         status: transaction.status,
+        paymentMethod: transaction.payment_method,
         orderStatus: transaction.order_status,
         paymentStatus: transaction.payment_status,
+        cashAmount: transaction.cash_amount,
+        changeAmount: transaction.change_amount,
         createdAt: transaction.created_at,
         updatedAt: transaction.updated_at
       }
     });
   } catch (error) {
-    console.error('❌ FreedomPay: Ошибка получения статуса платежа', error);
-    
-    return res.status(500).json({
+    console.error('❌ Ошибка получения статуса платежа:', error);
+    res.status(500).json({
       success: false,
       message: 'Внутренняя ошибка сервера'
     });
@@ -304,32 +294,18 @@ router.get('/freedompay/status/:orderId', async (req, res) => {
 });
 
 /**
- * Healthcheck для FreedomPay
- * GET /api/payments/freedompay/health
+ * Healthcheck
+ * GET /api/payments/health
  */
-router.get('/freedompay/health', async (req, res) => {
-  try {
-    // Проверяем реальный статус FreedomPay
-    const { freedomPayService } = require('./freedompay');
-    const isHealthy = await freedomPayService.checkHealth();
-    
-    return res.json({
-      success: true,
-      healthy: isHealthy,
-      timestamp: new Date().toISOString(),
-      service: 'FreedomPay',
-      mode: 'production',
-      baseUrl: 'https://mnogo-rolly.online'
-    });
-  } catch (error) {
-    console.error('❌ FreedomPay: Ошибка healthcheck', error);
-    
-    return res.status(500).json({
-      success: false,
-      healthy: false,
-      error: error.message
-    });
-  }
+router.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    healthy: true,
+    timestamp: new Date().toISOString(),
+    service: 'Payment System',
+    mode: 'production',
+    features: ['qr', 'card', 'cash']
+  });
 });
 
 module.exports = router;
