@@ -144,7 +144,7 @@ const CheckoutPage: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Телефон * <span className="text-red-500">*</span>
+
                   </label>
                   <Input
                     type="tel"

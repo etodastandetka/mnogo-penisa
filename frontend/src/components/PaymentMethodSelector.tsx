@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { Input } from './ui/input';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
+import { Input } from './ui/Input';
 import { 
   CreditCard, 
   QrCode, 
@@ -293,7 +293,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
                 <Input
                   type="number"
                   value={cashAmount}
-                  onChange={(e) => setCashAmount(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCashAmount(e.target.value)}
                   placeholder="Введите сумму"
                   min={amount}
                   step="1"
