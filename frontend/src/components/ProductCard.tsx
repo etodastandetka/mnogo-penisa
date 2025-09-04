@@ -205,36 +205,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
               {formatPrice(product.price)}
             </span>
             
-            {quantity > 0 ? (
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleUpdateQuantity(quantity - 1)}
-                  className="w-8 h-8 sm:w-9 sm:h-9 p-0 border-2 border-gray-300 hover:border-orange-400 hover:bg-orange-50 flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
-                >
-                  <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>
-                <span className="font-bold min-w-[2rem] sm:min-w-[2.5rem] text-center text-sm sm:text-base text-gray-900 bg-gray-50 px-2 py-1 rounded-lg">{quantity}</span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleUpdateQuantity(quantity + 1)}
-                  className="w-8 h-8 sm:w-9 sm:h-9 p-0 border-2 border-gray-300 hover:border-orange-400 hover:bg-orange-50 flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
-                >
-                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>
-              </div>
-            ) : (
-              <Button 
-                size="sm"
-                onClick={handleAddToCart}
-                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 active:from-orange-700 active:to-orange-800 text-white w-8 h-8 sm:w-9 sm:h-9 p-0 border-0 shadow-lg hover:shadow-xl flex items-center justify-center touch-manipulation active:scale-95 transition-all duration-200 rounded-full"
-                disabled={product.is_available === false}
-              >
-                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
-            )}
+            {/* Убрана оранжевая кнопка добавления в корзину */}
           </div>
           
           {/* Кнопка "Подробнее" */}

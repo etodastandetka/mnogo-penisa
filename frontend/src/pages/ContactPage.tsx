@@ -156,16 +156,46 @@ const ContactPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-soft">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Есть ли минимальная сумма заказа?
-                </h3>
-                <p className="text-gray-600">
-                  Минимальная сумма заказа составляет 1000 сом для обычных заказов. Для мероприятий и крупных заказов от 5000 сом мы делаем скидку.
-                </p>
-              </CardContent>
-            </Card>
+            {/* Блок преимуществ */}
+            <div className="col-span-1 md:col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="border-0 shadow-soft hover:shadow-medium transition-all duration-300 bg-gradient-to-br from-orange-50 to-red-50">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">🚚</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Быстрая доставка</h3>
+                    <p className="text-gray-600 text-sm">
+                      Доставляем заказы в течение 30-60 минут по всему Бишкеку
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-soft hover:shadow-medium transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">💳</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Удобная оплата</h3>
+                    <p className="text-gray-600 text-sm">
+                      Принимаем онлайн оплату и наличные. Безопасно и быстро
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-soft hover:shadow-medium transition-all duration-300 bg-gradient-to-br from-blue-50 to-indigo-50">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">⭐</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Качество гарантировано</h3>
+                    <p className="text-gray-600 text-sm">
+                      Используем только свежие ингредиенты и готовим с любовью
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
 
             <Card className="border-0 shadow-soft">
               <CardContent className="p-6">
