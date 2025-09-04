@@ -161,17 +161,6 @@ export const Navigation: React.FC = () => {
               Контакты
             </button>
             
-            <button
-              onClick={() => handleNavigation('/checkout')}
-              className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors relative"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              {activeOrders > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {activeOrders}
-                </span>
-              )}
-            </button>
 
             {user ? (
               <>

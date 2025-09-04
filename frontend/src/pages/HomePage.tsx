@@ -131,17 +131,6 @@ export const HomePage: React.FC = () => {
               <p className="text-gray-600 mobile-subheading">Выберите из нашего разнообразного меню</p>
             </div>
             <div className="flex gap-2 items-center">
-              <button
-                onClick={() => window.location.href = '/checkout'}
-                className="relative bg-orange-600 hover:bg-orange-700 text-white p-3 rounded-lg transition-colors"
-              >
-                <ShoppingCart className="w-6 h-6" />
-                {items.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
-                    {items.length}
-                  </span>
-                )}
-              </button>
               <ErrorFixButton onFix={handleRetry} error={error || undefined} />
             </div>
           </div>
