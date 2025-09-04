@@ -197,22 +197,8 @@ const CheckoutPage: React.FC = () => {
           {/* Корзина */}
           <div className="lg:col-span-1">
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Ваш заказ</h2>
-              
-              <div className="space-y-4 mb-6">
-                {items.map((item) => (
-                  <div key={item.product.id} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <img
-                        src={item.product.image || '/placeholder.jpg'}
-                        alt={item.product.name}
-                        className="w-12 h-12 object-cover rounded"
-                      />
-                      <div>
-                        <p className="font-medium">{item.product.name}</p>
-                        <p className="text-sm text-gray-500">
-                          {item.product.price} сом × {item.quantity}
-                        </p>
+
+
                       </div>
                     </div>
                     <p className="font-semibold">{item.product.price * item.quantity} сом</p>

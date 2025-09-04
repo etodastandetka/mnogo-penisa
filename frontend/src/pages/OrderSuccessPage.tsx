@@ -79,7 +79,7 @@ const OrderSuccessPage: React.FC = () => {
                   <p className="text-sm">
                     <span className="font-medium">Дадите курьеру:</span> {paymentData.cashAmount} сом
                   </p>
-                  {paymentData.changeAmount > 0 && (
+                  {paymentData.changeAmount && paymentData.changeAmount > 0 && (
                     <p className="text-sm">
                       <span className="font-medium">Сдача:</span> {paymentData.changeAmount} сом
                     </p>

@@ -93,16 +93,6 @@ function App() {
               </Suspense>
             </PageWithNavigation>
           } />
-          <Route path="/payment/success" element={
-            <Suspense fallback={<LoadingSpinner />}>
-              <PaymentSuccessPage />
-            </Suspense>
-          } />
-          <Route path="/payment/failure" element={
-            <Suspense fallback={<LoadingSpinner />}>
-              <PaymentFailurePage />
-            </Suspense>
-          } />
           <Route path="/auth" element={
             <Suspense fallback={<LoadingSpinner />}>
               <AuthPage />
