@@ -37,6 +37,12 @@ export const HomePage: React.FC = () => {
         
         // Получаем уникальные категории для фильтра
         const categories = [...new Set(sortedProducts.map(p => p.category))];
+        
+        // Принудительно добавляем категорию "sets" если её нет
+        if (!categories.includes('sets')) {
+          categories.push('sets');
+        }
+        
         setAvailableCategories(categories);
       } else {
         console.log('⚠️ Товары не найдены');

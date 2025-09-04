@@ -669,16 +669,19 @@ const AdminProductsPage: React.FC = () => {
 
       {/* Модальное окно редактирования товара */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">
-                  Редактировать товар
-                </h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform translate-y-0 border border-gray-100">
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Редактировать товар
+                  </h3>
+                  <p className="text-gray-500 mt-1">Внесите изменения в информацию о товаре</p>
+                </div>
                 <button
                   onClick={handleCancelEdit}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -686,45 +689,45 @@ const AdminProductsPage: React.FC = () => {
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {/* Название */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Название товара *
                   </label>
                   <input
                     type="text"
                     value={editForm.name}
                     onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white"
                     placeholder="Введите название товара"
                   />
                 </div>
 
                 {/* Описание */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Описание *
                   </label>
                   <textarea
                     value={editForm.description}
                     onChange={(e) => setEditForm({...editForm, description: e.target.value})}
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white resize-none"
                     placeholder="Введите описание товара"
                   />
                 </div>
 
                 {/* Цена */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Цена (сом) *
                   </label>
                   <input
                     type="number"
                     value={editForm.price}
                     onChange={(e) => setEditForm({...editForm, price: Number(e.target.value)})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white"
                     placeholder="0"
                     min="0"
                   />
@@ -732,13 +735,13 @@ const AdminProductsPage: React.FC = () => {
 
                 {/* Категория */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Категория *
                   </label>
                   <select
                     value={editForm.category}
                     onChange={(e) => setEditForm({...editForm, category: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white"
                   >
                     <option value="">Выберите категорию</option>
                     <option value="rolls">Роллы</option>
@@ -874,18 +877,18 @@ const AdminProductsPage: React.FC = () => {
               </div>
 
               {/* Кнопки */}
-              <div className="flex items-center justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
                 <button
                   onClick={handleCancelEdit}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium"
                 >
                   Отмена
                 </button>
                 <button
                   onClick={handleSaveEdit}
-                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  className="px-8 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
                 >
-                  Сохранить
+                  Сохранить изменения
                 </button>
               </div>
             </div>
@@ -895,16 +898,19 @@ const AdminProductsPage: React.FC = () => {
 
       {/* Модальное окно добавления товара */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">
-                  Добавить новый товар
-                </h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform translate-y-0 border border-gray-100">
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Добавить новый товар
+                  </h3>
+                  <p className="text-gray-500 mt-1">Заполните информацию о новом товаре</p>
+                </div>
                 <button
                   onClick={handleCancelAdd}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -912,45 +918,45 @@ const AdminProductsPage: React.FC = () => {
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {/* Название */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Название товара *
                   </label>
                   <input
                     type="text"
                     value={addForm.name}
                     onChange={(e) => setAddForm({...addForm, name: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white"
                     placeholder="Введите название товара"
                   />
                 </div>
 
                 {/* Описание */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Описание *
                   </label>
                   <textarea
                     value={addForm.description}
                     onChange={(e) => setAddForm({...addForm, description: e.target.value})}
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white resize-none"
                     placeholder="Введите описание товара"
                   />
                 </div>
 
                 {/* Цена */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Цена (сом) *
                   </label>
                   <input
                     type="number"
                     value={addForm.price}
                     onChange={(e) => setAddForm({...addForm, price: Number(e.target.value)})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white"
                     placeholder="0"
                     min="0"
                   />
@@ -958,13 +964,13 @@ const AdminProductsPage: React.FC = () => {
 
                 {/* Категория */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Категория *
                   </label>
                   <select
                     value={addForm.category}
                     onChange={(e) => setAddForm({...addForm, category: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white"
                   >
                     <option value="">Выберите категорию</option>
                     <option value="rolls">Роллы</option>
@@ -1089,16 +1095,16 @@ const AdminProductsPage: React.FC = () => {
               </div>
 
               {/* Кнопки */}
-              <div className="flex items-center justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
                 <button
                   onClick={handleCancelAdd}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium"
                 >
                   Отмена
                 </button>
                 <button
                   onClick={handleSaveAdd}
-                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  className="px-8 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
                 >
                   Добавить товар
                 </button>
