@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { createOrder } from '../api/orders';
-import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
+import { SimplePaymentSelector } from '../components/SimplePaymentSelector';
 import { Card } from '../components/ui/Card';
 
 const CheckoutPage: React.FC = () => {
@@ -144,7 +144,7 @@ const CheckoutPage: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-
+                    Телефон * <span className="text-red-500">*</span>
                   </label>
                   <Input
                     type="tel"
@@ -234,11 +234,12 @@ const CheckoutPage: React.FC = () => {
       {/* Компонент выбора способа оплаты */}
       {showPaymentComponent && orderId && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              <PaymentMethodSelector
+              <SimplePaymentSelector
                 orderId={orderId.toString()}
                 amount={getTotal()}
+                customerPhone={customerData.phone}
                 onPaymentComplete={handlePaymentComplete}
               />
             </div>

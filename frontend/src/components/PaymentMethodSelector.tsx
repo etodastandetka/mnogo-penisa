@@ -8,8 +8,10 @@ import {
   Banknote, 
   CheckCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  Smartphone
 } from 'lucide-react';
+import { ODengiPayment } from './ODengiPayment';
 
 interface PaymentMethodSelectorProps {
   orderId: string;
@@ -23,7 +25,7 @@ interface Bank {
   domain: string;
 }
 
-type PaymentMethod = 'card' | 'qr' | 'cash';
+type PaymentMethod = 'card' | 'qr' | 'cash' | 'odengi';
 
 export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   orderId,
@@ -38,6 +40,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   const [changeAmount, setChangeAmount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [customerPhone, setCustomerPhone] = useState<string>('');
 
   // Загружаем список банков
   useEffect(() => {
@@ -346,6 +349,45 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           </div>
         );
 
+      case 'odengi':
+        return (
+          <div className="space-y-4">
+            <div className="text-center">
+              <Smartphone className="w-16 h-16 mx-auto text-purple-500 mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Оплата через O!Dengi</h3>
+              <p className="text-gray-600 mb-4">
+                Быстрая и безопасная оплата через мобильное приложение
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Номер телефона (необязательно):
+                </label>
+                <Input
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomerPhone(e.target.value)}
+                  placeholder="+996 XXX XXX XXX"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Если укажете номер, получите уведомление о платеже
+                </p>
+              </div>
+
+              <ODengiPayment
+                orderId={orderId}
+                amount={amount}
+                description={`Заказ #${orderId}`}
+                customerPhone={customerPhone}
+                onPaymentComplete={onPaymentComplete}
+                onClose={() => setSelectedMethod(null)}
+              />
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -413,6 +455,21 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
                 </div>
               </div>
             </Card>
+
+            <Card 
+              className="p-4 cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-purple-300"
+              onClick={() => setSelectedMethod('odengi')}
+            >
+              <div className="flex items-center space-x-4">
+                <Smartphone className="w-8 h-8 text-purple-500" />
+                <div>
+                  <h4 className="font-medium">O!Dengi</h4>
+                  <p className="text-sm text-gray-600">
+                    QR-код для мобильного приложения
+                  </p>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
       ) : (
@@ -422,6 +479,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
               {selectedMethod === 'card' && 'Оплата картой'}
               {selectedMethod === 'qr' && 'Оплата по QR-коду'}
               {selectedMethod === 'cash' && 'Оплата наличными'}
+              {selectedMethod === 'odengi' && 'Оплата через O!Dengi'}
             </h3>
             <Button 
               variant="outline" 

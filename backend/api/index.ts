@@ -11,7 +11,8 @@ import multer from 'multer';
 import fs from 'fs';
 import https from 'https';
 import { sendNewOrderNotification, sendStatusUpdateNotification, getBotInfo, registerTelegramUser, getUserOrders, getUserOrder } from '../src/telegramBot';
-import paymentRoutes from './paymentRoutes';
+const paymentRoutes = require('./paymentRoutes');
+const odengiRoutes = require('../routes/odengi');
 
 // Telegram Bot конфигурация - теперь настройки берутся из базы данных
 console.log('🚀 СЕРВЕР ЗАПУСКАЕТСЯ! Telegram настройки загружаются из базы данных...');
@@ -244,6 +245,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Подключаем роуты для платежей FreedomPay
 app.use('/api/payments', paymentRoutes);
+
+// Подключаем роуты для O!Dengi API
+app.use('/api/odengi', odengiRoutes);
 
 // Статическая папка для загруженных файлов
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {

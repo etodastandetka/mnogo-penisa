@@ -105,6 +105,8 @@ const AdminProductsPage: React.FC = () => {
     });
     setSelectedImage(null);
     setImagePreview('');
+    // Блокируем скролл страницы
+    document.body.style.overflow = 'hidden';
   };
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -280,6 +282,8 @@ const AdminProductsPage: React.FC = () => {
       });
       setSelectedImage(null);
       setImagePreview('');
+      // Восстанавливаем скролл страницы
+      document.body.style.overflow = 'unset';
       alert('Товар успешно добавлен!');
     } catch (err) {
       console.error('❌ Ошибка создания товара:', err);
@@ -300,6 +304,8 @@ const AdminProductsPage: React.FC = () => {
     });
     setSelectedImage(null);
     setImagePreview('');
+    // Восстанавливаем скролл страницы
+    document.body.style.overflow = 'unset';
   };
 
   const handleEditProduct = (product: Product) => {
@@ -314,6 +320,8 @@ const AdminProductsPage: React.FC = () => {
       is_available: product.is_available
     });
     setShowEditModal(true);
+    // Блокируем скролл страницы
+    document.body.style.overflow = 'hidden';
   };
 
   const handleSaveEdit = async () => {
@@ -383,6 +391,8 @@ const AdminProductsPage: React.FC = () => {
       setEditingProduct(null);
       setSelectedImage(null);
       setImagePreview('');
+      // Восстанавливаем скролл страницы
+      document.body.style.overflow = 'unset';
       alert('Товар успешно обновлен!');
     } catch (err: any) {
       console.error('❌ Ошибка обновления товара:', err);
@@ -405,6 +415,8 @@ const AdminProductsPage: React.FC = () => {
     });
     setSelectedImage(null);
     setImagePreview('');
+    // Восстанавливаем скролл страницы
+    document.body.style.overflow = 'unset';
   };
 
   const handleImageUpload = (product: Product) => {
@@ -669,8 +681,26 @@ const AdminProductsPage: React.FC = () => {
 
       {/* Модальное окно редактирования товара */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform translate-y-0 border border-gray-100">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" 
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0,
+            padding: '20px',
+            boxSizing: 'border-box'
+          }}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-100"
+            style={{
+              maxHeight: 'calc(100vh - 40px)',
+              overflowY: 'auto',
+              margin: 'auto'
+            }}
+          >
             <div className="p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
@@ -898,8 +928,26 @@ const AdminProductsPage: React.FC = () => {
 
       {/* Модальное окно добавления товара */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform translate-y-0 border border-gray-100">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" 
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0,
+            padding: '20px',
+            boxSizing: 'border-box'
+          }}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-100"
+            style={{
+              maxHeight: 'calc(100vh - 40px)',
+              overflowY: 'auto',
+              margin: 'auto'
+            }}
+          >
             <div className="p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
