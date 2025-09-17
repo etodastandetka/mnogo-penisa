@@ -5,7 +5,6 @@ import { ArrowLeft } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { createOrder } from '../api/orders';
-import { SimplePaymentSelector } from '../components/SimplePaymentSelector';
 import { Card } from '../components/ui/Card';
 
 const CheckoutPage: React.FC = () => {
@@ -20,6 +19,9 @@ const CheckoutPage: React.FC = () => {
   });
   const [showPaymentComponent, setShowPaymentComponent] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
+  const [qrData, setQrData] = useState<any>(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,6 +84,63 @@ const CheckoutPage: React.FC = () => {
           amount: paymentData.amount,
           cashAmount: paymentData.cashAmount,
           changeAmount: paymentData.changeAmount
+        }
+      });
+    } catch (error: any) {
+      console.error('Ошибка завершения заказа:', error);
+      alert('Ошибка завершения заказа: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createQRCode = async () => {
+    if (!orderId) return;
+    
+    setPaymentLoading(true);
+    try {
+      const response = await fetch('/api/odengi/create-qr', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: orderId.toString(),
+          amount: getTotal(),
+          description: `Заказ #${orderId}`,
+          customerPhone: customerData.phone
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setQrData({
+          qrUrl: data.qrUrl,
+          invoiceId: data.invoiceId,
+          amount: data.amount
+        });
+      } else {
+        alert('Ошибка создания QR-кода: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Ошибка создания QR-кода:', error);
+      alert('Ошибка соединения с сервером');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const handleCashPayment = async () => {
+    try {
+      setLoading(true);
+      
+      // Очищаем корзину и перенаправляем на страницу успеха
+      clearCart();
+      navigate(`/order-success/${orderId}`, {
+        state: {
+          paymentMethod: 'cash',
+          amount: getTotal()
         }
       });
     } catch (error: any) {
@@ -207,6 +266,9 @@ const CheckoutPage: React.FC = () => {
                         src={item.product.image_url || '/placeholder.jpg'}
                         alt={item.product.name}
                         className="w-12 h-12 object-cover rounded"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder.jpg';
+                        }}
                       />
                       <div>
                         <p className="font-medium">{item.product.name}</p>
@@ -231,19 +293,106 @@ const CheckoutPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Компонент выбора способа оплаты */}
+      {/* Способы оплаты */}
       {showPaymentComponent && orderId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <SimplePaymentSelector
-                orderId={orderId.toString()}
-                amount={getTotal()}
-                customerPhone={customerData.phone}
-                onPaymentComplete={handlePaymentComplete}
-              />
+        <div className="mt-8">
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-6 text-center">Выберите способ оплаты</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Наличные */}
+              <Card 
+                className="p-6 cursor-pointer hover:shadow-lg transition-all duration-200 border-2 hover:border-orange-300 bg-gradient-to-r from-orange-50 to-orange-100"
+                onClick={handleCashPayment}
+              >
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto bg-orange-500 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-white text-2xl">💰</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Наличными курьеру</h3>
+                  <p className="text-gray-600 text-sm">Оплата при получении заказа</p>
+                </div>
+              </Card>
+
+              {/* QR-код */}
+              <Card 
+                className="p-6 cursor-pointer hover:shadow-lg transition-all duration-200 border-2 hover:border-blue-300 bg-gradient-to-r from-blue-50 to-blue-100"
+                onClick={() => {
+                  setSelectedPaymentMethod('qr');
+                  createQRCode();
+                }}
+              >
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto bg-blue-500 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-white text-2xl">📱</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">QR-код</h3>
+                  <p className="text-gray-600 text-sm">Оплата через мобильное приложение</p>
+                </div>
+              </Card>
             </div>
-          </div>
+
+            {/* QR-код отображение */}
+            {selectedPaymentMethod === 'qr' && (
+              <div className="mt-6 p-6 bg-gray-50 rounded-lg">
+                <h3 className="text-lg font-semibold mb-4 text-center">Оплата через QR-код</h3>
+                
+                {paymentLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p>Создание QR-кода...</p>
+                  </div>
+                ) : qrData ? (
+                  <div className="text-center">
+                    <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 mb-4 inline-block">
+                      <div className="w-64 h-64 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                        <img 
+                          src={qrData.qrUrl} 
+                          alt="QR код для оплаты"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <p className="text-lg font-medium text-gray-800 mb-2">
+                        Отсканируйте QR-код в приложении O!Dengi
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Сумма: {getTotal()} сом
+                      </p>
+                    </div>
+                    
+                    <div className="bg-green-50 p-4 rounded-lg mb-4">
+                      <div className="flex items-center justify-center mb-2">
+                        <span className="text-green-500 mr-2">✅</span>
+                        <span className="font-medium text-green-800">
+                          После оплаты заказ будет автоматически подтвержден
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 justify-center">
+                      <Button
+                        onClick={() => setSelectedPaymentMethod(null)}
+                        variant="outline"
+                        className="px-6"
+                      >
+                        ← Назад
+                      </Button>
+                      <Button
+                        onClick={handlePaymentComplete}
+                        className="px-6 bg-green-600 hover:bg-green-700"
+                      >
+                        Я оплатил
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-600 mb-4">Нажмите на карточку QR-кода выше для создания</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </Card>
         </div>
       )}
     </div>
